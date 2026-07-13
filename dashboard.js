@@ -125,7 +125,6 @@ function initDatabase() {
         checkSupabaseConfig();
         return;
     }
-    updateDashboardDynamic();
 }
 
 function refreshAllData() {
@@ -280,26 +279,28 @@ async function updateDashboardDynamic() {
                 displayName = "REKAPITULASI PENILAIAN SKP KECAMATAN KAB. ACEH TIMUR";
             }
 
-            if (filteredData && filteredData.length > 0) {
-                // Sum data
-                let aggregated = {
-                    pns: 0, pppk: 0, pppk_dw: 0,
-                    sangat_baik: 0, baik: 0, butuh_perbaikan: 0, kurang: 0, sangat_kurang: 0
-                };
-                filteredData.forEach(row => {
-                    aggregated.pns += parseInt(row.pns) || 0;
-                    aggregated.pppk += parseInt(row.pppk) || 0;
-                    aggregated.pppk_dw += parseInt(row.pppk_dw) || 0;
-                    aggregated.sangat_baik += parseInt(row.sangat_baik) || 0;
-                    aggregated.baik += parseInt(row.baik) || 0;
-                    aggregated.butuh_perbaikan += parseInt(row.butuh_perbaikan) || 0;
-                    aggregated.kurang += parseInt(row.kurang) || 0;
-                    aggregated.sangat_kurang += parseInt(row.sangat_kurang) || 0;
-                });
-                renderDashboardDOM(formatDashboardData(aggregated, displayName));
-            } else {
-                renderDashboardDOM(getEmptyDashboardData(displayName));
-            }
+            // Selalu tampilkan data master total Kabupaten jika memilih "TAMPILKAN SEMUA OPD"
+            let aggregated = {
+                pns: 6449,
+                pppk: 3224,
+                pppk_dw: 5069,
+                sangat_baik: 0,
+                baik: 0,
+                butuh_perbaikan: 0,
+                kurang: 0,
+                sangat_kurang: 0
+            };
+
+            // Hitung agregasi predikat kinerja dari data database yang ada
+            filteredData.forEach(row => {
+                aggregated.sangat_baik += parseInt(row.sangat_baik) || 0;
+                aggregated.baik += parseInt(row.baik) || 0;
+                aggregated.butuh_perbaikan += parseInt(row.butuh_perbaikan) || 0;
+                aggregated.kurang += parseInt(row.kurang) || 0;
+                aggregated.sangat_kurang += parseInt(row.sangat_kurang) || 0;
+            });
+
+            renderDashboardDOM(formatDashboardData(aggregated, displayName));
         }
     } catch (err) {
         console.error("Gagal memperbarui dashboard:", err);
@@ -1682,6 +1683,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initModalUploadEvents();
     syncOpdFilters();
     renderOpdList();
+    updateDashboardDynamic();
     switchView('dashboard');
     initSearchableDropdown();
 });
