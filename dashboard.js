@@ -4,8 +4,9 @@
 // KONFIGURASI SUPABASE
 // ==========================================
 // Masukkan URL Supabase dan Anon Key Anda di sini jika ingin di-hardcode
-let SUPABASE_URL = 'YOUR_SUPABASE_URL';
-let SUPABASE_KEY = 'YOUR_SUPABASE_KEY';
+let SUPABASE_URL = 'https://hjinzrpqbcrjrllylrth.supabase.co';
+
+let SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqaW56cnBxYmNyanJsbHlscnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MDk2NzUsImV4cCI6MjA5OTQ4NTY3NX0.zBTeSstK6ft82yyGRbr-A90mmRT14TSCj4dOvM0vzDw';
 
 // Fallback ke localStorage jika default masih placeholder
 if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || !SUPABASE_URL) {
