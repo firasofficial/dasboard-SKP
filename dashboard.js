@@ -260,16 +260,17 @@ async function updateDashboardDynamic() {
             // Akumulasi data
             let query = supabaseClient
                 .from('skp_rekap_bulanan')
-                .select('*, master_opd!inner(*)')
+                .select('*, master_opd(*)')
                 .eq('tahun', selectedYear)
                 .eq('bulan', selectedBulan);
 
-            if (currentCategoryFilter !== 'SEMUA') {
-                query = query.eq('master_opd.kategori', currentCategoryFilter);
-            }
-
             const { data, error } = await query;
             if (error) throw error;
+
+            let filteredData = data || [];
+            if (currentCategoryFilter !== 'SEMUA') {
+                filteredData = filteredData.filter(row => row.master_opd && row.master_opd.kategori === currentCategoryFilter);
+            }
 
             let displayName = "PENILAIAN SKP ASN PEMERINTAH KAB. ACEH TIMUR";
             if (currentCategoryFilter === 'DINAS') {
@@ -278,13 +279,13 @@ async function updateDashboardDynamic() {
                 displayName = "REKAPITULASI PENILAIAN SKP KECAMATAN KAB. ACEH TIMUR";
             }
 
-            if (data && data.length > 0) {
+            if (filteredData && filteredData.length > 0) {
                 // Sum data
                 let aggregated = {
                     pns: 0, pppk: 0, pppk_dw: 0,
                     sangat_baik: 0, baik: 0, butuh_perbaikan: 0, kurang: 0, sangat_kurang: 0
                 };
-                data.forEach(row => {
+                filteredData.forEach(row => {
                     aggregated.pns += parseInt(row.pns) || 0;
                     aggregated.pppk += parseInt(row.pppk) || 0;
                     aggregated.pppk_dw += parseInt(row.pppk_dw) || 0;
