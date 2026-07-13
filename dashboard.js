@@ -177,7 +177,7 @@ function updateBulanOptions() {
     if (currentBulan && INDONESIAN_MONTHS.includes(currentBulan)) {
         filterBulan.value = currentBulan;
     } else {
-        filterBulan.value = "APRIL"; // Default ke bulan April
+        filterBulan.value = "JANUARI"; // Default ke bulan Januari
     }
 
     updateOpdDropdown();
