@@ -934,7 +934,7 @@ function autoProcessExcelFile(file) {
                         const str = String(val).toLowerCase();
                         if (
                             /opd|unit|organisasi|kerja|instansi|kecamatan/i.test(str) ||
-                            /pns|pppk|dw/i.test(str) ||
+                            /pns|pppk|dw|paruh|waktu/i.test(str) ||
                             /sangat baik|baik|perbaikan|kurang/i.test(str) ||
                             /nip|nama|predikat|status pegawai/i.test(str)
                         ) {
@@ -963,7 +963,7 @@ function autoProcessExcelFile(file) {
                     mappings.tahun = [/tahun|year/i];
                     mappings.pns = [/^pns$/i, /pns/i];
                     mappings.pppk = [/^pppk$/i, /pppk/i];
-                    mappings.pppk_dw = [/dw|daerah|dinas/i, /pppk.*dw/i];
+                    mappings.pppk_dw = [/dw|daerah|dinas|paruh|waktu/i, /pppk.*dw/i, /pppk.*paruh/i];
                     mappings.sangat_baik = [/sangat baik/i, /sangatbaik/i];
                     mappings.baik = [/^baik$/i, /baik/i];
                     mappings.butuh_perbaikan = [/perbaikan|butuh/i];
@@ -1130,9 +1130,11 @@ async function uploadParsedData(formatType, parsedRows, filename) {
 
             const rowsPayload = parsedRows.map(row => {
                 const status = strtoupper(row.status || 'PNS');
+                const isPppkDw = status.includes('PPPK') && (status.includes('DW') || status.includes('DAERAH') || status.includes('DINAS') || status.includes('PARUH') || status.includes('WAKTU'));
+
                 if (status.includes('PNS')) {
                     pnsCount++;
-                } else if (status.includes('PPPK') && (status.includes('DW') || status.includes('DAERAH') || status.includes('DINAS'))) {
+                } else if (isPppkDw) {
                     pppkDwCount++;
                 } else if (status.includes('PPPK')) {
                     pppkCount++;
@@ -1151,7 +1153,7 @@ async function uploadParsedData(formatType, parsedRows, filename) {
                 return {
                     nip: row.nip || null,
                     nama_pegawai: row.nama || '',
-                    status_pegawai: status.includes('PNS') ? 'PNS' : (status.includes('DW') ? 'PPPK DW' : 'PPPK'),
+                    status_pegawai: status.includes('PNS') ? 'PNS' : (isPppkDw ? 'PPPK DW' : 'PPPK'),
                     opd_id: currentUploadOpdId,
                     predikat_kinerja: pred,
                     bulan: row.bulan || defaultBulan,
