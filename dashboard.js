@@ -1232,7 +1232,7 @@ function downloadTemplateFile(type) {
     let filename = '';
 
     if (type === 'rekap') {
-        headers = ["Unit Organisasi / OPD", "Bulan", "Tahun", "PNS", "PPPK", "PPPK DW", "Sangat Baik", "Baik", "Butuh Perbaikan", "Kurang", "Sangat Kurang"];
+        headers = ["Unit Organisasi / OPD", "Bulan", "Tahun", "PNS", "PPPK", "PPPK PW", "Sangat Baik", "Baik", "Butuh Perbaikan", "Kurang", "Sangat Kurang"];
         mockRows = [
             ["Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM)", "DESEMBER", 2023, 45, 20, 16, 20, 60, 1, 0, 0],
             ["Dinas Kesehatan", "DESEMBER", 2023, 210, 102, 100, 120, 260, 24, 6, 2],
@@ -1245,7 +1245,7 @@ function downloadTemplateFile(type) {
             ["198501012010011001", "Ahmad Subarjo", "PNS", "Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM)", "Sangat Baik", "DESEMBER", 2023],
             ["199203152018022003", "Siti Aminah", "PPPK", "Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM)", "Baik", "DESEMBER", 2023],
             ["198905202015031002", "Budi Santoso", "PNS", "Dinas Kesehatan", "Butuh Perbaikan", "DESEMBER", 2023],
-            ["200110122024012005", "Rina Lestari", "PPPK DW", "Dinas Kesehatan", "Baik", "DESEMBER", 2023]
+            ["200110122024012005", "Rina Lestari", "PPPK PW", "Dinas Kesehatan", "Baik", "DESEMBER", 2023]
         ];
         filename = 'template_detail_pegawai_skp.xlsx';
     }
