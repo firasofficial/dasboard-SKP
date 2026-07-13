@@ -1090,7 +1090,7 @@ async function uploadParsedData(formatType, parsedRows, filename) {
                 nama_file: filename
             };
 
-            const { error } = await supabaseClient.from('skp_rekap_bulanan').upsert(payload);
+            const { error } = await supabaseClient.from('skp_rekap_bulanan').upsert(payload, { onConflict: 'opd_id,bulan,tahun' });
             if (error) throw error;
 
             progressBar.style.width = '100%';
@@ -1184,7 +1184,7 @@ async function uploadParsedData(formatType, parsedRows, filename) {
                 nama_file: filename
             };
 
-            const { error: errorUpsertRekap } = await supabaseClient.from('skp_rekap_bulanan').upsert(rekapPayload);
+            const { error: errorUpsertRekap } = await supabaseClient.from('skp_rekap_bulanan').upsert(rekapPayload, { onConflict: 'opd_id,bulan,tahun' });
             if (errorUpsertRekap) throw errorUpsertRekap;
 
             progressBar.style.width = '100%';
