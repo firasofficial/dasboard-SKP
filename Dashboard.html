@@ -103,26 +103,23 @@
 
             /* Kop Surat (Letterhead) */
             .kop-surat {
-                position: relative;
                 display: flex !important;
                 align-items: center;
-                justify-content: center;
                 border-bottom: 3px double black;
                 padding-bottom: 8px;
                 margin-bottom: 20px;
-                min-height: 85px;
             }
 
             .kop-logo {
-                position: absolute;
-                left: 0;
                 height: 85px !important;
                 width: auto !important;
+                margin-right: 20px;
+                flex-shrink: 0;
             }
 
             .kop-text {
                 text-align: center;
-                width: 100%;
+                flex-grow: 1;
             }
 
             .kop-pemda {
