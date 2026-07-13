@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard SKP ASN - Pemerintah Kabupaten Aceh Timur</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS untuk olah file excel di browser -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Supabase JS SDK CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Custom scrollbar styling for a modern look */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Print CSS Styling */
+        @media screen {
+            .print-only {
+                display: none !important;
+            }
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            .print-only {
+                display: block !important;
+            }
+
+            body {
+                background: white !important;
+                color: black !important;
+                font-family: 'Times New Roman', Times, serif !important;
+            }
+
+            /* Remove sidebar margin & reset layout */
+            .md\:ml-64 {
+                margin-left: 0 !important;
+            }
+
+            aside,
+            #sidebar-overlay,
+            header {
+                display: none !important;
+            }
+
+            main {
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+            }
+
+            /* Printable table */
+            .print-table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                margin-top: 15px !important;
+                font-size: 8.5pt !important;
+            }
+
+            .print-table th,
+            .print-table td {
+                border: 1px solid black !important;
+                padding: 5px 6px !important;
+                color: black !important;
+            }
+
+            .print-table th {
+                background-color: #f2f2f2 !important;
+                font-weight: bold !important;
+                text-align: center !important;
+            }
+
+            /* Kop Surat (Letterhead) */
+            .kop-surat {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                border-bottom: 3px double black;
+                padding-bottom: 8px;
+                margin-bottom: 20px;
+            }
+
+            .kop-logo {
+                height: 70px !important;
+                width: auto !important;
+                margin-right: 15px;
+            }
+
+            .kop-text {
+                text-align: center;
+            }
+
+            .kop-pemda {
+                font-size: 13pt;
+                font-weight: bold;
+                text-transform: uppercase;
+                margin: 0;
+            }
+
+            .kop-dinas {
+                font-size: 14pt;
+                font-weight: 800;
+                text-transform: uppercase;
+                margin: 2px 0;
+            }
+
+            .kop-alamat {
+                font-size: 8.5pt;
+                margin: 0;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 1.5cm;
+            }
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased">
+
+    <div class="min-h-screen flex bg-slate-50">
+        <!-- Left Sidebar (Batang Navigasi Samping) -->
+        <aside id="sidebar"
+            class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-100 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out border-r border-slate-800">
+            <!-- Sidebar Header -->
+            <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
+                <div
+                    class="bg-indigo-600 text-white p-2.5 rounded-xl font-extrabold text-sm tracking-wider shadow-md shadow-indigo-600/30">
+                    ASN
+                </div>
+                <div>
+                    <h1 class="text-xs font-extrabold tracking-widest uppercase text-white">Aceh Timur</h1>
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Dashboard SKP</p>
+                </div>
+            </div>
+
+            <!-- Sidebar Navigation Links -->
+            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+                <a href="javascript:void(0)" id="nav-dashboard" onclick="switchView('dashboard')"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-600/10 text-indigo-400 font-semibold border border-indigo-500/20 transition-all">
+                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
+                    </svg>
+                    <span class="text-sm">Dashboard Utama</span>
+                </a>
+                <a href="javascript:void(0)" id="nav-data-opd" onclick="switchView('data-opd')"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-100 font-medium transition-all group">
+                    <svg class="w-5 h-5 text-slate-500 group-hover:text-slate-300" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <span class="text-sm">Data OPD</span>
+                </a>
+                <a href="javascript:void(0)" id="nav-laporan-bulanan" onclick="switchView('laporan-bulanan')"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-100 font-medium transition-all group">
+                    <svg class="w-5 h-5 text-slate-500 group-hover:text-slate-300" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span class="text-sm">Laporan Bulanan</span>
+                </a>
+                <div class="pt-4 pb-2 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Administrasi
+                </div>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-100 font-medium transition-all group">
+                    <svg class="w-5 h-5 text-slate-500 group-hover:text-slate-300" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    </svg>
+                    <span class="text-sm">Pengaturan</span>
+                </a>
+                <a href="#" onclick="handleLogout()"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-450 hover:bg-red-950/30 hover:text-red-300 font-medium transition-all group">
+                    <svg class="w-5 h-5 text-red-500/70 group-hover:text-red-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span class="text-sm">Keluar (Logout)</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer -->
+            <div class="p-4 border-t border-slate-850 flex items-center gap-3 bg-slate-950/40">
+                <div
+                    class="w-8 h-8 rounded-full bg-slate-800 text-indigo-400 font-bold text-xs flex items-center justify-center">
+                    AT
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-semibold text-slate-300 truncate">BKPSDM Aceh Timur</p>
+                    <p class="text-[10px] text-slate-500 truncate">Versi 2.0.1</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Sidebar Overlay (Mobile only) -->
+        <div id="sidebar-overlay" class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm hidden md:hidden"></div>
+
+        <!-- Main Content Wrapper -->
+        <div class="flex-1 md:ml-64 min-h-screen flex flex-col">
+            <!-- Top Header Navbar -->
+            <header
+                class="h-16 bg-white border-b border-slate-200/80 flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm shadow-slate-100/50">
+                <div class="flex items-center gap-3">
+                    <!-- Mobile Hamburger Menu Button -->
+                    <button id="sidebar-toggle"
+                        class="p-2 -ml-2 rounded-xl text-slate-600 hover:bg-slate-50 border border-transparent hover:border-slate-200 md:hidden transition-colors focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <div>
+                        <div class="text-[10px] text-slate-400 font-bold tracking-widest uppercase">Kabupaten Aceh Timur
+                        </div>
+                        <div class="text-xs font-semibold text-indigo-600 hidden sm:block">Sistem Informasi Penilaian
+                            SKP ASN</div>
+                    </div>
+                </div>
+
+                <!-- Right Header Actions (Profile) -->
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3 pl-3 border-l border-slate-100">
+                        <div class="text-right hidden sm:block">
+                            <p id="admin-profile-name" class="text-xs font-semibold text-slate-800 leading-tight">Admin
+                                BKPSDM</p>
+                            <p class="text-[10px] text-slate-400">Pengelola SKP</p>
+                        </div>
+                        <div
+                            class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white font-extrabold text-sm flex items-center justify-center shadow-lg shadow-indigo-600/20">
+                            AD
+                        </div>
+                    </div>
+                    <!-- Logout button next to profile -->
+                    <button onclick="handleLogout()" title="Keluar dari Sistem"
+                        class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-100 rounded-xl transition-all duration-200 focus:outline-none">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Main Dashboard Panel -->
+            <main class="flex-1 p-6 space-y-6 max-w-7xl mx-auto w-full">
+
+                <div id="view-dashboard" class="space-y-6">
+                    <!-- Page Title Area with Quick Filters -->
+                    <div
+                        class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm shadow-slate-100/50">
+                        <div>
+                            <div class="text-xs font-semibold text-indigo-600 tracking-wider uppercase mb-0.5">Ringkasan
+                                Statistik</div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight uppercase"
+                                id="opd-subtitle">PENILAIAN SKP ASN PEMERINTAH KAB. ACEH TIMUR</h2>
+                        </div>
+
+                        <!-- Date Filters -->
+                        <div
+                            class="flex items-center gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200 self-start lg:self-center">
+                            <div class="flex items-center gap-1.5">
+                                <span
+                                    class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider pl-1">Bulan:</span>
+                                <select id="filter-bulan"
+                                    class="border-0 bg-transparent text-xs font-bold text-slate-700 focus:ring-0 cursor-pointer focus:outline-none">
+                                    <option value="DESEMBER">DESEMBER</option>
+                                </select>
+                            </div>
+                            <div class="h-4 w-px bg-slate-200"></div>
+                            <div class="flex items-center gap-1.5">
+                                <span
+                                    class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider pl-1">Tahun:</span>
+                                <select id="filter-tahun"
+                                    class="border-0 bg-transparent text-xs font-bold text-slate-700 focus:ring-0 cursor-pointer focus:outline-none">
+                                    <option value="2023">2023</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Summary Statistic Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <!-- Total ASN -->
+                        <div
+                            class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden group">
+                            <div class="absolute top-0 left-0 w-2 h-full bg-indigo-600"></div>
+                            <div class="flex justify-between items-start pl-2">
+                                <div>
+                                    <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-1">TOTAL ASN
+                                    </p>
+                                    <p class="text-3xl font-extrabold text-slate-800 tracking-tight"
+                                        id="stat-total-asn">14.742</p>
+                                </div>
+                                <div
+                                    class="p-3 bg-indigo-50 rounded-xl text-indigo-500 group-hover:scale-110 transition-transform">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- PNS -->
+                        <div
+                            class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden group">
+                            <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
+                            <div class="flex justify-between items-start pl-2">
+                                <div>
+                                    <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-1">PNS</p>
+                                    <p class="text-3xl font-extrabold text-slate-800 tracking-tight" id="stat-pns">6.449
+                                    </p>
+                                </div>
+                                <div
+                                    class="p-3 bg-emerald-50 rounded-xl text-emerald-500 group-hover:scale-110 transition-transform">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- PPPK -->
+                        <div
+                            class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden group">
+                            <div class="absolute top-0 left-0 w-2 h-full bg-blue-500"></div>
+                            <div class="flex justify-between items-start pl-2">
+                                <div>
+                                    <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-1">PPPK</p>
+                                    <p class="text-3xl font-extrabold text-slate-800 tracking-tight" id="stat-pppk">
+                                        3.224</p>
+                                </div>
+                                <div
+                                    class="p-3 bg-blue-50 rounded-xl text-blue-500 group-hover:scale-110 transition-transform">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- PPPK DW -->
+                        <div
+                            class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden group">
+                            <div class="absolute top-0 left-0 w-2 h-full bg-amber-500"></div>
+                            <div class="flex justify-between items-start pl-2">
+                                <div>
+                                    <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-1">PPPK DW
+                                    </p>
+                                    <p class="text-3xl font-extrabold text-slate-800 tracking-tight" id="stat-pppk-dw">
+                                        5.069</p>
+                                </div>
+                                <div
+                                    class="p-3 bg-amber-50 rounded-xl text-amber-500 group-hover:scale-110 transition-transform">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Category cards with horizontal progress bars (dashboard batang) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+                        <!-- Sangat Baik -->
+                        <div
+                            class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <span
+                                    class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">Sangat
+                                    Baik</span>
+                                <span class="text-xl">👍</span>
+                            </div>
+                            <div class="flex items-baseline gap-1.5 mb-3">
+                                <span class="text-2xl font-extrabold text-slate-800"
+                                    id="cat-sangatbaik-count">5.012</span>
+                                <span class="text-xs font-semibold text-slate-400" id="cat-sangatbaik-pct">34.0%</span>
+                            </div>
+                            <div>
+                                <!-- Horizontal Progress Bar -->
+                                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-1">
+                                    <div id="cat-sangatbaik-bar"
+                                        class="bg-green-500 h-full rounded-full transition-all duration-500 ease-out"
+                                        style="width: 34.0%"></div>
+                                </div>
+                                <p class="text-[9px] text-slate-400 font-medium">Distribusi SKP ASN</p>
+                            </div>
+                        </div>
+                        <!-- Baik -->
+                        <div
+                            class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <span
+                                    class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">Baik</span>
+                                <span class="text-xl">✔️</span>
+                            </div>
+                            <div class="flex items-baseline gap-1.5 mb-3">
+                                <span class="text-2xl font-extrabold text-slate-800" id="cat-baik-count">6.044</span>
+                                <span class="text-xs font-semibold text-slate-400" id="cat-baik-pct">41.0%</span>
+                            </div>
+                            <div>
+                                <!-- Horizontal Progress Bar -->
+                                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-1">
+                                    <div id="cat-baik-bar"
+                                        class="bg-blue-500 h-full rounded-full transition-all duration-500 ease-out"
+                                        style="width: 41.0%"></div>
+                                </div>
+                                <p class="text-[9px] text-slate-400 font-medium">Distribusi SKP ASN</p>
+                            </div>
+                        </div>
+                        <!-- Butuh Perbaikan -->
+                        <div
+                            class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <span
+                                    class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-200">Butuh
+                                    Perbaikan</span>
+                                <span class="text-xl">⚠️</span>
+                            </div>
+                            <div class="flex items-baseline gap-1.5 mb-3">
+                                <span class="text-2xl font-extrabold text-slate-800"
+                                    id="cat-butuhperbaikan-count">2.476</span>
+                                <span class="text-xs font-semibold text-slate-400"
+                                    id="cat-butuhperbaikan-pct">16.8%</span>
+                            </div>
+                            <div>
+                                <!-- Horizontal Progress Bar -->
+                                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-1">
+                                    <div id="cat-butuhperbaikan-bar"
+                                        class="bg-yellow-500 h-full rounded-full transition-all duration-500 ease-out"
+                                        style="width: 16.8%"></div>
+                                </div>
+                                <p class="text-[9px] text-slate-400 font-medium">Distribusi SKP ASN</p>
+                            </div>
+                        </div>
+                        <!-- Kurang -->
+                        <div
+                            class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <span
+                                    class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200">Kurang</span>
+                                <span class="text-xl">⬇️</span>
+                            </div>
+                            <div class="flex items-baseline gap-1.5 mb-3">
+                                <span class="text-2xl font-extrabold text-slate-800" id="cat-kurang-count">855</span>
+                                <span class="text-xs font-semibold text-slate-400" id="cat-kurang-pct">5.8%</span>
+                            </div>
+                            <div>
+                                <!-- Horizontal Progress Bar -->
+                                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-1">
+                                    <div id="cat-kurang-bar"
+                                        class="bg-orange-500 h-full rounded-full transition-all duration-500 ease-out"
+                                        style="width: 5.8%"></div>
+                                </div>
+                                <p class="text-[9px] text-slate-400 font-medium">Distribusi SKP ASN</p>
+                            </div>
+                        </div>
+                        <!-- Sangat Kurang -->
+                        <div
+                            class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <span
+                                    class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-red-50 text-red-700 border border-red-200">Sangat
+                                    Kurang</span>
+                                <span class="text-xl">✖️</span>
+                            </div>
+                            <div class="flex items-baseline gap-1.5 mb-3">
+                                <span class="text-2xl font-extrabold text-slate-800"
+                                    id="cat-sangatkurang-count">324</span>
+                                <span class="text-xs font-semibold text-slate-400" id="cat-sangatkurang-pct">2.2%</span>
+                            </div>
+                            <div>
+                                <!-- Horizontal Progress Bar -->
+                                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-1">
+                                    <div id="cat-sangatkurang-bar"
+                                        class="bg-red-500 h-full rounded-full transition-all duration-500 ease-out"
+                                        style="width: 2.2%"></div>
+                                </div>
+                                <p class="text-[9px] text-slate-400 font-medium">Distribusi SKP ASN</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive OPD Filter Selector Card -->
+                    <div
+                        class="bg-white rounded-2xl border border-slate-200/60 p-5 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3.5">
+                            <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 tracking-tight">Pilih Unit Kerja (OPD / Kecamatan)
+                                </h3>
+                                <p class="text-xs text-slate-400">Analisis capaian predikat SKP berdasarkan unit kerja
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                            <!-- Segmented category filter tabs -->
+                            <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
+                                <button onclick="setCategoryFilter('SEMUA')" id="tab-cat-semua"
+                                    class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-slate-800 shadow-sm focus:outline-none">Semua</button>
+                                <button onclick="setCategoryFilter('DINAS')" id="tab-cat-dinas"
+                                    class="px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-500 hover:text-slate-850 focus:outline-none">Dinas
+                                    / Badan</button>
+                                <button onclick="setCategoryFilter('KECAMATAN')" id="tab-cat-kecamatan"
+                                    class="px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-500 hover:text-slate-850 focus:outline-none">Kecamatan</button>
+                            </div>
+                            <div class="w-full sm:w-72 md:w-80 lg:w-96 relative">
+                                <!-- Hidden original select to maintain compatibility with existing JS -->
+                                <select id="opd-select" class="hidden">
+                                    <!-- Populated dynamically -->
+                                </select>
+
+                                <!-- Custom Searchable Dropdown Wrapper -->
+                                <div id="searchable-opd-dropdown" class="w-full relative">
+                                    <!-- Trigger Button -->
+                                    <button type="button" id="searchable-opd-trigger"
+                                        class="w-full flex items-center justify-between border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 bg-slate-50 hover:bg-white hover:border-slate-350 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600">
+                                        <span id="searchable-opd-label">-- TAMPILKAN SEMUA OPD --</span>
+                                        <svg class="w-4 h-4 text-slate-400 pointer-events-none transition-transform duration-200"
+                                            id="searchable-opd-arrow" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+
+                                    <!-- Dropdown Content -->
+                                    <div id="searchable-opd-menu"
+                                        class="absolute left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden hidden transform origin-top scale-95 opacity-0 transition-all duration-150">
+                                        <!-- Search Input -->
+                                        <div class="p-2 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-slate-400 shrink-0 ml-1" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                            </svg>
+                                            <input type="text" id="searchable-opd-input"
+                                                placeholder="Cari unit kerja / OPD / kecamatan..."
+                                                class="w-full bg-transparent border-0 focus:outline-none focus:ring-0 text-xs font-semibold text-slate-700 placeholder-slate-400 py-1">
+                                        </div>
+
+                                        <!-- Items List -->
+                                        <div id="searchable-opd-list"
+                                            class="max-h-60 overflow-y-auto divide-y divide-slate-50 py-1">
+                                            <!-- Dynamically generated items -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Table & Chart Section (Bottom Grid) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                        <!-- Left Side: Data Table (2 cols) -->
+                        <div
+                            class="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden lg:col-span-2 flex flex-col">
+                            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                                <h3 class="font-bold text-slate-900 tracking-tight text-sm uppercase">Capaian Predikat
+                                    SKP</h3>
+                                <span id="table-total-asn"
+                                    class="text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full">
+                                    Total: 14.742 ASN
+                                </span>
+                            </div>
+                            <div class="flex-1 overflow-x-auto">
+                                <table class="w-full text-left text-sm border-collapse">
+                                    <thead>
+                                        <tr
+                                            class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold text-[10px] tracking-wider uppercase">
+                                            <th class="py-3 px-5">Predikat</th>
+                                            <th class="py-3 px-4 text-right">Jumlah</th>
+                                            <th class="py-3 px-5 text-right">Persentase</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-body" class="divide-y divide-slate-100">
+                                        <!-- Populated dynamically via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Right Side: Redesigned Grafik Batang (3 cols) -->
+                        <div
+                            class="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-5 lg:col-span-3 flex flex-col">
+                            <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+                                <div>
+                                    <h3 class="font-bold text-slate-900 tracking-tight text-sm uppercase">Grafik
+                                        Distribusi SKP</h3>
+                                    <p class="text-xs text-slate-400">Visualisasi diagram batang berdasarkan kategori
+                                        predikat</p>
+                                </div>
+                            </div>
+                            <div class="flex-1 relative w-full min-h-[300px]">
+                                <canvas id="kinerjaChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                </div> <!-- End #view-dashboard -->
+
+                <!-- Data OPD Panel (Import Excel) -->
+                <div id="view-data-opd" class="space-y-6 hidden">
+                    <!-- Page Title Area -->
+                    <div
+                        class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm shadow-slate-100/50">
+                        <div>
+                            <div class="text-xs font-semibold text-indigo-600 tracking-wider uppercase mb-0.5">
+                                Administrasi / Pengelolaan Data</div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight uppercase">Unggah
+                                Data SKP OPD</h2>
+                        </div>
+
+                        <!-- Date Filters -->
+                        <div
+                            class="flex items-center gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200 self-start md:self-center">
+                            <div class="flex items-center gap-1.5">
+                                <span
+                                    class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider pl-1">Bulan:</span>
+                                <select id="opd-filter-bulan"
+                                    class="border-0 bg-transparent text-xs font-bold text-slate-700 focus:ring-0 cursor-pointer focus:outline-none">
+                                    <!-- Dynamic Options synced from main filter -->
+                                </select>
+                            </div>
+                            <div class="h-4 w-px bg-slate-200"></div>
+                            <div class="flex items-center gap-1.5">
+                                <span
+                                    class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider pl-1">Tahun:</span>
+                                <select id="opd-filter-tahun"
+                                    class="border-0 bg-transparent text-xs font-bold text-slate-700 focus:ring-0 cursor-pointer focus:outline-none">
+                                    <!-- Dynamic Options synced from main filter -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Back to dashboard button -->
+                        <button onclick="switchView('dashboard')"
+                            class="flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-600 hover:text-indigo-600 bg-slate-50 border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/20 rounded-xl transition-all self-start md:self-center focus:outline-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Kembali ke Dashboard
+                        </button>
+                    </div>
+
+                    <!-- Main Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Left Side: Daftar Instansi & Unggah Berkas (7 cols) -->
+                        <div class="lg:col-span-7">
+                            <div
+                                class="bg-white rounded-2xl border border-slate-200/60 p-6 flex flex-col min-h-[500px]">
+                                <!-- Header Card -->
+                                <div class="mb-4">
+                                    <h2 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
+                                        Daftar Instansi & Unggah Berkas
+                                    </h2>
+                                    <p class="text-xs text-slate-400 mt-1">Kelola berkas spreadsheet SKP per unit kerja
+                                    </p>
+                                </div>
+
+                                <!-- Live Search Bar -->
+                                <div class="mb-4 relative">
+                                    <input type="text" placeholder="🔍 Cari Dinas atau Kecamatan..."
+                                        class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors"
+                                        id="searchOPD" oninput="renderOpdList()">
+                                </div>
+
+                                <!-- Daftar List OPD -->
+                                <div class="overflow-y-auto max-h-[420px] space-y-3 pr-2 flex-1" id="opdListContainer">
+                                    <!-- Populated dynamically via JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Side: Instructions & templates / history (5 cols) -->
+                        <div class="lg:col-span-5 space-y-6">
+                            <!-- Download Template Card -->
+                            <div
+                                class="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-6 relative overflow-hidden group">
+                                <div class="absolute top-0 left-0 w-full h-1.5 bg-emerald-500"></div>
+                                <h3 class="font-bold text-slate-900 tracking-tight text-sm uppercase mb-3">Unduh
+                                    Template Spreadsheet</h3>
+                                <p class="text-xs text-slate-400 leading-relaxed mb-4">Gunakan template berkas Excel di
+                                    bawah ini untuk memastikan format data SKP Anda sesuai agar dapat dibaca sistem
+                                    tanpa hambatan.</p>
+
+                                <div class="space-y-3">
+                                    <button onclick="downloadTemplateFile('rekap')"
+                                        class="w-full flex items-center justify-between p-3.5 border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/5 rounded-xl text-left transition-all group/btn focus:outline-none">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="p-2.5 bg-emerald-50 text-emerald-600 rounded-lg group-hover/btn:scale-105 transition-all">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-bold text-slate-700">Template Format Rekap OPD
+                                                </p>
+                                                <p class="text-[9px] text-slate-400 mt-0.5">Satu baris berisi rekap
+                                                    predikat per OPD (.xlsx)</p>
+                                            </div>
+                                        </div>
+                                        <span
+                                            class="text-xs text-emerald-600 font-bold opacity-0 group-hover/btn:opacity-100 transition-opacity">Unduh
+                                            &rarr;</span>
+                                    </button>
+
+                                    <button onclick="downloadTemplateFile('detail')"
+                                        class="w-full flex items-center justify-between p-3.5 border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/5 rounded-xl text-left transition-all group/btn focus:outline-none">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="p-2.5 bg-emerald-50 text-emerald-600 rounded-lg group-hover/btn:scale-105 transition-all">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-bold text-slate-700">Template Format Detail
+                                                    Pegawai</p>
+                                                <p class="text-[9px] text-slate-400 mt-0.5">Berisi daftar data mentah
+                                                    per pegawai (.xlsx)</p>
+                                            </div>
+                                        </div>
+                                        <span
+                                            class="text-xs text-emerald-600 font-bold opacity-0 group-hover/btn:opacity-100 transition-opacity">Unduh
+                                            &rarr;</span>
+                                    </button>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div> <!-- End #view-data-opd -->
+
+                <!-- Laporan Bulanan Panel -->
+                <div id="view-laporan-bulanan" class="space-y-6 hidden">
+                    <!-- Page Title Area (no-print) -->
+                    <div
+                        class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm shadow-slate-100/50 no-print">
+                        <div>
+                            <div class="text-xs font-semibold text-indigo-600 tracking-wider uppercase mb-0.5">
+                                Administrasi / Laporan Kepegawaian</div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight uppercase">Laporan
+                                Bulanan SKP OPD</h2>
+                        </div>
+
+                        <!-- Actions & Filters -->
+                        <div class="flex flex-wrap items-center gap-3 self-start md:self-center">
+                            <!-- Period Filters -->
+                            <div class="flex items-center gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                <div class="flex items-center gap-1.5">
+                                    <span
+                                        class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider pl-1">Bulan:</span>
+                                    <select id="laporan-filter-bulan"
+                                        class="border-0 bg-transparent text-xs font-bold text-slate-700 focus:ring-0 cursor-pointer focus:outline-none">
+                                        <!-- Options populated via JS -->
+                                    </select>
+                                </div>
+                                <div class="h-4 w-px bg-slate-200"></div>
+                                <div class="flex items-center gap-1.5">
+                                    <span
+                                        class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider pl-1">Tahun:</span>
+                                    <select id="laporan-filter-tahun"
+                                        class="border-0 bg-transparent text-xs font-bold text-slate-700 focus:ring-0 cursor-pointer focus:outline-none">
+                                        <!-- Options populated via JS -->
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Print Button -->
+                            <button onclick="window.print()"
+                                class="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 active:scale-[0.98] transition-all focus:outline-none">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
+                                Cetak Laporan
+                            </button>
+
+                            <!-- Back to dashboard button -->
+                            <button onclick="switchView('dashboard')"
+                                class="flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-600 hover:text-indigo-600 bg-slate-50 border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/20 rounded-xl transition-all focus:outline-none">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                </svg>
+                                Kembali ke Dashboard
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Web view content (no-print) -->
+                    <div class="space-y-6 no-print">
+                        <!-- Summary Cards Grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                            <!-- Total OPD mengisi -->
+                            <div
+                                class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm flex items-center justify-between">
+                                <div class="space-y-1">
+                                    <p class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Unit
+                                        Kerja Terisi</p>
+                                    <p class="text-xl font-bold text-slate-800" id="laporan-stat-opd-count">0 / 55</p>
+                                    <p class="text-[9px] text-slate-500 font-medium" id="laporan-stat-opd-pct">0.0%
+                                        Terpenuhi</p>
+                                </div>
+                                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl text-xl">🏢</div>
+                            </div>
+                            <!-- Total ASN Terdata -->
+                            <div
+                                class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm flex items-center justify-between">
+                                <div class="space-y-1">
+                                    <p class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Total
+                                        ASN Terdata</p>
+                                    <p class="text-xl font-bold text-slate-800" id="laporan-stat-asn-count">0</p>
+                                    <p class="text-[9px] text-slate-500 font-medium" id="laporan-stat-asn-ratio">PNS: 0
+                                        | PPPK: 0</p>
+                                </div>
+                                <div class="p-3 bg-indigo-50 text-indigo-600 rounded-2xl text-xl">👥</div>
+                            </div>
+                            <!-- Predikat Sangat Baik / Baik -->
+                            <div
+                                class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm flex items-center justify-between">
+                                <div class="space-y-1">
+                                    <p class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">
+                                        Predikat Baik/Sangat Baik</p>
+                                    <p class="text-xl font-bold text-emerald-600" id="laporan-stat-baik-pct">0.0%</p>
+                                    <p class="text-[9px] text-slate-550 font-medium" id="laporan-stat-baik-count">0
+                                        Pegawai</p>
+                                </div>
+                                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl text-xl">👍</div>
+                            </div>
+                            <!-- Butuh Perbaikan / Kurang -->
+                            <div
+                                class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm flex items-center justify-between">
+                                <div class="space-y-1">
+                                    <p class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Butuh
+                                        Perbaikan/Kurang</p>
+                                    <p class="text-xl font-bold text-rose-500" id="laporan-stat-kurang-pct">0.0%</p>
+                                    <p class="text-[9px] text-slate-500 font-medium" id="laporan-stat-kurang-count">0
+                                        Pegawai</p>
+                                </div>
+                                <div class="p-3 bg-rose-50 text-rose-600 rounded-2xl text-xl">⚠️</div>
+                            </div>
+                        </div>
+
+                        <!-- Main Table Card for Web View -->
+                        <div
+                            class="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col">
+                            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                                <h3 class="font-bold text-slate-900 tracking-tight text-xs sm:text-sm uppercase">Detail
+                                    Rekapitulasi SKP Bulanan</h3>
+                                <span
+                                    class="text-[10px] font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full uppercase"
+                                    id="laporan-web-subtitle">BULANAN</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr
+                                            class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold text-[9px] tracking-wider uppercase">
+                                            <th class="py-3 px-4 text-center">No</th>
+                                            <th class="py-3 px-4">Nama Unit Kerja / OPD</th>
+                                            <th class="py-3 px-4 text-center">Status</th>
+                                            <th class="py-3 px-4 text-right">Pegawai</th>
+                                            <th class="py-3 px-3 text-right text-emerald-600">Sangat Baik</th>
+                                            <th class="py-3 px-3 text-right text-blue-600">Baik</th>
+                                            <th class="py-3 px-3 text-right text-yellow-600">Butuh Perbaikan</th>
+                                            <th class="py-3 px-3 text-right text-orange-500">Kurang</th>
+                                            <th class="py-3 px-3 text-right text-red-500">Sangat Kurang</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="laporan-table-body"
+                                        class="divide-y divide-slate-100 font-medium text-slate-700">
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr
+                                            class="bg-slate-50 font-bold border-t border-slate-200 text-slate-800 text-[10px]">
+                                            <td colspan="2" class="py-3.5 px-4">TOTAL KESELURUHAN</td>
+                                            <td id="laporan-total-status"
+                                                class="py-3.5 px-4 text-center text-slate-500">0 OPD</td>
+                                            <td id="laporan-total-pegawai" class="py-3.5 px-4 text-right">0</td>
+                                            <td id="laporan-total-sangatbaik"
+                                                class="py-3.5 px-3 text-right text-emerald-600">0</td>
+                                            <td id="laporan-total-baik" class="py-3.5 px-3 text-right text-blue-600">0
+                                            </td>
+                                            <td id="laporan-total-butuhperbaikan"
+                                                class="py-3.5 px-3 text-right text-yellow-600">0</td>
+                                            <td id="laporan-total-kurang"
+                                                class="py-3.5 px-3 text-right text-orange-500">0</td>
+                                            <td id="laporan-total-sangatkurang"
+                                                class="py-3.5 px-3 text-right text-red-500">0</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Print View Container (print-only) -->
+                    <div class="print-only">
+                        <!-- Kop Surat -->
+                        <div class="kop-surat">
+                            <img src="Lambang_Kabupaten_Aceh_Timur.png" class="kop-logo" />
+                            <div class="kop-text">
+                                <h1 class="kop-pemda">Pemerintah Kabupaten Aceh Timur</h1>
+                                <h2 class="kop-dinas">Badan Kepegawaian dan Pengembangan Sumber Daya Manusia</h2>
+                                <p class="kop-alamat">Jalan Jenderal Ahmad Yani Km. 3,5 Idi Rayeuk Kode Pos 24454<br>
+                                    Telepon: (0646) 21122, Surel: bkpsdm@acehtimurkab.go.id, Website:
+                                    bkpsdm.acehtimurkab.go.id</p>
+                            </div>
+                        </div>
+
+                        <!-- Surat Title -->
+                        <div class="text-center my-6 space-y-1">
+                            <h3 class="text-sm font-bold text-center uppercase tracking-wide decoration-black underline"
+                                style="font-size: 12pt; font-weight: bold;">
+                                LAPORAN REKAPITULASI CAPAIAN PREDIKAT KINERJA SKP ASN
+                            </h3>
+                            <p class="text-xs text-center" id="laporan-print-period"
+                                style="font-size: 10pt; font-style: italic; margin-top: 2px;">
+                                PERIODE BULAN: - TAHUN -
+                            </p>
+                        </div>
+
+                        <!-- Summary info block -->
+                        <div class="my-4 text-xs font-normal" style="font-size: 9.5pt; line-height: 1.5;">
+                            <table style="width: auto; border: none; margin-bottom: 10px;">
+                                <tr>
+                                    <td style="padding: 1px 10px 1px 0; font-weight: bold;">1. Jumlah Unit Kerja Mengisi
+                                    </td>
+                                    <td style="padding: 1px 10px;">:</td>
+                                    <td id="print-info-opd-count" style="padding: 1px 0;">0 dari 55 Unit Kerja</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 1px 10px 1px 0; font-weight: bold;">2. Total Pegawai Terdata
+                                    </td>
+                                    <td style="padding: 1px 10px;">:</td>
+                                    <td id="print-info-pegawai-count" style="padding: 1px 0;">0 ASN (PNS: 0 | PPPK: 0)
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Print Table -->
+                        <table class="print-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 4%; text-align: center;">No</th>
+                                    <th>Nama Unit Kerja / OPD</th>
+                                    <th style="width: 10%; text-align: center;">Status</th>
+                                    <th style="width: 8%; text-align: right;">Total Pegawai</th>
+                                    <th style="width: 8%; text-align: right;">Sangat Baik</th>
+                                    <th style="width: 8%; text-align: right;">Baik</th>
+                                    <th style="width: 8%; text-align: right;">Butuh Perbaikan</th>
+                                    <th style="width: 8%; text-align: right;">Kurang</th>
+                                    <th style="width: 8%; text-align: right;">Sangat Kurang</th>
+                                </tr>
+                            </thead>
+                            <tbody id="laporan-print-table-body">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                            <tfoot>
+                                <tr style="font-weight: bold; background-color: #f2f2f2;">
+                                    <td colspan="2" style="padding: 5px 6px;">TOTAL REKAPITULASI</td>
+                                    <td id="print-total-status" style="text-align: center; padding: 5px 6px;">0 OPD</td>
+                                    <td id="print-total-pegawai" style="text-align: right; padding: 5px 6px;">0</td>
+                                    <td id="print-total-sangatbaik" style="text-align: right; padding: 5px 6px;">0</td>
+                                    <td id="print-total-baik" style="text-align: right; padding: 5px 6px;">0</td>
+                                    <td id="print-total-butuhperbaikan" style="text-align: right; padding: 5px 6px;">0
+                                    </td>
+                                    <td id="print-total-kurang" style="text-align: right; padding: 5px 6px;">0</td>
+                                    <td id="print-total-sangatkurang" style="text-align: right; padding: 5px 6px;">0
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <!-- Tanda Tangan (Signature) -->
+                        <div class="print-signature-area">
+                            <div class="print-signature">
+                                <p id="print-sig-date">Idi, - 2026</p>
+                                <p style="font-weight: bold; margin-top: 4px; line-height: 1.2;">
+                                    KEPALA BADAN KEPEGAWAIAN DAN<br>
+                                    PENGEMBANGAN SUMBER DAYA MANUSIA<br>
+                                    KABUPATEN ACEH TIMUR
+                                </p>
+                                <div style="height: 60px;"></div>
+                                <p style="font-weight: bold; text-decoration: underline; margin-bottom: 2px;">Drs. IRFAN
+                                    KAMAL, M.Si</p>
+                                <p style="margin: 0; font-size: 8.5pt;">Pembina Utama Muda (IV/c)</p>
+                                <p style="margin: 0; font-size: 8.5pt;">NIP. 19740520 200212 1 003</p>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- End #view-laporan-bulanan -->
+
+                <!-- Modal Upload Berkas SKP (Modal) -->
+                <div id="modal-upload"
+                    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+                    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 flex flex-col transform scale-95 opacity-0 transition-all duration-300 ease-out"
+                        id="modal-content">
+                        <!-- Modal Header -->
+                        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                            <div>
+                                <h3 class="font-bold text-slate-900 tracking-tight text-base uppercase"
+                                    id="modal-title">Unggah Berkas SKP</h3>
+                                <p class="text-xs text-slate-400 mt-0.5" id="modal-subtitle">Badan Kepegawaian dan
+                                    Pengembangan Sumber Daya Manusia (BKPSDM)</p>
+                            </div>
+                            <button onclick="tutupModalUpload()"
+                                class="p-1.5 text-slate-400 hover:text-slate-650 hover:bg-slate-50 rounded-xl transition-colors focus:outline-none">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Modal Body (Contains Upload controls) -->
+                        <div class="p-6 space-y-6">
+                            <!-- Dropzone Area -->
+                            <div id="modal-dropzone"
+                                class="border-2 border-dashed border-slate-200 hover:border-indigo-500 rounded-2xl p-8 text-center bg-slate-50/50 hover:bg-indigo-50/5 cursor-pointer transition-all duration-300 relative group">
+                                <input type="file" id="modal-file-input" class="hidden"
+                                    accept=".xlsx, .xls, .csv, .ods">
+                                <div class="space-y-4">
+                                    <div
+                                        class="w-14 h-14 mx-auto rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        </svg>
+                                    </div>
+                                    <div class="max-w-xs mx-auto">
+                                        <p class="text-sm font-semibold text-slate-700">Tarik dan lepas file di sini,
+                                            atau <span class="text-indigo-600 hover:underline">cari berkas</span></p>
+                                        <p class="text-xs text-slate-400 mt-1">Format didukung: .xlsx, .xls, .csv, .ods
+                                            (maks. 10MB)</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Parsing Progress -->
+                            <div id="modal-parsing-progress" class="hidden space-y-2">
+                                <div class="flex justify-between text-xs font-semibold text-slate-650">
+                                    <span id="modal-progress-status-text">Membaca berkas...</span>
+                                    <span id="modal-progress-percent">0%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                    <div id="modal-progress-bar"
+                                        class="bg-indigo-600 h-full rounded-full transition-all" style="width: 0%">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Import Config Card (dynamic) -->
+                            <div id="modal-import-config" class="space-y-6 hidden border-t border-slate-100 pt-6">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Konfigurasi
+                                        Kolom Excel</h4>
+                                    <span id="modal-parsed-file-info"
+                                        class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100"></span>
+                                </div>
+
+                                <!-- Sheet selector -->
+                                <div id="modal-sheet-selector-wrapper" class="space-y-1.5 hidden">
+                                    <label
+                                        class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Pilih
+                                        Lembar (Sheet)</label>
+                                    <select id="modal-sheet-select"
+                                        class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-750 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all cursor-pointer">
+                                    </select>
+                                </div>
+
+                                <!-- Format Type -->
+                                <div class="space-y-1.5">
+                                    <label
+                                        class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Format
+                                        Data SKP</label>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <label
+                                            class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:border-indigo-300 cursor-pointer bg-slate-50/50 hover:bg-indigo-50/5 transition-all">
+                                            <input type="radio" name="modal-data-format-type" value="rekap" checked
+                                                class="w-3.5 h-3.5 text-indigo-600 border-slate-300 focus:ring-indigo-500/20">
+                                            <div>
+                                                <p class="text-xs font-bold text-slate-750">Format Rekap OPD</p>
+                                                <p class="text-[9px] text-slate-400">Total per unit</p>
+                                            </div>
+                                        </label>
+                                        <label
+                                            class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:border-indigo-300 cursor-pointer bg-slate-50/50 hover:bg-indigo-50/5 transition-all">
+                                            <input type="radio" name="modal-data-format-type" value="detail"
+                                                class="w-3.5 h-3.5 text-indigo-600 border-slate-300 focus:ring-indigo-500/20">
+                                            <div>
+                                                <p class="text-xs font-bold text-slate-755">Format Detail Pegawai</p>
+                                                <p class="text-[9px] text-slate-400">Data per nama</p>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    <!-- Fields Mapper (hidden) -->
+                                    <div class="space-y-2 hidden">
+                                        <div class="flex items-center justify-between">
+                                            <label
+                                                class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Pemetaan
+                                                Kolom (Field Mapping)</label>
+                                            <button onclick="autoMapColumnsModal()"
+                                                class="text-[9px] font-bold text-indigo-600 hover:underline">Petakan
+                                                Otomatis</button>
+                                        </div>
+                                        <div id="modal-mapping-fields-container"
+                                            class="grid grid-cols-1 sm:grid-cols-2 gap-3 border border-slate-100 bg-slate-50/30 p-3 rounded-xl">
+                                            <!-- Fields will be dynamically loaded -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Default values if fields missing -->
+                                <div id="modal-default-values-config"
+                                    class="grid grid-cols-2 gap-3 border-t border-slate-100 pt-4">
+                                    <div class="space-y-1">
+                                        <label
+                                            class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">Bulan
+                                            Default</label>
+                                        <select id="modal-default-bulan"
+                                            class="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all cursor-pointer">
+                                            <option value="JANUARI">JANUARI</option>
+                                            <option value="FEBRUARI">FEBRUARI</option>
+                                            <option value="MARET">MARET</option>
+                                            <option value="APRIL">APRIL</option>
+                                            <option value="MEI">MEI</option>
+                                            <option value="JUNI">JUNI</option>
+                                            <option value="JULI">JULI</option>
+                                            <option value="AGUSTUS">AGUSTUS</option>
+                                            <option value="SEPTEMBER">SEPTEMBER</option>
+                                            <option value="OKTOBER">OKTOBER</option>
+                                            <option value="NOVEMBER">NOVEMBER</option>
+                                            <option value="DESEMBER" selected>DESEMBER</option>
+                                        </select>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label
+                                            class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">Tahun
+                                            Default</label>
+                                        <select id="modal-default-tahun"
+                                            class="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all cursor-pointer">
+                                            <option value="2025">2025</option>
+                                            <option value="2026" selected>2026</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Preview Table -->
+                                <div class="space-y-1.5">
+                                    <label
+                                        class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Preview
+                                        Data (5 Baris Pertama)</label>
+                                    <div class="border border-slate-100 rounded-xl overflow-hidden overflow-x-auto">
+                                        <table class="w-full text-left text-[10px] border-collapse">
+                                            <thead id="modal-preview-table-head"
+                                                class="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold uppercase">
+                                            </thead>
+                                            <tbody id="modal-preview-table-body"
+                                                class="divide-y divide-slate-100 font-medium text-slate-700">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="p-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50">
+                            <button onclick="tutupModalUpload()"
+                                class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-all focus:outline-none">Batal</button>
+                            <button onclick="processAndImportDataModal()" id="modal-btn-process"
+                                class="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 active:scale-[0.98] transition-all focus:outline-none"
+                                disabled>Proses & Simpan Data</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Simulation & Dynamic Actions Script -->
+                <script src="dashboard.js"></script>
+</body>
+
+</html>

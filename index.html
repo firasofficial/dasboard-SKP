@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin SKP ASN - Kabupaten Aceh Timur</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Inter & Outfit) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .heading-font {
+            font-family: 'Outfit', sans-serif;
+        }
+        /* Custom dynamic gradient background animation */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animate-gradient {
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+        }
+        /* Shaking animation for error state */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+            20%, 40%, 60%, 80% { transform: translateX(6px); }
+        }
+        .shake-animation {
+            animation: shake 0.5s ease-in-out;
+        }
+        /* Floating label styling */
+        .input-field:focus-within label,
+        .input-field input:not(:placeholder-shown) + label {
+            transform: translateY(-1.4rem) scale(0.85);
+            color: #4f46e5;
+            background-color: white;
+            padding: 0 4px;
+        }
+        .dark-theme-label:focus-within label,
+        .dark-theme-label input:not(:placeholder-shown) + label {
+            background-color: #0f172a;
+        }
+    </style>
+</head>
+<body class="h-full bg-slate-50 text-slate-800 antialiased flex overflow-hidden">
+
+    <!-- SPLIT-SCREEN CONTAINER -->
+    <div class="flex w-full h-full min-h-screen">
+        
+        <!-- LEFT SIDE: PRESENTATION PANEL (Hidden on Mobile/Tablet < lg) -->
+        <div class="hidden lg:flex lg:w-7/12 relative flex-col justify-between p-12 bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white overflow-hidden animate-gradient">
+            <!-- Decorative Vector Elements & Glows -->
+            <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-600/10 blur-[120px] pointer-events-none"></div>
+            <div class="absolute bottom-[-15%] left-[-10%] w-[600px] h-[600px] rounded-full bg-violet-600/15 blur-[150px] pointer-events-none"></div>
+            
+            <!-- Top Branding Header -->
+            <div class="relative z-10 flex items-center gap-4">
+                <img src="./Lambang_Kabupaten_Aceh_Timur.png" alt="Logo Pemkab Aceh Timur" class="h-16 w-auto drop-shadow-[0_4px_10px_rgba(255,255,255,0.15)] transition-all duration-300 hover:scale-105">
+                <div>
+                    <h2 class="heading-font text-lg font-bold tracking-wide uppercase leading-tight">Pemerintah Kabupaten</h2>
+                    <p class="heading-font text-2xl font-extrabold text-indigo-400 tracking-wider uppercase leading-none">Aceh Timur</p>
+                </div>
+            </div>
+
+            <!-- Central Content / Slogan -->
+            <div class="relative z-10 my-auto max-w-lg space-y-6">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-xs font-semibold tracking-wider text-indigo-300 uppercase">
+                    <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span> Panel Administrasi
+                </span>
+                <h1 class="heading-font text-4xl xl:text-5xl font-extrabold leading-[1.15] tracking-tight">
+                    Sistem Informasi <br>
+                    <span class="bg-gradient-to-r from-indigo-400 via-violet-300 to-amber-300 bg-clip-text text-transparent">Penilaian SKP</span> ASN
+                </h1>
+                <p class="text-sm text-slate-300/90 leading-relaxed font-light">
+                    Selamat datang di portal pengelolaan SKP pegawai BKPSDM Kabupaten Aceh Timur. Silakan masuk menggunakan kredensial admin Anda untuk memantau, memverifikasi, dan menganalisis capaian SKP aparatur secara berkala.
+                </p>
+                
+                <!-- Quick statistics mock or info box -->
+                <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-800">
+                    <div>
+                        <p class="text-2xl font-extrabold heading-font text-white">14K+</p>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Total ASN</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-extrabold heading-font text-indigo-300">100%</p>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Terintegrasi</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-extrabold heading-font text-amber-400">Real-Time</p>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Pelaporan</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Branding: Logo BerAKHLAK -->
+            <div class="relative z-10 flex items-center justify-between border-t border-slate-800/80 pt-6">
+                <div>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-widest font-extrabold mb-1.5">Core Values ASN</p>
+                    <img src="./Logo_BerAKHLAK.png" alt="Logo BerAKHLAK" class="h-8 w-auto grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                </div>
+                <p class="text-xs text-slate-500 font-medium">BKPSDM Aceh Timur &copy; 2026</p>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE: LOGIN FORM PANEL -->
+        <div class="w-full lg:w-5/12 flex items-center justify-center p-6 sm:p-12 md:p-16 bg-white relative overflow-y-auto">
+            
+            <!-- Background effects for mobile -->
+            <div class="absolute top-0 right-0 w-80 h-80 rounded-full bg-indigo-50/60 blur-[100px] pointer-events-none lg:hidden"></div>
+            
+            <div class="w-full max-w-md space-y-8 relative z-10">
+                
+                <!-- Header: Displayed on mobile/tablet (instead of left panel) -->
+                <div class="flex flex-col items-center text-center lg:hidden">
+                    <div class="flex items-center gap-3 justify-center mb-4">
+                        <img src="./Lambang_Kabupaten_Aceh_Timur.png" alt="Logo Pemkab Aceh Timur" class="h-14 w-auto">
+                        <div class="h-10 w-px bg-slate-200"></div>
+                        <img src="./Logo_BerAKHLAK.png" alt="Logo BerAKHLAK" class="h-8 w-auto">
+                    </div>
+                    <h2 class="heading-font text-xl font-bold text-slate-900 tracking-tight">SKP ASN Aceh Timur</h2>
+                    <p class="text-xs text-slate-500 mt-1">Sistem Informasi Penilaian SKP ASN</p>
+                </div>
+                
+                <!-- Desktop Header Label -->
+                <div class="hidden lg:block">
+                    <h2 class="heading-font text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                        Selamat Datang
+                    </h2>
+                    <p class="text-slate-500 text-sm mt-2">
+                        Silakan masukkan kredensial administrator BKPSDM Anda untuk mengakses Dashboard SKP.
+                    </p>
+                </div>
+
+                <!-- ALERT ERROR (Hidden by default) -->
+                <div id="error-alert" class="hidden p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex gap-3 items-start animate-pulse">
+                    <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <div class="text-xs">
+                        <p class="font-bold">Gagal Masuk</p>
+                        <p id="error-message" class="text-red-600 mt-0.5">Username (NIP) atau Password salah. Silakan coba kembali.</p>
+                    </div>
+                </div>
+
+                <!-- LOGIN FORM -->
+                <form id="login-form" class="space-y-6" onsubmit="handleLogin(event)">
+                    
+                    <!-- Username Input -->
+                    <div class="relative input-field">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <svg class="w-5 h-5 text-slate-400 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </div>
+                        <input type="text" id="username" name="username" required placeholder=" "
+                            class="block w-full pl-11 pr-4 py-3.5 text-sm font-medium bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all duration-200 peer">
+                        <label for="username" 
+                            class="absolute left-11 top-3.5 text-sm font-medium text-slate-400 pointer-events-none transition-all duration-200 origin-left">
+                            Username atau NIP Admin
+                        </label>
+                    </div>
+
+                    <!-- Password Input -->
+                    <div class="relative input-field">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <svg class="w-5 h-5 text-slate-400 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                        </div>
+                        <input type="password" id="password" name="password" required placeholder=" "
+                            class="block w-full pl-11 pr-12 py-3.5 text-sm font-medium bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all duration-200 peer">
+                        <label for="password" 
+                            class="absolute left-11 top-3.5 text-sm font-medium text-slate-400 pointer-events-none transition-all duration-200 origin-left">
+                            Kata Sandi
+                        </label>
+                        <!-- Show/Hide Toggle -->
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors">
+                            <svg id="eye-icon-open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            <svg id="eye-icon-close" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Remember & Forgot Password Links -->
+                    <div class="flex items-center justify-between text-xs font-semibold">
+                        <label class="flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-800 transition-colors">
+                            <input type="checkbox" id="remember" class="w-4.5 h-4.5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500/20">
+                            <span>Ingat Saya</span>
+                        </label>
+                        <a href="#" onclick="alert('Silakan hubungi Unit Administrator IT BKPSDM Kabupaten Aceh Timur untuk mereset kata sandi Anda.')" class="text-indigo-600 hover:text-indigo-800 hover:underline transition-all">Lupa Kata Sandi?</a>
+                    </div>
+
+                    <!-- SUBMIT BUTTON -->
+                    <button type="submit" id="btn-submit"
+                        class="w-full py-3.5 px-5 bg-indigo-600 text-white font-semibold text-sm rounded-xl hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/30 flex items-center justify-center gap-2">
+                        <span id="btn-text">Masuk ke Dashboard</span>
+                        <div id="btn-spinner" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                </form>
+
+                <!-- Footer disclaimer on desktop -->
+                <div class="hidden lg:block border-t border-slate-100 pt-6 text-center">
+                    <p class="text-[10px] text-slate-400 tracking-wider uppercase font-bold mb-2">Didukung oleh</p>
+                    <div class="flex items-center justify-center gap-4 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                        <img src="./Logo_BerAKHLAK.png" alt="BerAKHLAK logo" class="h-6 w-auto">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPT FOR LOGIN LOGIC -->
+    <script>
+        // Check if user is already logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('admin_session_active') === 'true') {
+                window.location.href = 'Dashboard.html';
+            }
+        });
+
+        // Toggle Password Visibility
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const eyeOpen = document.getElementById('eye-icon-open');
+            const eyeClose = document.getElementById('eye-icon-close');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeOpen.classList.add('hidden');
+                eyeClose.classList.remove('hidden');
+            } else {
+                passwordInput.type = 'password';
+                eyeOpen.classList.remove('hidden');
+                eyeClose.classList.add('hidden');
+            }
+        }
+
+        // Handle Login Submission
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const usernameField = document.getElementById('username');
+            const passwordField = document.getElementById('password');
+            const errorAlert = document.getElementById('error-alert');
+            const submitBtn = document.getElementById('btn-submit');
+            const btnText = document.getElementById('btn-text');
+            const btnSpinner = document.getElementById('btn-spinner');
+
+            const username = usernameField.value.trim();
+            const password = passwordField.value;
+
+            // Reset Alert State
+            errorAlert.classList.add('hidden');
+
+            // Show Loading Animation
+            submitBtn.disabled = true;
+            btnText.classList.add('hidden');
+            btnSpinner.classList.remove('hidden');
+
+            // Simulating API call latency (1.2 seconds)
+            setTimeout(() => {
+                // Kredensial Valid: NIP 200210242025041002 / bkpsdm2026 atau admin / admin
+                const isValidUser = (username === 'admin' && password === 'admin') || 
+                                    (username === '200210242025041002' && password === 'bkpsdm2026');
+
+                if (isValidUser) {
+                    // Save Session in localStorage
+                    localStorage.setItem('admin_session_active', 'true');
+                    localStorage.setItem('admin_user_display', username === 'admin' ? 'Admin BKPSDM' : 'NIP. 200210242025041002');
+                    
+                    // Redirect to Dashboard
+                    window.location.href = 'Dashboard.html';
+                } else {
+                    // Restore Button State
+                    submitBtn.disabled = false;
+                    btnText.classList.remove('hidden');
+                    btnSpinner.classList.add('hidden');
+
+                    // Show Error Alert with Shake Animation
+                    errorAlert.classList.remove('hidden');
+                    const formContainer = document.getElementById('login-form');
+                    formContainer.classList.add('shake-animation');
+                    
+                    // Remove Shake class after animation completes
+                    setTimeout(() => {
+                        formContainer.classList.remove('shake-animation');
+                    }, 500);
+                }
+            }, 1200);
+        }
+    </script>
+</body>
+</html>
