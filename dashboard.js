@@ -515,7 +515,7 @@ async function renderLaporanBulanan() {
     const printSigDate = document.getElementById('print-sig-date');
     if (printSigDate) {
         const monthTitle = selectedBulan.charAt(0) + selectedBulan.slice(1).toLowerCase();
-        printSigDate.textContent = `Idi, ${monthTitle} ${selectedYear}`;
+        printSigDate.textContent = `Idi,       ${monthTitle} ${selectedYear}`;
     }
 
     const tableBody = document.getElementById('laporan-table-body');
