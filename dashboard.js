@@ -156,7 +156,7 @@ function populateFilters() {
     if (currentTahun && years.includes(Number(currentTahun))) {
         filterTahun.value = currentTahun;
     } else {
-        filterTahun.value = 2025; // Default ke data awal (2025)
+        filterTahun.value = 2026; // Default ke tahun 2026
     }
 
     updateBulanOptions();
@@ -177,7 +177,7 @@ function updateBulanOptions() {
     if (currentBulan && INDONESIAN_MONTHS.includes(currentBulan)) {
         filterBulan.value = currentBulan;
     } else {
-        filterBulan.value = "DESEMBER";
+        filterBulan.value = "APRIL"; // Default ke bulan April
     }
 
     updateOpdDropdown();
