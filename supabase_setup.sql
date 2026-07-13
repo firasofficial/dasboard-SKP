@@ -111,15 +111,15 @@ INSERT INTO master_opd (id, nama, kategori) VALUES
 ('SET_MPU', 'Sekretariat Majelis Permusyawaratan Ulama', 'DINAS')
 ON CONFLICT (id) DO UPDATE SET nama = EXCLUDED.nama, kategori = EXCLUDED.kategori;
 
--- 6. Mengisi Data Awal Simulasi SKP (Tahun 2023 - Desember)
+-- 6. Mengisi Data Awal Simulasi SKP (Tahun 2025 - Desember)
 INSERT INTO skp_rekap_bulanan 
 (opd_id, bulan, tahun, pns, pppk, pppk_dw, sangat_baik, baik, butuh_perbaikan, kurang, sangat_kurang, nama_file) 
 VALUES
-('BKPSDM', 'DESEMBER', 2023, 45, 20, 16, 20, 60, 1, 0, 0, 'skp_bkpsdm_final.xlsx'),
-('DINKES', 'DESEMBER', 2023, 210, 102, 100, 120, 260, 24, 6, 2, 'skp_dinkes_final.xlsx'),
-('DISDIK', 'DESEMBER', 2023, 950, 500, 400, 580, 1100, 120, 40, 10, 'skp_disdik_final.xlsx'),
-('DISDUKCAPIL', 'DESEMBER', 2023, 30, 15, 10, 15, 38, 2, 0, 0, 'skp_disdukcapil_final.xlsx'),
-('SETDA', 'DESEMBER', 2023, 75, 25, 20, 45, 70, 5, 0, 0, 'skp_setda_final.xlsx'),
-('KEC_IDI', 'DESEMBER', 2023, 25, 15, 5, 10, 28, 5, 2, 0, 'skp_kec_idi_final.xlsx'),
-('KEC_PEUREULAK', 'DESEMBER', 2023, 30, 10, 10, 15, 30, 4, 1, 0, 'skp_kec_peureulak_final.xlsx')
+('BKPSDM', 'DESEMBER', 2025, 45, 20, 16, 20, 60, 1, 0, 0, 'skp_bkpsdm_final.xlsx'),
+('DINKES', 'DESEMBER', 2025, 210, 102, 100, 120, 260, 24, 6, 2, 'skp_dinkes_final.xlsx'),
+('DISDIK', 'DESEMBER', 2025, 950, 500, 400, 580, 1100, 120, 40, 10, 'skp_disdik_final.xlsx'),
+('DISDUKCAPIL', 'DESEMBER', 2025, 30, 15, 10, 15, 38, 2, 0, 0, 'skp_disdukcapil_final.xlsx'),
+('SETDA', 'DESEMBER', 2025, 75, 25, 20, 45, 70, 5, 0, 0, 'skp_setda_final.xlsx'),
+('KEC_IDI', 'DESEMBER', 2025, 25, 15, 5, 10, 28, 5, 2, 0, 'skp_kec_idi_final.xlsx'),
+('KEC_PEUREULAK', 'DESEMBER', 2025, 30, 10, 10, 15, 30, 4, 1, 0, 'skp_kec_peureulak_final.xlsx')
 ON CONFLICT (opd_id, bulan, tahun) DO NOTHING;

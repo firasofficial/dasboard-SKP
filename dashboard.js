@@ -155,7 +155,7 @@ function populateFilters() {
     if (currentTahun && years.includes(Number(currentTahun))) {
         filterTahun.value = currentTahun;
     } else {
-        filterTahun.value = 2026;
+        filterTahun.value = 2025; // Default ke data awal (2025)
     }
 
     updateBulanOptions();
@@ -774,15 +774,15 @@ window.confirmResetDatabase = async function () {
             if (errorRekap) throw errorRekap;
             if (errorDetail) throw errorDetail;
 
-            // Masukkan data default 2023
+            // Masukkan data default 2025
             const defaultSeed = [
-                { opd_id: 'BKPSDM', bulan: 'DESEMBER', tahun: 2023, pns: 45, pppk: 20, pppk_dw: 16, sangat_baik: 20, baik: 60, butuh_perbaikan: 1, kurang: 0, sangat_kurang: 0, nama_file: 'skp_bkpsdm_final.xlsx' },
-                { opd_id: 'DINKES', bulan: 'DESEMBER', tahun: 2023, pns: 210, pppk: 102, pppk_dw: 100, sangat_baik: 120, baik: 260, butuh_perbaikan: 24, kurang: 6, sangat_kurang: 2, nama_file: 'skp_dinkes_final.xlsx' },
-                { opd_id: 'DISDIK', bulan: 'DESEMBER', tahun: 2023, pns: 950, pppk: 500, pppk_dw: 400, sangat_baik: 580, baik: 1100, butuh_perbaikan: 120, kurang: 40, sangat_kurang: 10, nama_file: 'skp_disdik_final.xlsx' },
-                { opd_id: 'DISDUKCAPIL', bulan: 'DESEMBER', tahun: 2023, pns: 30, pppk: 15, pppk_dw: 10, sangat_baik: 15, baik: 38, butuh_perbaikan: 2, kurang: 0, sangat_kurang: 0, nama_file: 'skp_disdukcapil_final.xlsx' },
-                { opd_id: 'SETDA', bulan: 'DESEMBER', tahun: 2023, pns: 75, pppk: 25, pppk_dw: 20, sangat_baik: 45, baik: 70, butuh_perbaikan: 5, kurang: 0, sangat_kurang: 0, nama_file: 'skp_setda_final.xlsx' },
-                { opd_id: 'KEC_IDI', bulan: 'DESEMBER', tahun: 2023, pns: 25, pppk: 15, pppk_dw: 5, sangat_baik: 10, baik: 28, butuh_perbaikan: 5, kurang: 2, sangat_kurang: 0, nama_file: 'skp_kec_idi_final.xlsx' },
-                { opd_id: 'KEC_PEUREULAK', bulan: 'DESEMBER', tahun: 2023, pns: 30, pppk: 10, pppk_dw: 10, sangat_baik: 15, baik: 30, butuh_perbaikan: 4, kurang: 1, sangat_kurang: 0, nama_file: 'skp_kec_peureulak_final.xlsx' }
+                { opd_id: 'BKPSDM', bulan: 'DESEMBER', tahun: 2025, pns: 45, pppk: 20, pppk_dw: 16, sangat_baik: 20, baik: 60, butuh_perbaikan: 1, kurang: 0, sangat_kurang: 0, nama_file: 'skp_bkpsdm_final.xlsx' },
+                { opd_id: 'DINKES', bulan: 'DESEMBER', tahun: 2025, pns: 210, pppk: 102, pppk_dw: 100, sangat_baik: 120, baik: 260, butuh_perbaikan: 24, kurang: 6, sangat_kurang: 2, nama_file: 'skp_dinkes_final.xlsx' },
+                { opd_id: 'DISDIK', bulan: 'DESEMBER', tahun: 2025, pns: 950, pppk: 500, pppk_dw: 400, sangat_baik: 580, baik: 1100, butuh_perbaikan: 120, kurang: 40, sangat_kurang: 10, nama_file: 'skp_disdik_final.xlsx' },
+                { opd_id: 'DISDUKCAPIL', bulan: 'DESEMBER', tahun: 2025, pns: 30, pppk: 15, pppk_dw: 10, sangat_baik: 15, baik: 38, butuh_perbaikan: 2, kurang: 0, sangat_kurang: 0, nama_file: 'skp_disdukcapil_final.xlsx' },
+                { opd_id: 'SETDA', bulan: 'DESEMBER', tahun: 2025, pns: 75, pppk: 25, pppk_dw: 20, sangat_baik: 45, baik: 70, butuh_perbaikan: 5, kurang: 0, sangat_kurang: 0, nama_file: 'skp_setda_final.xlsx' },
+                { opd_id: 'KEC_IDI', bulan: 'DESEMBER', tahun: 2025, pns: 25, pppk: 15, pppk_dw: 5, sangat_baik: 10, baik: 28, butuh_perbaikan: 5, kurang: 2, sangat_kurang: 0, nama_file: 'skp_kec_idi_final.xlsx' },
+                { opd_id: 'KEC_PEUREULAK', bulan: 'DESEMBER', tahun: 2025, pns: 30, pppk: 10, pppk_dw: 10, sangat_baik: 15, baik: 30, butuh_perbaikan: 4, kurang: 1, sangat_kurang: 0, nama_file: 'skp_kec_peureulak_final.xlsx' }
             ];
 
             const { error: errorInsert } = await supabaseClient.from('skp_rekap_bulanan').insert(defaultSeed);
