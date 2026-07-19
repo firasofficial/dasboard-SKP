@@ -49,6 +49,11 @@ ALTER TABLE skp_rekap_bulanan DISABLE ROW LEVEL SECURITY;
 ALTER TABLE skp_detail_pegawai DISABLE ROW LEVEL SECURITY;
 
 -- 5. Mengisi Data Master OPD
+-- Migrasi ID OPD lama ke ID baru (jika sudah ada data sebelumnya) agar relasi CASCADE berjalan otomatis
+UPDATE master_opd SET id = 'DPMP2T', nama = 'Dinas Penanaman Modal dan Pelayanan Perizinan Terpadu (DPMP2T)' WHERE id = 'DPMPTSP';
+UPDATE master_opd SET id = 'DISBUNNAK', nama = 'Dinas Perkebunan dan Peternakan' WHERE id = 'DISTANBUN';
+UPDATE master_opd SET id = 'SET_MPA', nama = 'Sekretariat Majelis Pendidikan Aceh (MPA)' WHERE id = 'SET_MPD';
+
 INSERT INTO master_opd (id, nama, kategori) VALUES
 ('BKPSDM', 'Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM)', 'DINAS'),
 ('SETDA', 'Sekretariat Daerah', 'DINAS'),
@@ -68,29 +73,31 @@ INSERT INTO master_opd (id, nama, kategori) VALUES
 ('DPMG', 'Dinas Pemberdayaan Masyarakat dan Gampong (DPMG)', 'DINAS'),
 ('DSI', 'Dinas Syariat Islam', 'DINAS'),
 ('DINAS_DAYAH', 'Dinas Pendidikan Dayah', 'DINAS'),
-('DPMPTSP', 'Dinas Penanaman Modal dan Pelayanan Terpadu Satu Pintu (DPMPTSP)', 'DINAS'),
-('DISKOMINFO', 'Dinas Komunikasi dan Informatika (Diskominfo)', 'DINAS');
-
-
--- Gunakan INSERT biasa untuk semua list OPD jika belum ada
-INSERT INTO master_opd (id, nama, kategori) VALUES
+('DPMP2T', 'Dinas Penanaman Modal dan Pelayanan Perizinan Terpadu (DPMP2T)', 'DINAS'),
+('DISKOMINFO', 'Dinas Komunikasi dan Informatika (Diskominfo)', 'DINAS'),
 ('DISHUB', 'Dinas Perhubungan', 'DINAS'),
 ('DLH', 'Dinas Lingkungan Hidup', 'DINAS'),
 ('DISPARPORA', 'Dinas Pariwisata, Pemuda, dan Olahraga (Disparpora)', 'DINAS'),
 ('DISKOPUKM', 'Dinas Perdagangan, Koperasi, dan UKM', 'DINAS'),
-('DISTANBUN', 'Dinas Pertanian dan Perkebunan', 'DINAS'),
+('DISBUNNAK', 'Dinas Perkebunan dan Peternakan', 'DINAS'),
 ('DKP', 'Dinas Kelautan dan Perikanan', 'DINAS'),
 ('DP3AKB', 'Dinas Pemberdayaan Perempuan, Perlindungan Anak, dan Keluarga Berencana (DP3AKB)', 'DINAS'),
 ('DISPUSIP', 'Dinas Perpustakaan dan Kearsipan', 'DINAS'),
 ('PERTANAHAN', 'Dinas Pertanahan', 'DINAS'),
+('DISTANTPH', 'Dinas Tanaman Pangan dan Hortikultura', 'DINAS'),
+('DKPP', 'Dinas Ketahanan Pangan dan Penyuluhan', 'DINAS'),
+('DISPERINNAKERTRANS', 'Dinas Perindustrian, Tenaga Kerja dan Transmigrasi', 'DINAS'),
 ('KEC_BANDA_ALAM', 'Kecamatan Banda Alam', 'KECAMATAN'),
 ('KEC_BIREM_BAYEUN', 'Kecamatan Birem Bayeun', 'KECAMATAN'),
 ('KEC_DARUL_AMAN', 'Kecamatan Darul Aman', 'KECAMATAN'),
 ('KEC_DARUL_FALAH', 'Kecamatan Darul Falah', 'KECAMATAN'),
+('KEC_DARUL_IHSAN', 'Kecamatan Darul Ihsan', 'KECAMATAN'),
 ('KEC_IDI', 'Kecamatan Idi Rayeuk', 'KECAMATAN'),
 ('KEC_IDI_TIMUR', 'Kecamatan Idi Timur', 'KECAMATAN'),
 ('KEC_IDI_TUNONG', 'Kecamatan Idi Tunong', 'KECAMATAN'),
+('KEC_INDRA_MAKMU', 'Kecamatan Indra Makmu', 'KECAMATAN'),
 ('KEC_JULOK', 'Kecamatan Julok', 'KECAMATAN'),
+('KEC_MADAT', 'Kecamatan Madat', 'KECAMATAN'),
 ('KEC_NURUSSALAM', 'Kecamatan Nurussalam', 'KECAMATAN'),
 ('KEC_PANTE_BIDARI', 'Kecamatan Pante Bidari', 'KECAMATAN'),
 ('KEC_PEUDAWA', 'Kecamatan Peudawa', 'KECAMATAN'),
@@ -107,7 +114,7 @@ INSERT INTO master_opd (id, nama, kategori) VALUES
 ('SETWAN', 'Sekretariat Dewan Perwakilan Rakyat Kabupaten', 'DINAS'),
 ('SET_BAITUL_MAL', 'Sekretariat Baitul Mal', 'DINAS'),
 ('SET_MAA', 'Sekretariat Majelis Adat Aceh', 'DINAS'),
-('SET_MPD', 'Sekretariat Majelis Pendidikan Dayah', 'DINAS'),
+('SET_MPA', 'Sekretariat Majelis Pendidikan Aceh (MPA)', 'DINAS'),
 ('SET_MPU', 'Sekretariat Majelis Permusyawaratan Ulama', 'DINAS')
 ON CONFLICT (id) DO UPDATE SET nama = EXCLUDED.nama, kategori = EXCLUDED.kategori;
 
