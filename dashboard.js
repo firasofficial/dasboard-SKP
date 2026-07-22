@@ -294,7 +294,8 @@ async function updateDashboardDynamic() {
                 baik: 0,
                 butuh_perbaikan: 0,
                 kurang: 0,
-                sangat_kurang: 0
+                sangat_kurang: 0,
+                tidak_membuat_skp: 0
             };
 
             // Hitung agregasi predikat kinerja dari data database yang ada
@@ -304,6 +305,7 @@ async function updateDashboardDynamic() {
                 aggregated.butuh_perbaikan += parseInt(row.butuh_perbaikan) || 0;
                 aggregated.kurang += parseInt(row.kurang) || 0;
                 aggregated.sangat_kurang += parseInt(row.sangat_kurang) || 0;
+                aggregated.tidak_membuat_skp += parseInt(row.tidak_membuat_skp) || 0;
             });
 
             renderDashboardDOM(formatDashboardData(aggregated, displayName));
@@ -324,7 +326,8 @@ function formatDashboardData(data, displayName) {
     const butuhPerbaikan = parseInt(data.butuh_perbaikan || 0);
     const kurang = parseInt(data.kurang || 0);
     const sangatKurang = parseInt(data.sangat_kurang || 0);
-    const totalPredikat = sangatBaik + baik + butuhPerbaikan + kurang + sangatKurang;
+    const tidakMembuatSkp = parseInt(data.tidak_membuat_skp || 0);
+    const totalPredikat = sangatBaik + baik + butuhPerbaikan + kurang + sangatKurang + tidakMembuatSkp;
 
     return {
         nama: displayName,
@@ -337,7 +340,8 @@ function formatDashboardData(data, displayName) {
             { nama: 'Baik', emoji: '✔️', jumlah: baik, persen: totalPredikat > 0 ? (baik / totalPredikat) * 100 : 0, color: '#3b82f6' },
             { nama: 'Butuh Perbaikan', emoji: '⚠️', jumlah: butuhPerbaikan, persen: totalPredikat > 0 ? (butuhPerbaikan / totalPredikat) * 100 : 0, color: '#eab308' },
             { nama: 'Kurang', emoji: '⬇️', jumlah: kurang, persen: totalPredikat > 0 ? (kurang / totalPredikat) * 100 : 0, color: '#f97316' },
-            { nama: 'Sangat Kurang', emoji: '✖️', jumlah: sangatKurang, persen: totalPredikat > 0 ? (sangatKurang / totalPredikat) * 100 : 0, color: '#ef4444' }
+            { nama: 'Sangat Kurang', emoji: '✖️', jumlah: sangatKurang, persen: totalPredikat > 0 ? (sangatKurang / totalPredikat) * 100 : 0, color: '#ef4444' },
+            { nama: 'Tidak membuat SKP', emoji: '🚫', jumlah: tidakMembuatSkp, persen: totalPredikat > 0 ? (tidakMembuatSkp / totalPredikat) * 100 : 0, color: '#64748b' }
         ]
     };
 }
@@ -351,7 +355,8 @@ function getEmptyDashboardData(displayName) {
             { nama: 'Baik', emoji: '✔️', jumlah: 0, persen: 0, color: '#3b82f6' },
             { nama: 'Butuh Perbaikan', emoji: '⚠️', jumlah: 0, persen: 0, color: '#eab308' },
             { nama: 'Kurang', emoji: '⬇️', jumlah: 0, persen: 0, color: '#f97316' },
-            { nama: 'Sangat Kurang', emoji: '✖️', jumlah: 0, persen: 0, color: '#ef4444' }
+            { nama: 'Sangat Kurang', emoji: '✖️', jumlah: 0, persen: 0, color: '#ef4444' },
+            { nama: 'Tidak membuat SKP', emoji: '🚫', jumlah: 0, persen: 0, color: '#64748b' }
         ]
     };
 }
@@ -364,12 +369,15 @@ function renderDashboardDOM(data) {
     document.getElementById('stat-pppk').textContent = formatNumber(data.pppk);
     document.getElementById('stat-pppk-dw').textContent = formatNumber(data.pppkDw);
 
-    const keys = ['sangatbaik', 'baik', 'butuhperbaikan', 'kurang', 'sangatkurang'];
+    const keys = ['sangatbaik', 'baik', 'butuhperbaikan', 'kurang', 'sangatkurang', 'tidakmembuatskp'];
     data.predikat.forEach((item, index) => {
         const key = keys[index];
-        document.getElementById(`cat-${key}-count`).textContent = formatNumber(item.jumlah);
-        document.getElementById(`cat-${key}-pct`).textContent = item.persen.toFixed(1) + '%';
-        document.getElementById(`cat-${key}-bar`).style.width = item.persen + '%';
+        const countElem = document.getElementById(`cat-${key}-count`);
+        const pctElem = document.getElementById(`cat-${key}-pct`);
+        const barElem = document.getElementById(`cat-${key}-bar`);
+        if (countElem) countElem.textContent = formatNumber(item.jumlah);
+        if (pctElem) pctElem.textContent = item.persen.toFixed(1) + '%';
+        if (barElem) barElem.style.width = item.persen + '%';
     });
 
     document.getElementById('table-total-asn').textContent = `Total: ${formatNumber(data.total)} ASN`;
@@ -386,6 +394,7 @@ function renderDashboardDOM(data) {
         else if (item.nama === 'Butuh Perbaikan') badgeClass = 'bg-yellow-50 text-yellow-700 border-yellow-200';
         else if (item.nama === 'Kurang') badgeClass = 'bg-orange-50 text-orange-700 border-orange-200';
         else if (item.nama === 'Sangat Kurang') badgeClass = 'bg-red-50 text-red-700 border-red-200';
+        else if (item.nama === 'Tidak membuat SKP') badgeClass = 'bg-slate-100 text-slate-700 border-slate-300';
 
         row.innerHTML = `
             <td class="py-3.5 px-5 font-semibold text-slate-700 flex items-center gap-2.5">
@@ -555,6 +564,7 @@ async function renderLaporanBulanan() {
         let totalButuhPerbaikanAcc = 0;
         let totalKurangAcc = 0;
         let totalSangatKurangAcc = 0;
+        let totalTidakMembuatSkpAcc = 0;
 
         let countPns = 0;
         let countPppk = 0;
@@ -569,6 +579,7 @@ async function renderLaporanBulanan() {
             let butuhPerbaikan = 0;
             let kurang = 0;
             let sangatKurang = 0;
+            let tidakMembuatSkp = 0;
 
             if (hasData) {
                 totalPegawai = parseInt(dbData.pns || 0) + parseInt(dbData.pppk || 0) + parseInt(dbData.pppk_dw || 0);
@@ -577,6 +588,7 @@ async function renderLaporanBulanan() {
                 butuhPerbaikan = parseInt(dbData.butuh_perbaikan || 0);
                 kurang = parseInt(dbData.kurang || 0);
                 sangatKurang = parseInt(dbData.sangat_kurang || 0);
+                tidakMembuatSkp = parseInt(dbData.tidak_membuat_skp || 0);
 
                 countPns += parseInt(dbData.pns || 0);
                 countPppk += (parseInt(dbData.pppk || 0) + parseInt(dbData.pppk_dw || 0));
@@ -588,6 +600,7 @@ async function renderLaporanBulanan() {
                 totalButuhPerbaikanAcc += butuhPerbaikan;
                 totalKurangAcc += kurang;
                 totalSangatKurangAcc += sangatKurang;
+                totalTidakMembuatSkpAcc += tidakMembuatSkp;
             }
 
             // Web Table Row
@@ -610,6 +623,7 @@ async function renderLaporanBulanan() {
                 <td class="py-3 px-3 text-right text-yellow-600 font-semibold">${hasData ? formatNumber(butuhPerbaikan) : '-'}</td>
                 <td class="py-3 px-3 text-right text-orange-500 font-semibold">${hasData ? formatNumber(kurang) : '-'}</td>
                 <td class="py-3 px-3 text-right text-red-500 font-semibold">${hasData ? formatNumber(sangatKurang) : '-'}</td>
+                <td class="py-3 px-3 text-right text-slate-500 font-semibold">${hasData ? formatNumber(tidakMembuatSkp) : '-'}</td>
             `;
             tableBody.appendChild(tr);
 
@@ -625,6 +639,7 @@ async function renderLaporanBulanan() {
                 <td style="text-align: right;">${hasData ? formatNumber(butuhPerbaikan) : '0'}</td>
                 <td style="text-align: right;">${hasData ? formatNumber(kurang) : '0'}</td>
                 <td style="text-align: right;">${hasData ? formatNumber(sangatKurang) : '0'}</td>
+                <td style="text-align: right;">${hasData ? formatNumber(tidakMembuatSkp) : '0'}</td>
             `;
             printTableBody.appendChild(printTr);
         });
@@ -637,6 +652,8 @@ async function renderLaporanBulanan() {
         document.getElementById('laporan-total-butuhperbaikan').textContent = formatNumber(totalButuhPerbaikanAcc);
         document.getElementById('laporan-total-kurang').textContent = formatNumber(totalKurangAcc);
         document.getElementById('laporan-total-sangatkurang').textContent = formatNumber(totalSangatKurangAcc);
+        const webTidakMembuat = document.getElementById('laporan-total-tidakmembuatskp');
+        if (webTidakMembuat) webTidakMembuat.textContent = formatNumber(totalTidakMembuatSkpAcc);
 
         // Update print labels
         document.getElementById('print-total-status').textContent = `${totalOpdFilled} OPD`;
@@ -646,6 +663,8 @@ async function renderLaporanBulanan() {
         document.getElementById('print-total-butuhperbaikan').textContent = formatNumber(totalButuhPerbaikanAcc);
         document.getElementById('print-total-kurang').textContent = formatNumber(totalKurangAcc);
         document.getElementById('print-total-sangatkurang').textContent = formatNumber(totalSangatKurangAcc);
+        const printTidakMembuat = document.getElementById('print-total-tidakmembuatskp');
+        if (printTidakMembuat) printTidakMembuat.textContent = formatNumber(totalTidakMembuatSkpAcc);
 
         // Update statistics cards
         const opdPct = MASTER_OPD_LIST.length > 0 ? (totalOpdFilled / MASTER_OPD_LIST.length) * 100 : 0;
@@ -655,7 +674,7 @@ async function renderLaporanBulanan() {
         document.getElementById('laporan-stat-asn-count').textContent = formatNumber(totalPegawaiAcc);
         document.getElementById('laporan-stat-asn-ratio').textContent = `PNS: ${formatNumber(countPns)} | PPPK: ${formatNumber(countPppk)}`;
 
-        const totalPredikatAll = totalSangatBaikAcc + totalBaikAcc + totalButuhPerbaikanAcc + totalKurangAcc + totalSangatKurangAcc;
+        const totalPredikatAll = totalSangatBaikAcc + totalBaikAcc + totalButuhPerbaikanAcc + totalKurangAcc + totalSangatKurangAcc + totalTidakMembuatSkpAcc;
         const baikPct = totalPredikatAll > 0 ? ((totalSangatBaikAcc + totalBaikAcc) / totalPredikatAll) * 100 : 0;
         const kurangPct = totalPredikatAll > 0 ? ((totalButuhPerbaikanAcc + totalKurangAcc + totalSangatKurangAcc) / totalPredikatAll) * 100 : 0;
 
@@ -785,13 +804,13 @@ window.confirmResetDatabase = async function () {
 
             // Masukkan data default 2025
             const defaultSeed = [
-                { opd_id: 'BKPSDM', bulan: 'DESEMBER', tahun: 2025, pns: 45, pppk: 20, pppk_dw: 16, sangat_baik: 20, baik: 60, butuh_perbaikan: 1, kurang: 0, sangat_kurang: 0, nama_file: 'skp_bkpsdm_final.xlsx' },
-                { opd_id: 'DINKES', bulan: 'DESEMBER', tahun: 2025, pns: 210, pppk: 102, pppk_dw: 100, sangat_baik: 120, baik: 260, butuh_perbaikan: 24, kurang: 6, sangat_kurang: 2, nama_file: 'skp_dinkes_final.xlsx' },
-                { opd_id: 'DISDIK', bulan: 'DESEMBER', tahun: 2025, pns: 950, pppk: 500, pppk_dw: 400, sangat_baik: 580, baik: 1100, butuh_perbaikan: 120, kurang: 40, sangat_kurang: 10, nama_file: 'skp_disdik_final.xlsx' },
-                { opd_id: 'DISDUKCAPIL', bulan: 'DESEMBER', tahun: 2025, pns: 30, pppk: 15, pppk_dw: 10, sangat_baik: 15, baik: 38, butuh_perbaikan: 2, kurang: 0, sangat_kurang: 0, nama_file: 'skp_disdukcapil_final.xlsx' },
-                { opd_id: 'SETDA', bulan: 'DESEMBER', tahun: 2025, pns: 75, pppk: 25, pppk_dw: 20, sangat_baik: 45, baik: 70, butuh_perbaikan: 5, kurang: 0, sangat_kurang: 0, nama_file: 'skp_setda_final.xlsx' },
-                { opd_id: 'KEC_IDI', bulan: 'DESEMBER', tahun: 2025, pns: 25, pppk: 15, pppk_dw: 5, sangat_baik: 10, baik: 28, butuh_perbaikan: 5, kurang: 2, sangat_kurang: 0, nama_file: 'skp_kec_idi_final.xlsx' },
-                { opd_id: 'KEC_PEUREULAK', bulan: 'DESEMBER', tahun: 2025, pns: 30, pppk: 10, pppk_dw: 10, sangat_baik: 15, baik: 30, butuh_perbaikan: 4, kurang: 1, sangat_kurang: 0, nama_file: 'skp_kec_peureulak_final.xlsx' }
+                { opd_id: 'BKPSDM', bulan: 'DESEMBER', tahun: 2025, pns: 45, pppk: 20, pppk_dw: 16, sangat_baik: 20, baik: 60, butuh_perbaikan: 1, kurang: 0, sangat_kurang: 0, tidak_membuat_skp: 0, nama_file: 'skp_bkpsdm_final.xlsx' },
+                { opd_id: 'DINKES', bulan: 'DESEMBER', tahun: 2025, pns: 210, pppk: 102, pppk_dw: 100, sangat_baik: 120, baik: 260, butuh_perbaikan: 24, kurang: 6, sangat_kurang: 2, tidak_membuat_skp: 0, nama_file: 'skp_dinkes_final.xlsx' },
+                { opd_id: 'DISDIK', bulan: 'DESEMBER', tahun: 2025, pns: 950, pppk: 500, pppk_dw: 400, sangat_baik: 580, baik: 1100, butuh_perbaikan: 120, kurang: 40, sangat_kurang: 10, tidak_membuat_skp: 0, nama_file: 'skp_disdik_final.xlsx' },
+                { opd_id: 'DISDUKCAPIL', bulan: 'DESEMBER', tahun: 2025, pns: 30, pppk: 15, pppk_dw: 10, sangat_baik: 15, baik: 38, butuh_perbaikan: 2, kurang: 0, sangat_kurang: 0, tidak_membuat_skp: 0, nama_file: 'skp_disdukcapil_final.xlsx' },
+                { opd_id: 'SETDA', bulan: 'DESEMBER', tahun: 2025, pns: 75, pppk: 25, pppk_dw: 20, sangat_baik: 45, baik: 70, butuh_perbaikan: 5, kurang: 0, sangat_kurang: 0, tidak_membuat_skp: 0, nama_file: 'skp_setda_final.xlsx' },
+                { opd_id: 'KEC_IDI', bulan: 'DESEMBER', tahun: 2025, pns: 25, pppk: 15, pppk_dw: 5, sangat_baik: 10, baik: 28, butuh_perbaikan: 5, kurang: 2, sangat_kurang: 0, tidak_membuat_skp: 0, nama_file: 'skp_kec_idi_final.xlsx' },
+                { opd_id: 'KEC_PEUREULAK', bulan: 'DESEMBER', tahun: 2025, pns: 30, pppk: 10, pppk_dw: 10, sangat_baik: 15, baik: 30, butuh_perbaikan: 4, kurang: 1, sangat_kurang: 0, tidak_membuat_skp: 0, nama_file: 'skp_kec_peureulak_final.xlsx' }
             ];
 
             const { error: errorInsert } = await supabaseClient.from('skp_rekap_bulanan').insert(defaultSeed);
@@ -976,6 +995,7 @@ function autoProcessExcelFile(file) {
                     mappings.butuh_perbaikan = [/perbaikan|butuh/i];
                     mappings.kurang = [/^kurang$/i, /kurang/i];
                     mappings.sangat_kurang = [/sangat kurang/i, /sangatkurang/i];
+                    mappings.tidak_membuat_skp = [/tidak membuat/i, /tidak_membuat/i, /tanpa skp/i, /tidak skp/i, /blanks?/i];
                 } else {
                     mappings.nip = [/nip|nomor induk/i];
                     mappings.nama = [/nama|pegawai/i];
@@ -1030,7 +1050,7 @@ function autoProcessExcelFile(file) {
                     // Normalisasi isi data
                     if (obj.bulan) obj.bulan = String(obj.bulan).trim().toUpperCase();
                     if (obj.tahun) obj.tahun = parseInt(obj.tahun) || null;
-                    if (formatType === 'detail' && obj.predikat) {
+                    if (formatType === 'detail') {
                         obj.predikat = normalizePredikatName(obj.predikat);
                     }
                     return obj;
@@ -1065,7 +1085,7 @@ async function uploadParsedData(formatType, parsedRows, filename) {
         if (formatType === 'rekap') {
             // Akumulasi baris
             let pns = 0, pppk = 0, pppk_dw = 0;
-            let sangat_baik = 0, baik = 0, butuh_perbaikan = 0, kurang = 0, sangat_kurang = 0;
+            let sangat_baik = 0, baik = 0, butuh_perbaikan = 0, kurang = 0, sangat_kurang = 0, tidak_membuat_skp = 0;
             let bulan = defaultBulan;
             let tahun = defaultTahun;
 
@@ -1078,6 +1098,7 @@ async function uploadParsedData(formatType, parsedRows, filename) {
                 butuh_perbaikan += parseInt(row.butuh_perbaikan) || 0;
                 kurang += parseInt(row.kurang) || 0;
                 sangat_kurang += parseInt(row.sangat_kurang) || 0;
+                tidak_membuat_skp += parseInt(row.tidak_membuat_skp) || 0;
                 if (row.bulan) bulan = row.bulan;
                 if (row.tahun) tahun = parseInt(row.tahun);
             });
@@ -1094,6 +1115,7 @@ async function uploadParsedData(formatType, parsedRows, filename) {
                 butuh_perbaikan: butuh_perbaikan,
                 kurang: kurang,
                 sangat_kurang: sangat_kurang,
+                tidak_membuat_skp: tidak_membuat_skp,
                 nama_file: filename
             };
 
@@ -1133,7 +1155,7 @@ async function uploadParsedData(formatType, parsedRows, filename) {
             let pnsCount = 0;
             let pppkCount = 0;
             let pppkDwCount = 0;
-            let sangatBaik = 0, baik = 0, butuhPerbaikan = 0, kurang = 0, sangatKurang = 0;
+            let sangatBaik = 0, baik = 0, butuhPerbaikan = 0, kurang = 0, sangatKurang = 0, tidakMembuatSkp = 0;
 
             const rowsPayload = parsedRows.map(row => {
                 const status = strtoupper(row.status || 'PNS');
@@ -1149,13 +1171,14 @@ async function uploadParsedData(formatType, parsedRows, filename) {
                     pnsCount++;
                 }
 
-                const pred = row.predikat || 'Baik';
+                const pred = normalizePredikatName(row.predikat);
                 if (pred === 'Sangat Baik') sangatBaik++;
                 else if (pred === 'Baik') baik++;
                 else if (pred === 'Butuh Perbaikan') butuhPerbaikan++;
                 else if (pred === 'Kurang') kurang++;
                 else if (pred === 'Sangat Kurang') sangatKurang++;
-                else baik++;
+                else if (pred === 'Tidak membuat SKP') tidakMembuatSkp++;
+                else tidakMembuatSkp++;
 
                 return {
                     nip: row.nip || null,
@@ -1188,6 +1211,7 @@ async function uploadParsedData(formatType, parsedRows, filename) {
                 butuh_perbaikan: butuhPerbaikan,
                 kurang: kurang,
                 sangat_kurang: sangatKurang,
+                tidak_membuat_skp: tidakMembuatSkp,
                 nama_file: filename
             };
 
@@ -1212,13 +1236,17 @@ async function uploadParsedData(formatType, parsedRows, filename) {
 }
 
 function normalizePredikatName(name) {
+    if (!name || String(name).trim() === '' || String(name).trim() === '-' || String(name).trim() === '0') {
+        return 'Tidak membuat SKP';
+    }
     const clean = String(name).toUpperCase().replace(/\s+/g, '');
     if (clean.includes('SANGATBAIK')) return 'Sangat Baik';
+    if (clean.includes('SANGATKURANG')) return 'Sangat Kurang';
     if (clean.includes('BAIK')) return 'Baik';
     if (clean.includes('PERBAIKAN') || clean.includes('BUTUH')) return 'Butuh Perbaikan';
-    if (clean.includes('SANGATKURANG')) return 'Sangat Kurang';
     if (clean.includes('KURANG')) return 'Kurang';
-    return 'Baik';
+    if (clean.includes('TIDAK') || clean.includes('TANPA') || clean.includes('BLANK') || clean.includes('KOSONG')) return 'Tidak membuat SKP';
+    return 'Tidak membuat SKP';
 }
 
 function formatNumber(num) {
@@ -1239,11 +1267,11 @@ function downloadTemplateFile(type) {
     let filename = '';
 
     if (type === 'rekap') {
-        headers = ["Unit Organisasi / OPD", "Bulan", "Tahun", "PNS", "PPPK", "PPPK PW", "Sangat Baik", "Baik", "Butuh Perbaikan", "Kurang", "Sangat Kurang"];
+        headers = ["Unit Organisasi / OPD", "Bulan", "Tahun", "PNS", "PPPK", "PPPK PW", "Sangat Baik", "Baik", "Butuh Perbaikan", "Kurang", "Sangat Kurang", "Tidak membuat SKP"];
         mockRows = [
-            ["Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM)", "DESEMBER", 2023, 45, 20, 16, 20, 60, 1, 0, 0],
-            ["Dinas Kesehatan", "DESEMBER", 2023, 210, 102, 100, 120, 260, 24, 6, 2],
-            ["Dinas Pendidikan dan Kebudayaan", "DESEMBER", 2023, 950, 500, 400, 580, 1100, 120, 40, 10]
+            ["Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM)", "DESEMBER", 2023, 45, 20, 16, 20, 60, 1, 0, 0, 0],
+            ["Dinas Kesehatan", "DESEMBER", 2023, 210, 102, 100, 120, 260, 24, 6, 2, 0],
+            ["Dinas Pendidikan dan Kebudayaan", "DESEMBER", 2023, 950, 500, 400, 580, 1100, 120, 40, 10, 0]
         ];
         filename = 'template_rekap_skp_opd.xlsx';
     } else {
@@ -1252,7 +1280,7 @@ function downloadTemplateFile(type) {
             ["198501012010011001", "Ahmad Subarjo", "PNS", "Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM)", "Sangat Baik", "DESEMBER", 2023],
             ["199203152018022003", "Siti Aminah", "PPPK", "Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM)", "Baik", "DESEMBER", 2023],
             ["198905202015031002", "Budi Santoso", "PNS", "Dinas Kesehatan", "Butuh Perbaikan", "DESEMBER", 2023],
-            ["200110122024012005", "Rina Lestari", "PPPK PW", "Dinas Kesehatan", "Baik", "DESEMBER", 2023]
+            ["200110122024012005", "Rina Lestari", "PPPK PW", "Dinas Kesehatan", "Tidak membuat SKP", "DESEMBER", 2023]
         ];
         filename = 'template_detail_pegawai_skp.xlsx';
     }
@@ -1553,8 +1581,8 @@ window.syncLaporanFilters = function () {
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Render Chart
     const ctx = document.getElementById('kinerjaChart').getContext('2d');
-    const labels = ['Sangat Baik', 'Baik', 'Butuh Perbaikan', 'Kurang', 'Sangat Kurang'];
-    const colors = ['#22c55e', '#3b82f6', '#eab308', '#f97316', '#ef4444'];
+    const labels = ['Sangat Baik', 'Baik', 'Butuh Perbaikan', 'Kurang', 'Sangat Kurang', 'Tidak membuat SKP'];
+    const colors = ['#22c55e', '#3b82f6', '#eab308', '#f97316', '#ef4444', '#64748b'];
 
     kinerjaChart = new Chart(ctx, {
         type: 'bar',
@@ -1562,7 +1590,7 @@ document.addEventListener('DOMContentLoaded', () => {
             labels: labels,
             datasets: [{
                 label: 'Jumlah ASN',
-                data: [0, 0, 0, 0, 0],
+                data: [0, 0, 0, 0, 0, 0],
                 backgroundColor: colors,
                 borderRadius: 8,
                 borderWidth: 0,
