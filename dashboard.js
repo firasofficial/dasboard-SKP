@@ -813,8 +813,20 @@ window.confirmResetDatabase = async function () {
                 { opd_id: 'KEC_PEUREULAK', bulan: 'DESEMBER', tahun: 2025, pns: 30, pppk: 10, pppk_dw: 10, sangat_baik: 15, baik: 30, butuh_perbaikan: 4, kurang: 1, sangat_kurang: 0, tidak_membuat_skp: 0, nama_file: 'skp_kec_peureulak_final.xlsx' }
             ];
 
-            const { error: errorInsert } = await supabaseClient.from('skp_rekap_bulanan').insert(defaultSeed);
-            if (errorInsert) throw errorInsert;
+            let { error: errorInsert } = await supabaseClient.from('skp_rekap_bulanan').insert(defaultSeed);
+            if (errorInsert) {
+                if (errorInsert.message && (errorInsert.message.includes('tidak_membuat_skp') || errorInsert.code === 'PGRST204')) {
+                    const fallbackSeed = defaultSeed.map(item => {
+                        const copy = { ...item };
+                        delete copy.tidak_membuat_skp;
+                        return copy;
+                    });
+                    const { error: errFallback } = await supabaseClient.from('skp_rekap_bulanan').insert(fallbackSeed);
+                    if (errFallback) throw errFallback;
+                } else {
+                    throw errorInsert;
+                }
+            }
 
             alert("Database Supabase berhasil dikembalikan ke kondisi default.");
             refreshAllData();
@@ -1081,6 +1093,8 @@ async function uploadParsedData(formatType, parsedRows, filename) {
     const defaultBulan = document.getElementById('modal-default-bulan').value;
     const defaultTahun = parseInt(document.getElementById('modal-default-tahun').value);
 
+    let columnWarning = false;
+
     try {
         if (formatType === 'rekap') {
             // Akumulasi baris
@@ -1090,15 +1104,33 @@ async function uploadParsedData(formatType, parsedRows, filename) {
             let tahun = defaultTahun;
 
             parsedRows.forEach(row => {
-                pns += parseInt(row.pns) || 0;
-                pppk += parseInt(row.pppk) || 0;
-                pppk_dw += parseInt(row.pppk_dw) || 0;
-                sangat_baik += parseInt(row.sangat_baik) || 0;
-                baik += parseInt(row.baik) || 0;
-                butuh_perbaikan += parseInt(row.butuh_perbaikan) || 0;
-                kurang += parseInt(row.kurang) || 0;
-                sangat_kurang += parseInt(row.sangat_kurang) || 0;
-                tidak_membuat_skp += parseInt(row.tidak_membuat_skp) || 0;
+                const rPns = parseInt(row.pns) || 0;
+                const rPppk = parseInt(row.pppk) || 0;
+                const rPppkDw = parseInt(row.pppk_dw) || 0;
+                const rSangatBaik = parseInt(row.sangat_baik) || 0;
+                const rBaik = parseInt(row.baik) || 0;
+                const rButuhPerbaikan = parseInt(row.butuh_perbaikan) || 0;
+                const rKurang = parseInt(row.kurang) || 0;
+                const rSangatKurang = parseInt(row.sangat_kurang) || 0;
+                let rTidakMembuatSkp = parseInt(row.tidak_membuat_skp) || 0;
+
+                // Jika nilai tidak_membuat_skp 0 atau kosong, hitung selisih total pegawai vs yang dinilai
+                const rTotalPegawai = rPns + rPppk + rPppkDw;
+                const rTotalRated = rSangatBaik + rBaik + rButuhPerbaikan + rKurang + rSangatKurang;
+                if (rTidakMembuatSkp === 0 && rTotalPegawai > rTotalRated) {
+                    rTidakMembuatSkp = rTotalPegawai - rTotalRated;
+                }
+
+                pns += rPns;
+                pppk += rPppk;
+                pppk_dw += rPppkDw;
+                sangat_baik += rSangatBaik;
+                baik += rBaik;
+                butuh_perbaikan += rButuhPerbaikan;
+                kurang += rKurang;
+                sangat_kurang += rSangatKurang;
+                tidak_membuat_skp += rTidakMembuatSkp;
+
                 if (row.bulan) bulan = row.bulan;
                 if (row.tahun) tahun = parseInt(row.tahun);
             });
@@ -1119,8 +1151,18 @@ async function uploadParsedData(formatType, parsedRows, filename) {
                 nama_file: filename
             };
 
-            const { error } = await supabaseClient.from('skp_rekap_bulanan').upsert(payload, { onConflict: 'opd_id,bulan,tahun' });
-            if (error) throw error;
+            let { error } = await supabaseClient.from('skp_rekap_bulanan').upsert(payload, { onConflict: 'opd_id,bulan,tahun' });
+            if (error) {
+                if (error.message && (error.message.includes('tidak_membuat_skp') || error.code === 'PGRST204')) {
+                    columnWarning = true;
+                    const fallbackPayload = { ...payload };
+                    delete fallbackPayload.tidak_membuat_skp;
+                    const { error: errFallback } = await supabaseClient.from('skp_rekap_bulanan').upsert(fallbackPayload, { onConflict: 'opd_id,bulan,tahun' });
+                    if (errFallback) throw errFallback;
+                } else {
+                    throw error;
+                }
+            }
 
             progressBar.style.width = '100%';
             percentText.textContent = '100%';
@@ -1128,7 +1170,11 @@ async function uploadParsedData(formatType, parsedRows, filename) {
 
             setTimeout(() => {
                 tutupModalUpload();
-                alert("Data Rekap OPD berhasil diunggah ke Supabase!");
+                if (columnWarning) {
+                    alert("Data Rekap OPD berhasil diunggah!\n\n(Catatan: Kolom 'tidak_membuat_skp' belum ada di tabel 'skp_rekap_bulanan' database Supabase Anda. Silakan jalankan skrip SQL migration agar kolom 'tidak_membuat_skp' tersimpan di Supabase database).");
+                } else {
+                    alert("Data Rekap OPD berhasil diunggah ke Supabase!");
+                }
                 refreshAllData();
             }, 500);
 
@@ -1177,7 +1223,6 @@ async function uploadParsedData(formatType, parsedRows, filename) {
                 else if (pred === 'Butuh Perbaikan') butuhPerbaikan++;
                 else if (pred === 'Kurang') kurang++;
                 else if (pred === 'Sangat Kurang') sangatKurang++;
-                else if (pred === 'Tidak membuat SKP') tidakMembuatSkp++;
                 else tidakMembuatSkp++;
 
                 return {
@@ -1215,8 +1260,18 @@ async function uploadParsedData(formatType, parsedRows, filename) {
                 nama_file: filename
             };
 
-            const { error: errorUpsertRekap } = await supabaseClient.from('skp_rekap_bulanan').upsert(rekapPayload, { onConflict: 'opd_id,bulan,tahun' });
-            if (errorUpsertRekap) throw errorUpsertRekap;
+            let { error: errorUpsertRekap } = await supabaseClient.from('skp_rekap_bulanan').upsert(rekapPayload, { onConflict: 'opd_id,bulan,tahun' });
+            if (errorUpsertRekap) {
+                if (errorUpsertRekap.message && (errorUpsertRekap.message.includes('tidak_membuat_skp') || errorUpsertRekap.code === 'PGRST204')) {
+                    columnWarning = true;
+                    const fallbackRekap = { ...rekapPayload };
+                    delete fallbackRekap.tidak_membuat_skp;
+                    const { error: errFallback } = await supabaseClient.from('skp_rekap_bulanan').upsert(fallbackRekap, { onConflict: 'opd_id,bulan,tahun' });
+                    if (errFallback) throw errFallback;
+                } else {
+                    throw errorUpsertRekap;
+                }
+            }
 
             progressBar.style.width = '100%';
             percentText.textContent = '100%';
@@ -1224,7 +1279,11 @@ async function uploadParsedData(formatType, parsedRows, filename) {
 
             setTimeout(() => {
                 tutupModalUpload();
-                alert("Data Detail Pegawai berhasil diunggah & diakumulasikan ke Supabase!");
+                if (columnWarning) {
+                    alert("Data Detail Pegawai berhasil diunggah!\n\n(Catatan: Kolom 'tidak_membuat_skp' belum ada di tabel 'skp_rekap_bulanan' database Supabase Anda. Silakan jalankan skrip SQL migration agar data Tidak Membuat SKP tersimpan di Rekap Supabase).");
+                } else {
+                    alert("Data Detail Pegawai berhasil diunggah & diakumulasikan ke Supabase!");
+                }
                 refreshAllData();
             }, 500);
         }
@@ -1236,16 +1295,32 @@ async function uploadParsedData(formatType, parsedRows, filename) {
 }
 
 function normalizePredikatName(name) {
-    if (!name || String(name).trim() === '' || String(name).trim() === '-' || String(name).trim() === '0') {
+    if (name === null || name === undefined) {
         return 'Tidak membuat SKP';
     }
-    const clean = String(name).toUpperCase().replace(/\s+/g, '');
+    const str = String(name).trim();
+    if (
+        str === '' || 
+        str === '-' || 
+        str === '--' || 
+        str === '0' || 
+        /^n\/?a$/i.test(str) || 
+        /^null$/i.test(str) || 
+        /^undefined$/i.test(str) ||
+        /^kosong$/i.test(str) ||
+        /^tidak\s*ada$/i.test(str) ||
+        /^belum\s*isi$/i.test(str) ||
+        /^belum\s*membuat$/i.test(str)
+    ) {
+        return 'Tidak membuat SKP';
+    }
+    const clean = str.toUpperCase().replace(/\s+/g, '');
     if (clean.includes('SANGATBAIK')) return 'Sangat Baik';
     if (clean.includes('SANGATKURANG')) return 'Sangat Kurang';
     if (clean.includes('BAIK')) return 'Baik';
     if (clean.includes('PERBAIKAN') || clean.includes('BUTUH')) return 'Butuh Perbaikan';
     if (clean.includes('KURANG')) return 'Kurang';
-    if (clean.includes('TIDAK') || clean.includes('TANPA') || clean.includes('BLANK') || clean.includes('KOSONG')) return 'Tidak membuat SKP';
+    if (clean.includes('TIDAK') || clean.includes('TANPA') || clean.includes('BLANK') || clean.includes('KOSONG') || clean.includes('BELUM')) return 'Tidak membuat SKP';
     return 'Tidak membuat SKP';
 }
 
