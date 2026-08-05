@@ -1025,7 +1025,7 @@ function autoProcessExcelFile(file) {
                     mappings.nip = [/nip|nomor induk/i];
                     mappings.nama = [/nama|pegawai/i];
                     mappings.status = [/status|golongan|jenis|kategori/i];
-                    mappings.predikat = [/predikat|kinerja|skp|nilai/i];
+                    mappings.predikat = [/predikat|kinerja|skp|nilai|hasil|evaluasi|mutu|kategori|rating|kesimpulan/i];
                     mappings.bulan = [/bulan|month/i];
                     mappings.tahun = [/tahun|year/i];
                     mappings.opd = [/opd|unit|organisasi|kerja|instansi|kecamatan/i];
@@ -1052,7 +1052,7 @@ function autoProcessExcelFile(file) {
                     const required = ['nama', 'predikat'];
                     const missing = required.filter(f => colIdx[f] === -1);
                     if (missing.length > 0) {
-                        throw new Error("Kolom Excel tidak sesuai template Detail Pegawai (Kolom hilang: " + missing.join(', ') + ")");
+                        throw new Error("Kolom Excel tidak sesuai template Detail Pegawai (Kolom hilang: " + missing.join(', ') + "). Kolom yang terdeteksi di berkas: [" + headers.filter(h => h !== "").join(', ') + "]");
                     }
                 }
 
