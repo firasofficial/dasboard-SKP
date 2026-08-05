@@ -989,8 +989,21 @@ function autoProcessExcelFile(file) {
                 const sheetRows = rawData.slice(headerRowIndex + 1).filter(row => row.some(val => val !== ""));
 
                 // Deteksi otomatis tipe format
-                const hasNip = headers.some(h => /nip|nama|pegawai/i.test(h));
-                const hasPredikats = headers.some(h => /sangat baik|baik|butuh perbaikan/i.test(h));
+                const hasNip = headers.some(h => 
+                    /nip/i.test(h) || 
+                    /^nama$/i.test(h) || 
+                    (/nama/i.test(h) && !/opd|unit|organisasi|kerja|instansi|kecamatan|badan|kantor/i.test(h)) ||
+                    /pegawai/i.test(h)
+                );
+                
+                const predikatHeadersCount = headers.filter(h => 
+                    /^sangat baik$/i.test(h) || 
+                    /^baik$/i.test(h) || 
+                    /perbaikan/i.test(h) || 
+                    /^kurang$/i.test(h) || 
+                    /sangat kurang/i.test(h)
+                ).length;
+                const hasPredikats = predikatHeadersCount >= 3;
                 const formatType = (hasNip && !hasPredikats) ? 'detail' : 'rekap';
 
                 // Pemetaan kata kunci kolom
@@ -1030,13 +1043,13 @@ function autoProcessExcelFile(file) {
 
                 // Validasi kolom minimum
                 if (formatType === 'rekap') {
-                    const required = ['pns', 'pppk', 'pppk_dw', 'sangat_baik', 'baik', 'butuh_perbaikan', 'kurang', 'sangat_kurang'];
-                    const missing = required.filter(f => colIdx[f] === -1);
-                    if (missing.length > 0) {
-                        throw new Error("Kolom Excel tidak sesuai template Rekap OPD (Kolom hilang: " + missing.join(', ') + ")");
+                    // Cukup pastikan kolom utama PNS atau Baik ditemukan agar tidak memproses file yang salah
+                    if (colIdx['pns'] === -1 && colIdx['baik'] === -1) {
+                        throw new Error("Kolom Excel tidak sesuai template Rekap OPD (Kolom utama PNS/Baik tidak ditemukan)");
                     }
                 } else {
-                    const required = ['nama', 'status', 'predikat'];
+                    // Untuk detail, kolom nama dan predikat wajib ada, sedangkan status opsional (jika kosong default ke PNS)
+                    const required = ['nama', 'predikat'];
                     const missing = required.filter(f => colIdx[f] === -1);
                     if (missing.length > 0) {
                         throw new Error("Kolom Excel tidak sesuai template Detail Pegawai (Kolom hilang: " + missing.join(', ') + ")");
@@ -1067,6 +1080,28 @@ function autoProcessExcelFile(file) {
                     }
                     return obj;
                 });
+
+                // Validasi kesesuaian OPD agar tidak salah upload file (khusus format detail)
+                if (formatType === 'detail' && parsedRows.length > 0) {
+                    const sampleOpd = parsedRows.find(r => r.opd && String(r.opd).trim() !== "")?.opd;
+                    if (sampleOpd) {
+                        const targetOpd = MASTER_OPD_LIST.find(o => o.id === currentUploadOpdId);
+                        if (targetOpd) {
+                            const cleanString = (str) => String(str).toLowerCase().replace(/[^a-z0-9]/g, '');
+                            const cleanSample = cleanString(sampleOpd);
+                            const cleanTarget = cleanString(targetOpd.nama);
+                            
+                            if (!cleanSample.includes(cleanTarget) && !cleanTarget.includes(cleanSample)) {
+                                const confirmUpload = confirm(`Peringatan: Berkas yang Anda unggah tampaknya milik "${sampleOpd}", tetapi Anda memilih untuk mengunggah ke "${targetOpd.nama}".\n\nApakah Anda yakin ingin melanjutkan?`);
+                                if (!confirmUpload) {
+                                    progressDiv.classList.add('hidden');
+                                    resetModalUploadState();
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
 
                 progressBar.style.width = '75%';
                 percentText.textContent = '75%';
