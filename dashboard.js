@@ -952,6 +952,27 @@ function autoProcessExcelFile(file) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+                // Isi sel yang digabung (merged cells) agar header tabel ber-merge tidak menjadi string kosong
+                if (sheet['!merges']) {
+                    sheet['!merges'].forEach(range => {
+                        const startCell = XLSX.utils.encode_cell(range.s);
+                        const val = sheet[startCell] ? sheet[startCell].v : undefined;
+                        if (val !== undefined && val !== null && val !== "") {
+                            for (let R = range.s.r; R <= range.e.r; ++R) {
+                                for (let C = range.s.c; C <= range.e.c; ++C) {
+                                    const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                                    if (!sheet[cellAddress]) {
+                                        sheet[cellAddress] = { t: 's', v: val };
+                                    } else if (sheet[cellAddress].v === undefined || sheet[cellAddress].v === "") {
+                                        sheet[cellAddress].v = val;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
                 const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
 
                 if (rawData.length === 0) {
@@ -1282,9 +1303,11 @@ async function uploadParsedData(formatType, parsedRows, filename) {
 
             const rowsPayload = parsedRows.map(row => {
                 const status = strtoupper(row.status || 'PNS');
+                const isCpns = status.includes('CPNS') || status.includes('CALON');
+                const isPns = status.includes('PNS') || isCpns;
                 const isPppkDw = status.includes('PPPK') && (status.includes('DW') || status.includes('DAERAH') || status.includes('DINAS') || status.includes('PARUH') || status.includes('WAKTU'));
 
-                if (status.includes('PNS')) {
+                if (isPns) {
                     pnsCount++;
                 } else if (isPppkDw) {
                     pppkDwCount++;
@@ -1303,9 +1326,9 @@ async function uploadParsedData(formatType, parsedRows, filename) {
                 else tidakMembuatSkp++;
 
                 return {
-                    nip: row.nip || null,
-                    nama_pegawai: row.nama || '',
-                    status_pegawai: status.includes('PNS') ? 'PNS' : (isPppkDw ? 'PPPK DW' : 'PPPK'),
+                    nip: row.nip ? String(row.nip).trim() : null,
+                    nama_pegawai: row.nama ? String(row.nama).trim() : '',
+                    status_pegawai: isPns ? 'PNS' : (isPppkDw ? 'PPPK DW' : 'PPPK'),
                     opd_id: currentUploadOpdId,
                     predikat_kinerja: pred,
                     bulan: row.bulan || defaultBulan,
