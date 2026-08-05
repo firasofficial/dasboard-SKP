@@ -1041,6 +1041,48 @@ function autoProcessExcelFile(file) {
                     colIdx[field] = idx;
                 });
 
+                // Fallback deteksi kolom berdasarkan konten data jika deteksi header gagal (khusus format detail)
+                if (formatType === 'detail') {
+                    if (colIdx['predikat'] === -1) {
+                        for (let j = 0; j < headers.length; j++) {
+                            let matchesCount = 0;
+                            let checkedRows = 0;
+                            for (let i = 0; i < Math.min(sheetRows.length, 20); i++) {
+                                const val = String(sheetRows[i][j] || "").trim().toLowerCase();
+                                if (val !== "") {
+                                    checkedRows++;
+                                    if (val.includes("baik") || val.includes("kurang") || val.includes("perbaikan") || val.includes("buruk")) {
+                                        matchesCount++;
+                                    }
+                                }
+                            }
+                            if (checkedRows > 0 && matchesCount / checkedRows >= 0.7) {
+                                colIdx['predikat'] = j;
+                                break;
+                            }
+                        }
+                    }
+                    if (colIdx['status'] === -1) {
+                        for (let j = 0; j < headers.length; j++) {
+                            let matchesCount = 0;
+                            let checkedRows = 0;
+                            for (let i = 0; i < Math.min(sheetRows.length, 20); i++) {
+                                const val = String(sheetRows[i][j] || "").trim().toLowerCase();
+                                if (val !== "") {
+                                    checkedRows++;
+                                    if (val.includes("pns") || val.includes("pppk") || val.includes("dw") || val.includes("waktu")) {
+                                        matchesCount++;
+                                    }
+                                }
+                            }
+                            if (checkedRows > 0 && matchesCount / checkedRows >= 0.7) {
+                                colIdx['status'] = j;
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 // Validasi kolom minimum
                 if (formatType === 'rekap') {
                     // Cukup pastikan kolom utama PNS atau Baik ditemukan agar tidak memproses file yang salah
