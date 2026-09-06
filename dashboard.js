@@ -1893,7 +1893,7 @@ window.unduhLaporanPDF = async function () {
     if (btn) {
         btn.innerHTML = `
             <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
             <span>Membuat PDF...</span>
@@ -1909,7 +1909,7 @@ window.unduhLaporanPDF = async function () {
         }
 
         const doc = new jsPDF({
-            orientation: 'landscape',
+            orientation: 'portrait',
             unit: 'mm',
             format: 'a4'
         });
@@ -1917,47 +1917,65 @@ window.unduhLaporanPDF = async function () {
         const filterBulan = document.getElementById('laporan-filter-bulan')?.value || 'BULAN';
         const filterTahun = document.getElementById('laporan-filter-tahun')?.value || '2026';
         const filename = `Laporan_Rekapitulasi_SKP_ASN_${filterBulan}_${filterTahun}_Kab_Aceh_Timur.pdf`;
-        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageWidth = doc.internal.pageSize.getWidth(); // 210mm
+        const pageHeight = doc.internal.pageSize.getHeight(); // 297mm
 
-        // 1. KOP SURAT
+        // 1. KOP SURAT (DENGAN LOGO KABUPATEN ACEH TIMUR)
+        const logoImg = document.querySelector('.kop-logo') || document.querySelector('img[src*="Lambang_Kabupaten_Aceh_Timur"]');
+        if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
+            try {
+                doc.addImage(logoImg, 'PNG', 14, 10, 19, 23.5);
+            } catch (imgErr) {
+                console.warn('Gagal memuat logo ke PDF:', imgErr);
+            }
+        }
+
+        const kopCenterX = 115; // Titik tengah teks Kop Surat (antara x=34 s/d x=196)
+
         doc.setFont("times", "normal");
-        doc.setFontSize(11);
-        doc.text("PEMERINTAH DAERAH KABUPATEN ACEH TIMUR", pageWidth / 2, 13, { align: "center" });
+        doc.setFontSize(10.5);
+        doc.text("PEMERINTAH DAERAH KABUPATEN ACEH TIMUR", kopCenterX, 13.5, { align: "center" });
 
         doc.setFont("times", "bold");
-        doc.setFontSize(15);
-        doc.text("BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA", pageWidth / 2, 19, { align: "center" });
+        doc.setFontSize(13.5);
+        doc.text("BADAN KEPEGAWAIAN DAN PENGEMBANGAN", kopCenterX, 18.5, { align: "center" });
+        doc.text("SUMBER DAYA MANUSIA", kopCenterX, 23.5, { align: "center" });
 
         doc.setFont("times", "normal");
-        doc.setFontSize(8);
-        doc.text("KOMPLEK PUSAT PEMERINTAHAN, JALAN BANDA ACEH – MEDAN KM 370 GEDUNG NO 12 IDI", pageWidth / 2, 24, { align: "center" });
-        doc.text("KODE POS 24454 TELEPON (0646) 7020166, email : bkpsdm.acehtimur@gmail.com", pageWidth / 2, 27.5, { align: "center" });
+        doc.setFontSize(7.5);
+        doc.text("KOMPLEK PUSAT PEMERINTAHAN", kopCenterX, 27.5, { align: "center" });
+        doc.text("JALAN BANDA ACEH – MEDAN KM 370 GEDUNG NO 12 IDI", kopCenterX, 30.7, { align: "center" });
+        doc.text("KODE POS 24454 TELEPON (0646) 7020166, email : bkpsdm.acehtimur@gmail.com", kopCenterX, 33.9, { align: "center" });
 
-        // Garis Ganda Kop Surat
+        // Garis Ganda Kop Surat (Tebal & Tipis)
         doc.setLineWidth(0.8);
-        doc.line(14, 30, pageWidth - 14, 30);
+        doc.line(14, 36.5, pageWidth - 14, 36.5);
         doc.setLineWidth(0.3);
-        doc.line(14, 31, pageWidth - 14, 31);
+        doc.line(14, 37.5, pageWidth - 14, 37.5);
 
-        // 2. JUDUL DOKUMEN
+        // 2. JUDUL DOKUMEN & PERIODE
         doc.setFont("times", "bold");
-        doc.setFontSize(11.5);
-        doc.text("LAPORAN REKAPITULASI CAPAIAN PREDIKAT KINERJA SKP ASN", pageWidth / 2, 37, { align: "center" });
+        doc.setFontSize(11);
+        const titleText = "LAPORAN REKAPITULASI CAPAIAN PREDIKAT KINERJA SKP ASN";
+        doc.text(titleText, pageWidth / 2, 43.5, { align: "center" });
+        const titleWidth = doc.getTextWidth(titleText);
+        doc.setLineWidth(0.3);
+        doc.line((pageWidth / 2) - (titleWidth / 2), 44.5, (pageWidth / 2) + (titleWidth / 2), 44.5);
 
         doc.setFont("times", "italic");
         doc.setFontSize(9);
-        doc.text(`PERIODE BULAN: ${filterBulan}  TAHUN: ${filterTahun}`, pageWidth / 2, 42, { align: "center" });
+        doc.text(`PERIODE BULAN: ${filterBulan}  TAHUN: ${filterTahun}`, pageWidth / 2, 49, { align: "center" });
 
         // 3. RINGKASAN INFORMASI
         const infoOpd = document.getElementById('print-info-opd-count')?.textContent || '0 dari 55 Unit Kerja';
         const infoPegawai = document.getElementById('print-info-pegawai-count')?.textContent || '0 ASN';
 
         doc.setFont("times", "bold");
-        doc.setFontSize(8.5);
-        doc.text(`1. Jumlah Unit Kerja Mengisi : ${infoOpd}`, 14, 48);
-        doc.text(`2. Total Pegawai Terdata    : ${infoPegawai}`, 14, 52);
+        doc.setFontSize(8);
+        doc.text(`1. Jumlah Unit Kerja Mengisi : ${infoOpd}`, 14, 54.5);
+        doc.text(`2. Total Pegawai Terdata    : ${infoPegawai}`, 14, 58.5);
 
-        // 4. EKSTRAKSI DATA TABEL
+        // 4. EKSTRAKSI DATA TABEL LAPORAN
         const tableRows = [];
         const printRows = document.querySelectorAll('#laporan-print-table-body tr');
         printRows.forEach(tr => {
@@ -1978,7 +1996,7 @@ window.unduhLaporanPDF = async function () {
             }
         });
 
-        // Baris Total di Footer Tabel
+        // Baris Total Rekapitulasi di Footer Tabel
         const footData = [[
             { content: 'TOTAL REKAPITULASI', colSpan: 2, styles: { halign: 'left', fontStyle: 'bold' } },
             document.getElementById('print-total-status')?.textContent || '0 OPD',
@@ -1993,7 +2011,7 @@ window.unduhLaporanPDF = async function () {
 
         // 5. GENERATE TABEL VEKTOR
         doc.autoTable({
-            startY: 56,
+            startY: 61,
             head: [[
                 'No', 'Nama Unit Kerja / OPD', 'Status', 'Total Pegawai',
                 'Sangat Baik', 'Baik', 'Butuh Perbaikan', 'Kurang', 'Sangat Kurang', 'Tidak Membuat SKP'
@@ -2006,74 +2024,83 @@ window.unduhLaporanPDF = async function () {
                 textColor: [0, 0, 0],
                 font: 'times',
                 fontStyle: 'bold',
-                fontSize: 8,
+                fontSize: 7.5,
                 halign: 'center',
                 valign: 'middle',
                 lineWidth: 0.2,
-                lineColor: [0, 0, 0]
+                lineColor: [0, 0, 0],
+                cellPadding: 1.4
             },
             bodyStyles: {
                 textColor: [0, 0, 0],
                 font: 'times',
-                fontSize: 7.5,
+                fontSize: 7,
                 lineWidth: 0.15,
                 lineColor: [0, 0, 0],
-                cellPadding: 1.4
+                cellPadding: 1.2
             },
             footStyles: {
                 fillColor: [242, 242, 242],
                 textColor: [0, 0, 0],
                 font: 'times',
                 fontStyle: 'bold',
-                fontSize: 7.5,
+                fontSize: 7,
                 lineWidth: 0.2,
-                lineColor: [0, 0, 0]
+                lineColor: [0, 0, 0],
+                cellPadding: 1.4
             },
             columnStyles: {
-                0: { halign: 'center', cellWidth: 8 },
-                1: { halign: 'left', cellWidth: 'auto' },
+                0: { halign: 'center', cellWidth: 7 },
+                1: { halign: 'left', cellWidth: 52 },
                 2: { halign: 'center', cellWidth: 16 },
-                3: { halign: 'right', cellWidth: 18 },
-                4: { halign: 'right', cellWidth: 18 },
-                5: { halign: 'right', cellWidth: 16 },
-                6: { halign: 'right', cellWidth: 20 },
-                7: { halign: 'right', cellWidth: 16 },
-                8: { halign: 'right', cellWidth: 18 },
-                9: { halign: 'right', cellWidth: 22 }
+                3: { halign: 'right', cellWidth: 15 },
+                4: { halign: 'right', cellWidth: 14 },
+                5: { halign: 'right', cellWidth: 13 },
+                6: { halign: 'right', cellWidth: 18 },
+                7: { halign: 'right', cellWidth: 13 },
+                8: { halign: 'right', cellWidth: 15 },
+                9: { halign: 'right', cellWidth: 23 }
             },
             margin: { left: 14, right: 14, bottom: 15 },
             didDrawPage: function (data) {
-                // Tambahkan nomor halaman di setiap halaman
-                const pageNum = "Halaman " + doc.internal.getNumberOfPages();
+                // Tambahkan nomor halaman di sudut kanan bawah setiap halaman
+                const pageNum = "Halaman " + data.pageNumber;
                 doc.setFont("times", "italic");
-                doc.setFontSize(8);
-                doc.text(pageNum, pageWidth - 30, doc.internal.pageSize.getHeight() - 8);
+                doc.setFontSize(7.5);
+                doc.text(pageNum, pageWidth - 14, pageHeight - 8, { align: "right" });
             }
         });
 
         // 6. KOLOM TANDA TANGAN DI AKHIR DOKUMEN
-        let finalY = (doc.lastAutoTable ? doc.lastAutoTable.finalY : 120) + 8;
-        if (finalY > doc.internal.pageSize.getHeight() - 48) {
+        let finalY = (doc.lastAutoTable ? doc.lastAutoTable.finalY : 120) + 7;
+        if (finalY > pageHeight - 45) {
             doc.addPage();
             finalY = 20;
         }
 
-        const sigX = pageWidth - 95;
-        const monthTitle = filterBulan.charAt(0) + filterBulan.slice(1).toLowerCase();
+        const sigX = pageWidth - 80;
+        const monthTitle = filterBulan.charAt(0).toUpperCase() + filterBulan.slice(1).toLowerCase();
 
         doc.setFont("times", "normal");
-        doc.setFontSize(8.5);
+        doc.setFontSize(8);
         doc.text(`Idi,       ${monthTitle} ${filterTahun}`, sigX, finalY);
 
         doc.setFont("times", "bold");
         doc.text("KEPALA BADAN KEPEGAWAIAN DAN", sigX, finalY + 4);
-        doc.text("PENGEMBANGAN SUMBER DAYA MANUSIA", sigX, finalY + 8);
-        doc.text("KABUPATEN ACEH TIMUR", sigX, finalY + 12);
+        doc.text("PENGEMBANGAN SUMBER DAYA MANUSIA", sigX, finalY + 7.5);
+        doc.text("KABUPATEN ACEH TIMUR", sigX, finalY + 11);
 
-        doc.text("Teuku Didi Farisha, S.STP,. M. AP", sigX, finalY + 34);
+        // Nama Pejabat & Garis Bawah
+        const sigName = "Teuku Didi Farisha, S.STP,. M. AP";
+        doc.text(sigName, sigX, finalY + 30);
+        const nameWidth = doc.getTextWidth(sigName);
+        doc.setLineWidth(0.25);
+        doc.line(sigX, finalY + 30.7, sigX + nameWidth, finalY + 30.7);
+
         doc.setFont("times", "normal");
-        doc.text("Pembina Utama Muda (IV/c)", sigX, finalY + 38);
-        doc.text("NIP. 198412302004121001", sigX, finalY + 41.5);
+        doc.setFontSize(7.5);
+        doc.text("Pembina Utama Muda (IV/c)", sigX, finalY + 34);
+        doc.text("NIP. 198412302004121001", sigX, finalY + 37.5);
 
         // 7. SIMPAN BERKAS PDF
         doc.save(filename);
