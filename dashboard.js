@@ -1911,20 +1911,29 @@ window.unduhLaporanPDF = async function () {
     const filterTahun = document.getElementById('laporan-filter-tahun')?.value || '2026';
     const filename = `Laporan_Rekapitulasi_SKP_ASN_${filterBulan}_${filterTahun}_Kab_Aceh_Timur.pdf`;
 
-    // Buat clone wrapper dengan styling dokumen resmi
-    const exportWrapper = document.createElement('div');
-    exportWrapper.style.position = 'fixed';
-    exportWrapper.style.top = '-9999px';
-    exportWrapper.style.left = '0';
-    exportWrapper.style.width = '1120px'; // Lebar proporsional A4 Landscape
-    exportWrapper.style.backgroundColor = '#ffffff';
-    exportWrapper.style.color = '#000000';
-    exportWrapper.style.fontFamily = "'Times New Roman', Times, serif";
-    exportWrapper.style.padding = '25px 35px';
-    exportWrapper.style.zIndex = '-9999';
+    // Overlay Loading
+    const overlay = document.createElement('div');
+    overlay.id = 'pdf-export-overlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.85);backdrop-filter:blur(4px);z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-family:sans-serif;';
+    overlay.innerHTML = `
+        <div style="background:white;color:#0f172a;padding:28px 36px;border-radius:20px;text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
+            <div style="width:40px;height:40px;border:4px solid #e2e8f0;border-top-color:#4f46e5;border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite;"></div>
+            <p style="font-weight:800;font-size:16px;margin:0 0 6px;">Sedang Menyusun Laporan PDF...</p>
+            <p style="font-size:13px;color:#64748b;margin:0;">Berkas akan terunduh otomatis dalam beberapa detik</p>
+        </div>
+        <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+    `;
+    document.body.appendChild(overlay);
 
-    exportWrapper.innerHTML = printContainer.innerHTML;
-    document.body.appendChild(exportWrapper);
+    // Target rendering element
+    const renderTarget = document.createElement('div');
+    renderTarget.id = 'pdf-capture-target';
+    renderTarget.style.cssText = 'position:fixed;top:0;left:0;width:1120px;background:#ffffff;color:#000000;font-family:"Times New Roman",Times,serif;padding:30px 40px;z-index:999990;box-sizing:border-box;visibility:visible;opacity:1;';
+    renderTarget.innerHTML = printContainer.innerHTML;
+    document.body.appendChild(renderTarget);
+
+    // Tunggu gambar dan DOM termuat
+    await new Promise(resolve => setTimeout(resolve, 400));
 
     const opt = {
         margin: [8, 8, 8, 8],
@@ -1933,8 +1942,12 @@ window.unduhLaporanPDF = async function () {
         html2canvas: {
             scale: 2,
             useCORS: true,
+            allowTaint: true,
             letterRendering: true,
-            logging: false
+            logging: false,
+            windowWidth: 1200,
+            scrollY: 0,
+            scrollX: 0
         },
         jsPDF: {
             unit: 'mm',
@@ -1946,18 +1959,16 @@ window.unduhLaporanPDF = async function () {
 
     try {
         if (typeof html2pdf !== 'undefined') {
-            await html2pdf().set(opt).from(exportWrapper).save();
+            await html2pdf().set(opt).from(renderTarget).save();
         } else {
-            // Fallback ke print window jika pustaka belum termuat
             window.print();
         }
     } catch (err) {
         console.error('Gagal membuat PDF otomatis:', err);
         window.print();
     } finally {
-        if (exportWrapper.parentNode) {
-            document.body.removeChild(exportWrapper);
-        }
+        if (renderTarget.parentNode) renderTarget.parentNode.removeChild(renderTarget);
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
         if (btn) {
             btn.innerHTML = originalContent;
             btn.disabled = false;
