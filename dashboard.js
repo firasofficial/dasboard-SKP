@@ -1885,15 +1885,9 @@ window.handleLogout = function () {
 };
 
 // ==========================================
-// UNDUH LAPORAN DALAM FORMAT PDF
+// UNDUH LAPORAN DALAM FORMAT PDF (VECTOR PDF)
 // ==========================================
 window.unduhLaporanPDF = async function () {
-    const printContainer = document.getElementById('laporan-print-container');
-    if (!printContainer) {
-        window.print();
-        return;
-    }
-
     const btn = document.getElementById('btn-unduh-pdf');
     const originalContent = btn ? btn.innerHTML : '';
     if (btn) {
@@ -1907,68 +1901,186 @@ window.unduhLaporanPDF = async function () {
         btn.disabled = true;
     }
 
-    const filterBulan = document.getElementById('laporan-filter-bulan')?.value || 'BULAN';
-    const filterTahun = document.getElementById('laporan-filter-tahun')?.value || '2026';
-    const filename = `Laporan_Rekapitulasi_SKP_ASN_${filterBulan}_${filterTahun}_Kab_Aceh_Timur.pdf`;
-
-    // Overlay Loading
-    const overlay = document.createElement('div');
-    overlay.id = 'pdf-export-overlay';
-    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.85);backdrop-filter:blur(4px);z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-family:sans-serif;';
-    overlay.innerHTML = `
-        <div style="background:white;color:#0f172a;padding:28px 36px;border-radius:20px;text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
-            <div style="width:40px;height:40px;border:4px solid #e2e8f0;border-top-color:#4f46e5;border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite;"></div>
-            <p style="font-weight:800;font-size:16px;margin:0 0 6px;">Sedang Menyusun Laporan PDF...</p>
-            <p style="font-size:13px;color:#64748b;margin:0;">Berkas akan terunduh otomatis dalam beberapa detik</p>
-        </div>
-        <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
-    `;
-    document.body.appendChild(overlay);
-
-    // Target rendering element
-    const renderTarget = document.createElement('div');
-    renderTarget.id = 'pdf-capture-target';
-    renderTarget.style.cssText = 'position:fixed;top:0;left:0;width:1120px;background:#ffffff;color:#000000;font-family:"Times New Roman",Times,serif;padding:30px 40px;z-index:999990;box-sizing:border-box;visibility:visible;opacity:1;';
-    renderTarget.innerHTML = printContainer.innerHTML;
-    document.body.appendChild(renderTarget);
-
-    // Tunggu gambar dan DOM termuat
-    await new Promise(resolve => setTimeout(resolve, 400));
-
-    const opt = {
-        margin: [8, 8, 8, 8],
-        filename: filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            letterRendering: true,
-            logging: false,
-            windowWidth: 1200,
-            scrollY: 0,
-            scrollX: 0
-        },
-        jsPDF: {
-            unit: 'mm',
-            format: 'a4',
-            orientation: 'landscape'
-        },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-    };
-
     try {
-        if (typeof html2pdf !== 'undefined') {
-            await html2pdf().set(opt).from(renderTarget).save();
-        } else {
+        const { jsPDF } = window.jspdf || {};
+        if (!jsPDF) {
             window.print();
+            return;
         }
+
+        const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        const filterBulan = document.getElementById('laporan-filter-bulan')?.value || 'BULAN';
+        const filterTahun = document.getElementById('laporan-filter-tahun')?.value || '2026';
+        const filename = `Laporan_Rekapitulasi_SKP_ASN_${filterBulan}_${filterTahun}_Kab_Aceh_Timur.pdf`;
+        const pageWidth = doc.internal.pageSize.getWidth();
+
+        // 1. KOP SURAT
+        doc.setFont("times", "normal");
+        doc.setFontSize(11);
+        doc.text("PEMERINTAH DAERAH KABUPATEN ACEH TIMUR", pageWidth / 2, 13, { align: "center" });
+
+        doc.setFont("times", "bold");
+        doc.setFontSize(15);
+        doc.text("BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA", pageWidth / 2, 19, { align: "center" });
+
+        doc.setFont("times", "normal");
+        doc.setFontSize(8);
+        doc.text("KOMPLEK PUSAT PEMERINTAHAN, JALAN BANDA ACEH – MEDAN KM 370 GEDUNG NO 12 IDI", pageWidth / 2, 24, { align: "center" });
+        doc.text("KODE POS 24454 TELEPON (0646) 7020166, email : bkpsdm.acehtimur@gmail.com", pageWidth / 2, 27.5, { align: "center" });
+
+        // Garis Ganda Kop Surat
+        doc.setLineWidth(0.8);
+        doc.line(14, 30, pageWidth - 14, 30);
+        doc.setLineWidth(0.3);
+        doc.line(14, 31, pageWidth - 14, 31);
+
+        // 2. JUDUL DOKUMEN
+        doc.setFont("times", "bold");
+        doc.setFontSize(11.5);
+        doc.text("LAPORAN REKAPITULASI CAPAIAN PREDIKAT KINERJA SKP ASN", pageWidth / 2, 37, { align: "center" });
+
+        doc.setFont("times", "italic");
+        doc.setFontSize(9);
+        doc.text(`PERIODE BULAN: ${filterBulan}  TAHUN: ${filterTahun}`, pageWidth / 2, 42, { align: "center" });
+
+        // 3. RINGKASAN INFORMASI
+        const infoOpd = document.getElementById('print-info-opd-count')?.textContent || '0 dari 55 Unit Kerja';
+        const infoPegawai = document.getElementById('print-info-pegawai-count')?.textContent || '0 ASN';
+
+        doc.setFont("times", "bold");
+        doc.setFontSize(8.5);
+        doc.text(`1. Jumlah Unit Kerja Mengisi : ${infoOpd}`, 14, 48);
+        doc.text(`2. Total Pegawai Terdata    : ${infoPegawai}`, 14, 52);
+
+        // 4. EKSTRAKSI DATA TABEL
+        const tableRows = [];
+        const printRows = document.querySelectorAll('#laporan-print-table-body tr');
+        printRows.forEach(tr => {
+            const cells = tr.querySelectorAll('td');
+            if (cells.length >= 10) {
+                tableRows.push([
+                    cells[0].textContent.trim(),
+                    cells[1].textContent.trim(),
+                    cells[2].textContent.trim(),
+                    cells[3].textContent.trim(),
+                    cells[4].textContent.trim(),
+                    cells[5].textContent.trim(),
+                    cells[6].textContent.trim(),
+                    cells[7].textContent.trim(),
+                    cells[8].textContent.trim(),
+                    cells[9].textContent.trim()
+                ]);
+            }
+        });
+
+        // Baris Total di Footer Tabel
+        const footData = [[
+            { content: 'TOTAL REKAPITULASI', colSpan: 2, styles: { halign: 'left', fontStyle: 'bold' } },
+            document.getElementById('print-total-status')?.textContent || '0 OPD',
+            document.getElementById('print-total-pegawai')?.textContent || '0',
+            document.getElementById('print-total-sangatbaik')?.textContent || '0',
+            document.getElementById('print-total-baik')?.textContent || '0',
+            document.getElementById('print-total-butuhperbaikan')?.textContent || '0',
+            document.getElementById('print-total-kurang')?.textContent || '0',
+            document.getElementById('print-total-sangatkurang')?.textContent || '0',
+            document.getElementById('print-total-tidakmembuatskp')?.textContent || '0'
+        ]];
+
+        // 5. GENERATE TABEL VEKTOR
+        doc.autoTable({
+            startY: 56,
+            head: [[
+                'No', 'Nama Unit Kerja / OPD', 'Status', 'Total Pegawai',
+                'Sangat Baik', 'Baik', 'Butuh Perbaikan', 'Kurang', 'Sangat Kurang', 'Tidak Membuat SKP'
+            ]],
+            body: tableRows,
+            foot: footData,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [242, 242, 242],
+                textColor: [0, 0, 0],
+                font: 'times',
+                fontStyle: 'bold',
+                fontSize: 8,
+                halign: 'center',
+                valign: 'middle',
+                lineWidth: 0.2,
+                lineColor: [0, 0, 0]
+            },
+            bodyStyles: {
+                textColor: [0, 0, 0],
+                font: 'times',
+                fontSize: 7.5,
+                lineWidth: 0.15,
+                lineColor: [0, 0, 0],
+                cellPadding: 1.4
+            },
+            footStyles: {
+                fillColor: [242, 242, 242],
+                textColor: [0, 0, 0],
+                font: 'times',
+                fontStyle: 'bold',
+                fontSize: 7.5,
+                lineWidth: 0.2,
+                lineColor: [0, 0, 0]
+            },
+            columnStyles: {
+                0: { halign: 'center', cellWidth: 8 },
+                1: { halign: 'left', cellWidth: 'auto' },
+                2: { halign: 'center', cellWidth: 16 },
+                3: { halign: 'right', cellWidth: 18 },
+                4: { halign: 'right', cellWidth: 18 },
+                5: { halign: 'right', cellWidth: 16 },
+                6: { halign: 'right', cellWidth: 20 },
+                7: { halign: 'right', cellWidth: 16 },
+                8: { halign: 'right', cellWidth: 18 },
+                9: { halign: 'right', cellWidth: 22 }
+            },
+            margin: { left: 14, right: 14, bottom: 15 },
+            didDrawPage: function (data) {
+                // Tambahkan nomor halaman di setiap halaman
+                const pageNum = "Halaman " + doc.internal.getNumberOfPages();
+                doc.setFont("times", "italic");
+                doc.setFontSize(8);
+                doc.text(pageNum, pageWidth - 30, doc.internal.pageSize.getHeight() - 8);
+            }
+        });
+
+        // 6. KOLOM TANDA TANGAN DI AKHIR DOKUMEN
+        let finalY = (doc.lastAutoTable ? doc.lastAutoTable.finalY : 120) + 8;
+        if (finalY > doc.internal.pageSize.getHeight() - 48) {
+            doc.addPage();
+            finalY = 20;
+        }
+
+        const sigX = pageWidth - 95;
+        const monthTitle = filterBulan.charAt(0) + filterBulan.slice(1).toLowerCase();
+
+        doc.setFont("times", "normal");
+        doc.setFontSize(8.5);
+        doc.text(`Idi,       ${monthTitle} ${filterTahun}`, sigX, finalY);
+
+        doc.setFont("times", "bold");
+        doc.text("KEPALA BADAN KEPEGAWAIAN DAN", sigX, finalY + 4);
+        doc.text("PENGEMBANGAN SUMBER DAYA MANUSIA", sigX, finalY + 8);
+        doc.text("KABUPATEN ACEH TIMUR", sigX, finalY + 12);
+
+        doc.text("Teuku Didi Farisha, S.STP,. M. AP", sigX, finalY + 34);
+        doc.setFont("times", "normal");
+        doc.text("Pembina Utama Muda (IV/c)", sigX, finalY + 38);
+        doc.text("NIP. 198412302004121001", sigX, finalY + 41.5);
+
+        // 7. SIMPAN BERKAS PDF
+        doc.save(filename);
     } catch (err) {
-        console.error('Gagal membuat PDF otomatis:', err);
+        console.error('Gagal generate PDF via jsPDF:', err);
         window.print();
     } finally {
-        if (renderTarget.parentNode) renderTarget.parentNode.removeChild(renderTarget);
-        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
         if (btn) {
             btn.innerHTML = originalContent;
             btn.disabled = false;
