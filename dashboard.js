@@ -1883,3 +1883,84 @@ window.handleLogout = function () {
         window.location.href = 'index.html';
     }
 };
+
+// ==========================================
+// UNDUH LAPORAN DALAM FORMAT PDF
+// ==========================================
+window.unduhLaporanPDF = async function () {
+    const printContainer = document.getElementById('laporan-print-container');
+    if (!printContainer) {
+        window.print();
+        return;
+    }
+
+    const btn = document.getElementById('btn-unduh-pdf');
+    const originalContent = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.innerHTML = `
+            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Membuat PDF...</span>
+        `;
+        btn.disabled = true;
+    }
+
+    const filterBulan = document.getElementById('laporan-filter-bulan')?.value || 'BULAN';
+    const filterTahun = document.getElementById('laporan-filter-tahun')?.value || '2026';
+    const filename = `Laporan_Rekapitulasi_SKP_ASN_${filterBulan}_${filterTahun}_Kab_Aceh_Timur.pdf`;
+
+    // Buat clone wrapper dengan styling dokumen resmi
+    const exportWrapper = document.createElement('div');
+    exportWrapper.style.position = 'fixed';
+    exportWrapper.style.top = '-9999px';
+    exportWrapper.style.left = '0';
+    exportWrapper.style.width = '1120px'; // Lebar proporsional A4 Landscape
+    exportWrapper.style.backgroundColor = '#ffffff';
+    exportWrapper.style.color = '#000000';
+    exportWrapper.style.fontFamily = "'Times New Roman', Times, serif";
+    exportWrapper.style.padding = '25px 35px';
+    exportWrapper.style.zIndex = '-9999';
+
+    exportWrapper.innerHTML = printContainer.innerHTML;
+    document.body.appendChild(exportWrapper);
+
+    const opt = {
+        margin: [8, 8, 8, 8],
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            logging: false
+        },
+        jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'landscape'
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    try {
+        if (typeof html2pdf !== 'undefined') {
+            await html2pdf().set(opt).from(exportWrapper).save();
+        } else {
+            // Fallback ke print window jika pustaka belum termuat
+            window.print();
+        }
+    } catch (err) {
+        console.error('Gagal membuat PDF otomatis:', err);
+        window.print();
+    } finally {
+        if (exportWrapper.parentNode) {
+            document.body.removeChild(exportWrapper);
+        }
+        if (btn) {
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+        }
+    }
+};
