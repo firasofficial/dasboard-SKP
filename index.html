@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMONIKA - Sistem Informasi MONitoring Kinerja ASN | Kabupaten Aceh Timur</title>
+    <title>SIMONIKA - Sistem Informasi Monitoring Kinerja ASN | Kabupaten Aceh Timur</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts (Inter & Outfit) -->
@@ -36,14 +36,17 @@
         }
         /* Floating label styling */
         .input-field:focus-within label,
-        .input-field input:not(:placeholder-shown) + label {
+        .input-field input:not(:placeholder-shown) + label,
+        .input-field input:-webkit-autofill + label {
             transform: translateY(-1.4rem) scale(0.85);
             color: #4f46e5;
             background-color: white;
             padding: 0 4px;
+            z-index: 10;
         }
         .dark-theme-label:focus-within label,
-        .dark-theme-label input:not(:placeholder-shown) + label {
+        .dark-theme-label input:not(:placeholder-shown) + label,
+        .dark-theme-label input:-webkit-autofill + label {
             background-color: #0f172a;
         }
     </style>
@@ -75,7 +78,7 @@
                 </span>
                 <h1 class="heading-font text-4xl xl:text-5xl font-extrabold leading-tight tracking-tight">
                     <span class="bg-gradient-to-r from-indigo-400 via-violet-300 to-amber-300 bg-clip-text text-transparent">SIMONIKA</span> <br>
-                    <span class="text-xl xl:text-2xl font-semibold text-slate-200 block mt-1">(Sistem Informasi MONitoring Kinerja ASN)</span>
+                    <span class="text-xl xl:text-2xl font-semibold text-slate-200 block mt-1">(Sistem Informasi Monitoring Kinerja ASN)</span>
                 </h1>
                 <p class="text-sm text-slate-300/90 leading-relaxed font-light">
                     Selamat datang di portal pengelolaan data kinerja ASN Pemerintah Kabupaten Aceh Timur. Silahkan masuk menggunakan kredensial admin anda untuk memantau, memverifikasi, dan menganalisis capaian kinerja aparatur secara berkala.
@@ -124,7 +127,7 @@
                         <img src="./Logo_BerAKHLAK.png" alt="Logo BerAKHLAK" class="h-8 w-auto">
                     </div>
                     <h2 class="heading-font text-2xl font-bold text-slate-900 tracking-tight">SIMONIKA</h2>
-                    <p class="text-xs text-slate-500 mt-1">Sistem Informasi MONitoring Kinerja ASN</p>
+                    <p class="text-xs text-slate-500 mt-1">Sistem Informasi Monitoring Kinerja ASN</p>
                 </div>
                 
                 <!-- Desktop Header Label -->
