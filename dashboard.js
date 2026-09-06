@@ -1437,35 +1437,12 @@ function strtoupper(str) {
 // ==========================================
 
 function downloadTemplateFile(type) {
-    let headers = [];
-    let mockRows = [];
-    let filename = '';
-
-    if (type === 'rekap' || !type) {
-        headers = ["Unit Organisasi / OPD", "Bulan", "Tahun", "PNS", "PPPK", "PPPK PW", "Sangat Baik", "Baik", "Butuh Perbaikan", "Kurang", "Sangat Kurang", "Tidak membuat SKP"];
-        mockRows = [
-            ["Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM)", "DESEMBER", 2026, 45, 20, 16, 20, 60, 1, 0, 0, 0],
-            ["Dinas Kesehatan", "DESEMBER", 2026, 210, 102, 100, 120, 260, 24, 6, 2, 0],
-            ["Dinas Pendidikan dan Kebudayaan", "DESEMBER", 2026, 950, 500, 400, 580, 1100, 120, 40, 10, 0],
-            ["Kecamatan Idi Rayeuk", "DESEMBER", 2026, 25, 10, 8, 15, 26, 2, 0, 0, 0]
-        ];
-        filename = 'Template_Data_SKP_Kinerja_OPD_Kab_Aceh_Timur.xlsx';
-    } else {
-        headers = ["NIP", "Nama", "Status Pegawai", "Unit Kerja / OPD", "Predikat Kinerja", "Bulan", "Tahun"];
-        mockRows = [
-            ["198501012010011001", "Ahmad Subarjo", "PNS", "Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM)", "Sangat Baik", "DESEMBER", 2026],
-            ["199203152018022003", "Siti Aminah", "PPPK", "Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM)", "Baik", "DESEMBER", 2026],
-            ["198905202015031002", "Budi Santoso", "PNS", "Dinas Kesehatan", "Butuh Perbaikan", "DESEMBER", 2026],
-            ["200110122024012005", "Rina Lestari", "PPPK PW", "Dinas Kesehatan", "Tidak membuat SKP", "DESEMBER", 2026]
-        ];
-        filename = 'Template_Detail_Pegawai_SKP_Kinerja_OPD_Kab_Aceh_Timur.xlsx';
-    }
-
-    const wsData = [headers, ...mockRows];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Template OPD");
-    XLSX.writeFile(wb, filename);
+    const link = document.createElement('a');
+    link.href = './Format Rekap SKP per OPD.xlsx';
+    link.download = 'Format Rekap SKP per OPD.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 // ==========================================
