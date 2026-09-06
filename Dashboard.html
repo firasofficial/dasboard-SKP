@@ -122,6 +122,11 @@
         }
 
         /* Print CSS Styling */
+        @page {
+            size: A4 portrait;
+            margin: 0mm;
+        }
+
         @media screen {
             .print-only {
                 display: none !important;
@@ -129,7 +134,22 @@
         }
 
         @media print {
-            .no-print {
+            @page {
+                size: A4 portrait;
+                margin: 0mm;
+            }
+
+            .no-print,
+            header,
+            aside,
+            #sidebar,
+            #sidebar-overlay,
+            #view-dashboard,
+            #view-data-opd,
+            #modal-upload,
+            #modal-preview,
+            #modal-confirm,
+            #toast-container {
                 display: none !important;
             }
 
@@ -137,21 +157,20 @@
                 display: block !important;
             }
 
+            html,
             body {
                 background: white !important;
                 color: black !important;
                 font-family: 'Times New Roman', Times, serif !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
 
             /* Remove sidebar margin & reset layout */
             .md\:ml-64 {
                 margin-left: 0 !important;
-            }
-
-            aside,
-            #sidebar-overlay,
-            header {
-                display: none !important;
             }
 
             main {
@@ -160,12 +179,32 @@
                 max-width: 100% !important;
             }
 
+            #laporan-print-container {
+                display: block !important;
+                padding: 1.2cm 1.5cm !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
+            }
+
             /* Printable table */
             .print-table {
                 width: 100% !important;
                 border-collapse: collapse !important;
                 margin-top: 15px !important;
                 font-size: 8.5pt !important;
+            }
+
+            .print-table thead {
+                display: table-header-group !important;
+            }
+
+            .print-table tfoot {
+                display: table-footer-group !important;
+            }
+
+            .print-table tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
 
             .print-table th,
@@ -179,6 +218,8 @@
                 background-color: #f2f2f2 !important;
                 font-weight: bold !important;
                 text-align: center !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
 
             /* Kop Surat (Letterhead) */
@@ -188,6 +229,8 @@
                 border-bottom: 3px double black;
                 padding-bottom: 8px;
                 margin-bottom: 20px;
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
 
             .kop-logo {
@@ -228,16 +271,12 @@
                 justify-content: flex-end;
                 margin-top: 30px;
                 page-break-inside: avoid;
+                break-inside: avoid;
             }
 
             .print-signature {
                 text-align: left;
                 width: 320px;
-            }
-
-            @page {
-                size: A4 portrait;
-                margin: 1.5cm;
             }
         }
     </style>
@@ -903,6 +942,16 @@
                                 </div>
                             </div>
 
+                            <!-- Cetak Laporan Button -->
+                            <button id="btn-cetak-laporan" onclick="window.print()"
+                                class="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/20 active:scale-[0.98] transition-all focus:outline-none">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
+                                <span>Cetak Laporan</span>
+                            </button>
+
                             <!-- Unduh PDF Button -->
                             <button id="btn-unduh-pdf" onclick="unduhLaporanPDF()"
                                 class="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 active:scale-[0.98] transition-all focus:outline-none">
@@ -910,7 +959,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                <span>Unduh Laporan (PDF)</span>
+                                <span>Unduh PDF (Resmi)</span>
                             </button>
 
                             <!-- Back to dashboard button -->
