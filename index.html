@@ -7,6 +7,8 @@
     <title>SIMONIKA - Sistem Informasi MONitoring Kinerja ASN | Kabupaten Aceh Timur</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 CDN for Modern Alerts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Google Fonts (Inter & Outfit) -->
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
@@ -42,52 +44,18 @@
 
         /* Shaking animation for error state */
         @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            10%,
-            30%,
-            50%,
-            70%,
-            90% {
-                transform: translateX(-6px);
-            }
-
-            20%,
-            40%,
-            60%,
-            80% {
-                transform: translateX(6px);
-            }
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+            20%, 40%, 60%, 80% { transform: translateX(6px); }
         }
 
         .shake-animation {
             animation: shake 0.5s ease-in-out;
         }
-
-        /* Floating label styling */
-        .input-field:focus-within label,
-        .input-field input:not(:placeholder-shown)+label,
-        .input-field input:-webkit-autofill+label {
-            transform: translateY(-1.4rem) scale(0.85);
-            color: #4f46e5;
-            background-color: white;
-            padding: 0 4px;
-            z-index: 10;
-        }
-
-        .dark-theme-label:focus-within label,
-        .dark-theme-label input:not(:placeholder-shown)+label,
-        .dark-theme-label input:-webkit-autofill+label {
-            background-color: #0f172a;
-        }
     </style>
 </head>
 
-<body class="h-full bg-slate-50 text-slate-800 antialiased flex overflow-hidden">
+<body class="h-full bg-slate-100 text-slate-800 antialiased flex overflow-hidden">
 
     <!-- SPLIT-SCREEN CONTAINER -->
     <div class="flex w-full h-full min-h-screen">
@@ -95,192 +63,183 @@
         <!-- LEFT SIDE: PRESENTATION PANEL (Hidden on Mobile/Tablet < lg) -->
         <div
             class="hidden lg:flex lg:w-7/12 relative flex-col justify-between p-12 bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white overflow-hidden animate-gradient">
-            <!-- Decorative Vector Elements & Glows -->
+            <!-- Decorative Vector Glows -->
             <div
-                class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-600/10 blur-[120px] pointer-events-none">
+                class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-600/15 blur-[120px] pointer-events-none">
             </div>
             <div
-                class="absolute bottom-[-15%] left-[-10%] w-[600px] h-[600px] rounded-full bg-violet-600/15 blur-[150px] pointer-events-none">
+                class="absolute bottom-[-15%] left-[-10%] w-[600px] h-[600px] rounded-full bg-violet-600/20 blur-[150px] pointer-events-none">
             </div>
 
             <!-- Top Branding Header -->
             <div class="relative z-10 flex items-center gap-4">
                 <img src="./Lambang_Kabupaten_Aceh_Timur.png" alt="Logo Pemkab Aceh Timur"
-                    class="h-16 w-auto drop-shadow-[0_4px_10px_rgba(255,255,255,0.15)] transition-all duration-300 hover:scale-105">
+                    class="h-16 w-auto drop-shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-all duration-300 hover:scale-105">
                 <div>
-                    <h2 class="heading-font text-lg font-bold tracking-wide uppercase leading-tight">Pemerintah
-                        Kabupaten</h2>
-                    <p
-                        class="heading-font text-2xl font-extrabold text-indigo-400 tracking-wider uppercase leading-none">
-                        Aceh Timur</p>
+                    <h2 class="heading-font text-base font-bold tracking-wider uppercase text-slate-200 leading-tight">Pemerintah Kabupaten</h2>
+                    <p class="heading-font text-2xl font-extrabold text-indigo-300 tracking-wider uppercase leading-none">Aceh Timur</p>
                 </div>
             </div>
 
             <!-- Central Content / Slogan -->
             <div class="relative z-10 my-auto max-w-lg space-y-6">
                 <span
-                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-xs font-semibold tracking-wider text-indigo-300 uppercase">
-                    <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span> Panel Administrasi
+                    class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-xs font-bold tracking-wider text-indigo-200 uppercase shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span> Portal Layanan Kinerja ASN
                 </span>
                 <h1 class="heading-font text-4xl xl:text-5xl font-extrabold leading-tight tracking-tight">
                     <span
-                        class="bg-gradient-to-r from-indigo-400 via-violet-300 to-amber-300 bg-clip-text text-transparent">SIMONIKA</span>
+                        class="bg-gradient-to-r from-indigo-300 via-violet-200 to-amber-200 bg-clip-text text-transparent">SIMONIKA</span>
                     <br>
-                    <span class="text-xl xl:text-2xl font-semibold text-slate-200 block mt-1">(Sistem Informasi
-                        MONitoring Kinerja ASN)</span>
+                    <span class="text-xl xl:text-2xl font-medium text-slate-100 block mt-1.5">(Sistem Informasi MONitoring Kinerja ASN)</span>
                 </h1>
-                <p class="text-sm text-slate-300/90 leading-relaxed font-light">
-                    Selamat datang di portal pengelolaan data kinerja ASN Pemerintah Kabupaten Aceh Timur. Silahkan
-                    masuk menggunakan kredensial admin anda untuk memantau, memverifikasi, dan menganalisis capaian
-                    kinerja aparatur secara berkala.
+                <p class="text-sm text-slate-200 leading-relaxed font-normal">
+                    Platform terpusat pemantauan, verifikasi, dan analisis capaian penilaian kinerja aparatur sipil negara di lingkungan Pemerintah Kabupaten Aceh Timur.
                 </p>
 
-                <!-- Quick statistics mock or info box -->
-                <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-800">
-                    <div>
+                <!-- Statistics Highlight Box -->
+                <div class="grid grid-cols-3 gap-4 pt-5 border-t border-slate-700/80">
+                    <div class="bg-white/5 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
                         <p class="text-2xl font-extrabold heading-font text-white">14K+</p>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Total ASN</p>
+                        <p class="text-[11px] text-slate-200 uppercase tracking-wider font-bold mt-0.5">Pegawai ASN</p>
                     </div>
-                    <div>
-                        <p class="text-2xl font-extrabold heading-font text-indigo-300">100%</p>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Terintegrasi</p>
+                    <div class="bg-white/5 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
+                        <p class="text-2xl font-extrabold heading-font text-indigo-300">61</p>
+                        <p class="text-[11px] text-slate-200 uppercase tracking-wider font-bold mt-0.5">Unit Kerja / OPD</p>
                     </div>
-                    <div>
-                        <p class="text-2xl font-extrabold heading-font text-amber-400">Real-Time</p>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Pelaporan</p>
+                    <div class="bg-white/5 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
+                        <p class="text-2xl font-extrabold heading-font text-amber-300">Otomatis</p>
+                        <p class="text-[11px] text-slate-200 uppercase tracking-wider font-bold mt-0.5">Pemilahan Data</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Bottom Branding: Logo BerAKHLAK -->
-            <div class="relative z-10 flex items-center justify-between border-t border-slate-800/80 pt-6">
-                <div>
-                    <p class="text-[10px] text-slate-400 uppercase tracking-widest font-extrabold mb-1.5">Core Values
-                        ASN</p>
-                    <img src="./Logo_BerAKHLAK.png" alt="Logo BerAKHLAK"
-                        class="h-8 w-auto grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+            <!-- Bottom Branding: Logo BerAKHLAK (High Contrast WCAG AA Compliant) -->
+            <div class="relative z-10 flex items-center justify-between border-t border-slate-800 pt-6">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white p-2 rounded-xl shadow-md inline-flex items-center">
+                        <img src="./Logo_BerAKHLAK.png" alt="Logo BerAKHLAK" class="h-7 w-auto object-contain">
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-300 uppercase tracking-widest font-extrabold">Core Values ASN</p>
+                        <p class="text-xs text-white font-semibold">Berorientasi Pelayanan, Akuntabel, Kompeten</p>
+                    </div>
                 </div>
-                <p class="text-xs text-slate-500 font-medium">BKPSDM Kab. Aceh Timur &copy; 2026</p>
+                <p class="text-xs text-slate-200 font-semibold tracking-wide">BKPSDM Kab. Aceh Timur &copy; 2026</p>
             </div>
         </div>
 
         <!-- RIGHT SIDE: LOGIN FORM PANEL -->
         <div
-            class="w-full lg:w-5/12 flex items-center justify-center p-6 sm:p-12 md:p-16 bg-white relative overflow-y-auto">
+            class="w-full lg:w-5/12 flex items-center justify-center p-6 sm:p-10 md:p-14 bg-white relative overflow-y-auto">
 
-            <!-- Background effects for mobile -->
+            <!-- Mobile background glow -->
             <div
-                class="absolute top-0 right-0 w-80 h-80 rounded-full bg-indigo-50/60 blur-[100px] pointer-events-none lg:hidden">
+                class="absolute top-0 right-0 w-80 h-80 rounded-full bg-indigo-50/70 blur-[100px] pointer-events-none lg:hidden">
             </div>
 
-            <div class="w-full max-w-md space-y-8 relative z-10">
+            <div class="w-full max-w-md my-auto relative z-10 flex flex-col justify-center">
 
-                <!-- Header: Displayed on mobile/tablet (instead of left panel) -->
-                <div class="flex flex-col items-center text-center lg:hidden">
-                    <div class="flex items-center gap-3 justify-center mb-4">
-                        <img src="./Lambang_Kabupaten_Aceh_Timur.png" alt="Logo Pemkab Aceh Timur" class="h-14 w-auto">
-                        <div class="h-10 w-px bg-slate-200"></div>
-                        <img src="./Logo_BerAKHLAK.png" alt="Logo BerAKHLAK" class="h-8 w-auto">
-                    </div>
-                    <h2 class="heading-font text-2xl font-bold text-slate-900 tracking-tight">SIMONIKA</h2>
-                    <p class="text-xs text-slate-500 mt-1">Sistem Informasi MONitoring Kinerja ASN</p>
+                <!-- Mobile Header Area -->
+                <div class="flex flex-col items-center text-center lg:hidden mb-6">
+                    <img src="./Lambang_Kabupaten_Aceh_Timur.png" alt="Logo Pemkab Aceh Timur" class="h-16 w-auto mb-3 drop-shadow-sm">
+                    <h2 class="heading-font text-2xl font-extrabold text-slate-900 tracking-tight">SIMONIKA</h2>
+                    <p class="text-xs font-semibold text-indigo-600 mt-0.5">Pemerintah Kabupaten Aceh Timur</p>
                 </div>
 
-                <!-- Desktop Header Label -->
-                <div class="hidden lg:block">
+                <!-- Desktop Form Header -->
+                <div class="mb-6">
                     <h2 class="heading-font text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                        Selamat Datang
+                        Masuk ke Akun
                     </h2>
-                    <p class="text-slate-500 text-sm mt-2">
-                        Silakan masukkan kredensial administrator BKPSDM Anda untuk mengakses SIMONIKA.
+                    <p class="text-slate-500 text-xs sm:text-sm mt-1">
+                        Masukkan NIP atau Username dan Kata Sandi Anda untuk mengakses dashboard.
                     </p>
                 </div>
 
-                <!-- ALERT ERROR (Hidden by default) -->
+                <!-- ALERT ERROR (Shake Animated) -->
                 <div id="error-alert"
-                    class="hidden p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex gap-3 items-start animate-pulse">
-                    <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
+                    class="hidden mb-4 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 flex gap-3 items-start animate-pulse">
+                    <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                     <div class="text-xs">
                         <p class="font-bold">Gagal Masuk</p>
-                        <p id="error-message" class="text-red-600 mt-0.5">Username (NIP) atau Password salah. Silakan
-                            coba kembali.</p>
+                        <p id="error-message" class="text-red-600 mt-0.5">NIP / Username atau Kata Sandi tidak sesuai. Silakan coba kembali.</p>
                     </div>
                 </div>
 
                 <!-- LOGIN FORM -->
-                <form id="login-form" class="space-y-6" onsubmit="handleLogin(event)">
+                <form id="login-form" class="space-y-4" onsubmit="handleLogin(event)">
 
-                    <!-- Username Input -->
-                    <div class="relative input-field">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <svg class="w-5 h-5 text-slate-400 transition-colors duration-200" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                        </div>
-                        <input type="text" id="username" name="username" required placeholder=" "
-                            class="block w-full pl-11 pr-4 py-3.5 text-sm font-medium bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all duration-200 peer">
-                        <label for="username"
-                            class="absolute left-11 top-3.5 text-sm font-medium text-slate-400 pointer-events-none transition-all duration-200 origin-left">
-                            Username atau NIP Admin
+                    <!-- USERNAME INPUT -->
+                    <div>
+                        <label for="username" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                            <span>NIP / Username</span>
+                            <span class="text-[10px] text-slate-500 font-normal lowercase">contoh: admin atau opd_disdik</span>
                         </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                            <input type="text" id="username" name="username" required autofocus
+                                placeholder="Masukkan NIP atau username unit kerja..."
+                                class="block w-full pl-11 pr-4 py-3.5 text-sm font-medium bg-slate-50 border border-slate-300 hover:border-slate-400 rounded-xl text-slate-900 placeholder:text-slate-500 focus:bg-white focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all duration-200">
+                        </div>
                     </div>
 
-                    <!-- Password Input -->
-                    <div class="relative input-field">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <svg class="w-5 h-5 text-slate-400 transition-colors duration-200" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
-                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                        </div>
-                        <input type="password" id="password" name="password" required placeholder=" "
-                            class="block w-full pl-11 pr-12 py-3.5 text-sm font-medium bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all duration-200 peer">
-                        <label for="password"
-                            class="absolute left-11 top-3.5 text-sm font-medium text-slate-400 pointer-events-none transition-all duration-200 origin-left">
-                            Kata Sandi
+                    <!-- PASSWORD INPUT -->
+                    <div>
+                        <label for="password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                            <span>Kata Sandi</span>
+                            <span class="text-[10px] text-slate-500 font-normal lowercase">kredensial resmi</span>
                         </label>
-                        <!-- Show/Hide Toggle -->
-                        <button type="button" onclick="togglePasswordVisibility()"
-                            class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors">
-                            <svg id="eye-icon-open" class="w-5 h-5" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                            <svg id="eye-icon-close" class="w-5 h-5 hidden" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                            </svg>
-                        </button>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <input type="password" id="password" name="password" required
+                                placeholder="Masukkan kata sandi..."
+                                class="block w-full pl-11 pr-12 py-3.5 text-sm font-medium bg-slate-50 border border-slate-300 hover:border-slate-400 rounded-xl text-slate-900 placeholder:text-slate-500 focus:bg-white focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all duration-200">
+                            <!-- Show/Hide Toggle Button -->
+                            <button type="button" onclick="togglePasswordVisibility()" title="Tampilkan/Sembunyikan Kata Sandi"
+                                class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-800 transition-colors focus:outline-none">
+                                <svg id="eye-icon-open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                <svg id="eye-icon-close" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Remember & Forgot Password Links -->
-                    <div class="flex items-center justify-between text-xs font-semibold">
-                        <label
-                            class="flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-800 transition-colors">
-                            <input type="checkbox" id="remember"
-                                class="w-4.5 h-4.5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500/20">
+                    <!-- Remember & Help Links -->
+                    <div class="flex items-center justify-between text-xs font-semibold pt-1">
+                        <label class="flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900 transition-colors select-none">
+                            <input type="checkbox" id="remember" checked
+                                class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500/20">
                             <span>Ingat Saya</span>
                         </label>
-                        <a href="#"
-                            onclick="alert('Silakan hubungi Unit Administrator IT BKPSDM Kabupaten Aceh Timur untuk mereset kata sandi Anda.')"
-                            class="text-indigo-600 hover:text-indigo-800 hover:underline transition-all">Lupa Kata
-                            Sandi?</a>
+                        <a href="javascript:void(0)"
+                            onclick="showLoginHelp()"
+                            class="text-indigo-600 hover:text-indigo-800 hover:underline transition-all">Bantuan Masuk?</a>
                     </div>
 
                     <!-- SUBMIT BUTTON -->
                     <button type="submit" id="btn-submit"
-                        class="w-full py-3.5 px-5 bg-indigo-600 text-white font-semibold text-sm rounded-xl hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/30 flex items-center justify-center gap-2">
+                        class="w-full py-3.5 px-5 bg-indigo-600 text-white font-bold text-sm rounded-xl hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-md shadow-indigo-600/25 hover:shadow-indigo-600/35 flex items-center justify-center gap-2 mt-2">
                         <span id="btn-text">Masuk ke Dashboard</span>
                         <div id="btn-spinner"
                             class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin">
@@ -288,12 +247,10 @@
                     </button>
                 </form>
 
-                <!-- Footer logo on desktop -->
-                <div class="hidden lg:block border-t border-slate-100 pt-6 text-center">
-                    <div
-                        class="flex items-center justify-center gap-4 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
-                        <img src="./Logo_BerAKHLAK.png" alt="BerAKHLAK logo" class="h-6 w-auto">
-                    </div>
+                <!-- Footer Mobile Logo & Copyright -->
+                <div class="mt-8 pt-6 border-t border-slate-100 text-center flex flex-col items-center gap-2 lg:hidden">
+                    <img src="./Logo_BerAKHLAK.png" alt="Logo BerAKHLAK" class="h-6 w-auto object-contain">
+                    <p class="text-xs text-slate-500 font-medium">BKPSDM Kab. Aceh Timur &copy; 2026</p>
                 </div>
 
             </div>
@@ -301,8 +258,72 @@
 
     </div>
 
-    <!-- SCRIPT FOR LOGIN LOGIC -->
+    <!-- SCRIPT FOR UNIFIED SMART AUTHENTICATION -->
     <script>
+        const OPD_LIST_KOMPLIT = [
+            { id: 'BKPSDM', nama: 'Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM)', aliases: ['bkpsdm', 'kepegawaian', 'badan kepegawaian', 'sdm'] },
+            { id: 'SETDA', nama: 'Sekretariat Daerah', aliases: ['setda', 'sekretariat daerah'] },
+            { id: 'BPKD', nama: 'Badan Pengelolaan Keuangan Daerah (BPKD)', aliases: ['bpkd', 'keuangan', 'pengelolaan keuangan'] },
+            { id: 'BAPPEDA', nama: 'Badan Perencanaan Pembangunan Daerah (Bappeda)', aliases: ['bappeda', 'perencanaan'] },
+            { id: 'BPBD', nama: 'Badan Penanggulangan Bencana Daerah (BPBD)', aliases: ['bpbd', 'bencana'] },
+            { id: 'KESBANGPOL', nama: 'Badan Kesatuan Bangsa dan Politik (Kesbangpol)', aliases: ['kesbangpol', 'bakesbangpol', 'kesatuan bangsa'] },
+            { id: 'INSPEKTORAT', nama: 'Inspektorat Daerah', aliases: ['inspektorat', 'inspektorat daerah'] },
+            { id: 'SATPOL_PP_WH', nama: 'Satuan Polisi Pamong Praja dan Wilayatul Hisbah (Satpol PP dan WH)', aliases: ['satpol_pp_wh', 'satpolpp', 'satpol', 'wh'] },
+            { id: 'RSUD_ZM', nama: 'Rumah Sakit Umum Daerah (RSUD) dr. Zubir Mahmud', aliases: ['rsud_zm', 'zubir mahmud', 'rsud zubir'] },
+            { id: 'RSUD_SAAS', nama: 'Rumah Sakit Umum Daerah (RSUD) Sultan Abdul Aziz Syah Peureulak', aliases: ['rsud_saas', 'saas', 'rsud peureulak'] },
+            { id: 'DISDIK', nama: 'Dinas Pendidikan dan Kebudayaan', aliases: ['disdik', 'pendidikan dan kebudayaan', 'pdk'] },
+            { id: 'DINKES', nama: 'Dinas Kesehatan', aliases: ['dinkes', 'kesehatan'] },
+            { id: 'PUPR', nama: 'Dinas Pekerjaan Umum dan Perumahan Rakyat (PUPR)', aliases: ['pupr', 'pekerjaan umum', 'perumahan rakyat'] },
+            { id: 'DINSOS', nama: 'Dinas Sosial', aliases: ['dinsos', 'sosial', 'dinas sosial'] },
+            { id: 'DISDUKCAPIL', nama: 'Dinas Kependudukan dan Pencatatan Sipil (Disdukcapil)', aliases: ['disdukcapil', 'dukcapil', 'capil'] },
+            { id: 'DPMG', nama: 'Dinas Pemberdayaan Masyarakat dan Gampong (DPMG)', aliases: ['dpmg', 'gampong', 'masyarakat'] },
+            { id: 'DSI', nama: 'Dinas Syariat Islam', aliases: ['dsi', 'syariat islam'] },
+            { id: 'DINAS_DAYAH', nama: 'Dinas Pendidikan Dayah', aliases: ['dinas_dayah', 'dayah', 'pendidikan dayah'] },
+            { id: 'DPMP2T', nama: 'Dinas Penanaman Modal dan Pelayanan Perizinan Terpadu (DPMP2T)', aliases: ['dpmp2t', 'dpmptsp', 'perizinan', 'modal'] },
+            { id: 'DISKOMINFO', nama: 'Dinas Komunikasi dan Informatika (Diskominfo)', aliases: ['diskominfo', 'kominfo'] },
+            { id: 'DISHUB', nama: 'Dinas Perhubungan', aliases: ['dishub', 'perhubungan'] },
+            { id: 'DLH', nama: 'Dinas Lingkungan Hidup', aliases: ['dlh', 'lingkungan hidup'] },
+            { id: 'DISPARPORA', nama: 'Dinas Pariwisata, Pemuda, dan Olahraga (Disparpora)', aliases: ['disparpora', 'dispora', 'pariwisata', 'pemuda', 'olahraga'] },
+            { id: 'DISKOPUKM', nama: 'Dinas Perdagangan, Koperasi, dan UKM', aliases: ['diskopukm', 'koperasi', 'perdagangan', 'ukm'] },
+            { id: 'DISBUNNAK', nama: 'Dinas Perkebunan dan Peternakan', aliases: ['disbunnak', 'perkebunan', 'peternakan'] },
+            { id: 'DKP', nama: 'Dinas Kelautan dan Perikanan', aliases: ['dkp', 'perikanan', 'kelautan', 'dinas perikanan'] },
+            { id: 'DP3AKB', nama: 'Dinas Pemberdayaan Perempuan, Perlindungan Anak, dan KB (DP3AKB)', aliases: ['dp3akb', 'pemberdayaan perempuan', 'perlindungan anak', 'kb'] },
+            { id: 'DISPUSIP', nama: 'Dinas Perpustakaan dan Kearsipan', aliases: ['dispusip', 'perpustakaan', 'kearsipan', 'arsip'] },
+            { id: 'PERTANAHAN', nama: 'Dinas Pertanahan', aliases: ['pertanahan', 'dinas pertanahan'] },
+            { id: 'DISTANTPH', nama: 'Dinas Tanaman Pangan dan Hortikultura', aliases: ['distantph', 'pertanian', 'tanaman pangan', 'hortikultura'] },
+            { id: 'DKPP', nama: 'Dinas Ketahanan Pangan dan Penyuluhan', aliases: ['dkpp', 'pangan', 'ketahanan pangan'] },
+            { id: 'DISPERINNAKERTRANS', nama: 'Dinas Perindustrian, Tenaga Kerja dan Transmigrasi', aliases: ['disperinnakertrans', 'disnaker', 'tenaga kerja', 'transmigrasi'] },
+            { id: 'SETWAN', nama: 'Sekretariat Dewan Perwakilan Rakyat Kabupaten', aliases: ['setwan', 'dprk', 'sekretariat dprk'] },
+            { id: 'SET_BAITUL_MAL', nama: 'Sekretariat Baitul Mal', aliases: ['set_baitul_mal', 'baitul mal'] },
+            { id: 'SET_MAA', nama: 'Sekretariat Majelis Adat Aceh', aliases: ['set_maa', 'maa', 'majelis adat'] },
+            { id: 'SET_MPA', nama: 'Sekretariat Majelis Pendidikan Aceh (MPA)', aliases: ['set_mpa', 'mpa', 'mpd', 'majelis pendidikan'] },
+            { id: 'SET_MPU', nama: 'Sekretariat Majelis Permusyawaratan Ulama', aliases: ['set_mpu', 'mpu', 'ulama'] },
+            { id: 'KEC_BANDA_ALAM', nama: 'Kecamatan Banda Alam', aliases: ['kec_banda_alam', 'banda alam'] },
+            { id: 'KEC_BIREM_BAYEUN', nama: 'Kecamatan Birem Bayeun', aliases: ['kec_birem_bayeun', 'birem bayeun', 'birem'] },
+            { id: 'KEC_DARUL_AMAN', nama: 'Kecamatan Darul Aman', aliases: ['kec_darul_aman', 'darul aman'] },
+            { id: 'KEC_DARUL_FALAH', nama: 'Kecamatan Darul Falah', aliases: ['kec_darul_falah', 'darul falah'] },
+            { id: 'KEC_DARUL_IHSAN', nama: 'Kecamatan Darul Ihsan', aliases: ['kec_darul_ihsan', 'darul ihsan'] },
+            { id: 'KEC_IDI', nama: 'Kecamatan Idi Rayeuk', aliases: ['kec_idi', 'idi rayeuk', 'kecamatan idi'] },
+            { id: 'KEC_IDI_TIMUR', nama: 'Kecamatan Idi Timur', aliases: ['kec_idi_timur', 'idi timur'] },
+            { id: 'KEC_IDI_TUNONG', nama: 'Kecamatan Idi Tunong', aliases: ['kec_idi_tunong', 'idi tunong'] },
+            { id: 'KEC_INDRA_MAKMU', nama: 'Kecamatan Indra Makmu', aliases: ['kec_indra_makmu', 'indra makmu', 'indramakmu'] },
+            { id: 'KEC_JULOK', nama: 'Kecamatan Julok', aliases: ['kec_julok', 'julok'] },
+            { id: 'KEC_MADAT', nama: 'Kecamatan Madat', aliases: ['kec_madat', 'madat'] },
+            { id: 'KEC_NURUSSALAM', nama: 'Kecamatan Nurussalam', aliases: ['kec_nurussalam', 'nurussalam'] },
+            { id: 'KEC_PANTE_BIDARI', nama: 'Kecamatan Pante Bidari', aliases: ['kec_pante_bidari', 'pante bidari', 'pantee bidari'] },
+            { id: 'KEC_PEUDAWA', nama: 'Kecamatan Peudawa', aliases: ['kec_peudawa', 'peudawa'] },
+            { id: 'KEC_PEUNARON', nama: 'Kecamatan Peunaron', aliases: ['kec_peunaron', 'peunaron'] },
+            { id: 'KEC_PEUREULAK', nama: 'Kecamatan Peureulak', aliases: ['kec_peureulak', 'peureulak'] },
+            { id: 'KEC_PEUREULAK_BARAT', nama: 'Kecamatan Peureulak Barat', aliases: ['kec_peureulak_barat', 'peureulak barat'] },
+            { id: 'KEC_PEUREULAK_TIMUR', nama: 'Kecamatan Peureulak Timur', aliases: ['kec_peureulak_timur', 'peureulak timur'] },
+            { id: 'KEC_RANTO_PEUREULAK', nama: 'Kecamatan Ranto Peureulak', aliases: ['kec_ranto_peureulak', 'ranto peureulak'] },
+            { id: 'KEC_RANTAU_SELAMAT', nama: 'Kecamatan Rantau Selamat', aliases: ['kec_rantau_selamat', 'rantau selamat'] },
+            { id: 'KEC_SERBAJADI', nama: 'Kecamatan Serbajadi', aliases: ['kec_serbajadi', 'serbajadi'] },
+            { id: 'KEC_SIMPANG_JERNIH', nama: 'Kecamatan Simpang Jernih', aliases: ['kec_simpang_jernih', 'simpang jernih'] },
+            { id: 'KEC_SIMPANG_ULIM', nama: 'Kecamatan Simpang Ulim', aliases: ['kec_simpang_ulim', 'simpang ulim'] },
+            { id: 'KEC_SUNGAI_RAYA', nama: 'Kecamatan Sungai Raya', aliases: ['kec_sungai_raya', 'sungai raya'] }
+        ];
+
         // Check if user is already logged in
         window.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('admin_session_active') === 'true') {
@@ -334,11 +355,13 @@
             const usernameField = document.getElementById('username');
             const passwordField = document.getElementById('password');
             const errorAlert = document.getElementById('error-alert');
+            const errorMessage = document.getElementById('error-message');
             const submitBtn = document.getElementById('btn-submit');
             const btnText = document.getElementById('btn-text');
             const btnSpinner = document.getElementById('btn-spinner');
 
-            const username = usernameField.value.trim();
+            const rawUsername = usernameField.value.trim();
+            const username = rawUsername.toLowerCase();
             const password = passwordField.value;
 
             // Reset Alert State
@@ -349,18 +372,87 @@
             btnText.classList.add('hidden');
             btnSpinner.classList.remove('hidden');
 
-            // Simulating API call latency (1.2 seconds)
             setTimeout(() => {
-                // Kredensial Valid: NIP 200210242025041002 / bkpsdm2026 atau admin / admin
-                const isValidUser = (username === 'admin' && password === 'admin') ||
-                    (username === '200210242025041002' && password === 'bkpsdm2026');
+                let isValid = false;
+                let userLevel = 1;
+                let userRole = 'admin';
+                let userOpdId = 'ALL';
+                let userOpdName = 'Kabupaten Aceh Timur';
+                let userDisplayName = 'Admin BKPSDM';
 
-                if (isValidUser) {
-                    // Save Session in localStorage
+                // ==========================================
+                // 1. CEK KREDENSIAL ADMIN BKPSDM
+                // ==========================================
+                if (
+                    (username === 'admin' && (password === 'admin' || password === 'admin123' || password === 'bkpsdm2026')) ||
+                    (username === '200210242025041002' && (password === 'bkpsdm2026' || password === 'admin' || password === 'admin123')) ||
+                    (username === 'bkpsdm_admin' && (password === 'admin' || password === 'admin123'))
+                ) {
+                    isValid = true;
+                    userLevel = 1;
+                    userRole = 'admin';
+                    userOpdId = 'ALL';
+                    userOpdName = 'Kabupaten Aceh Timur';
+                    userDisplayName = username === '200210242025041002' ? 'NIP. 200210242025041002' : 'Admin BKPSDM';
+                } 
+                // ==========================================
+                // 2. CEK KREDENSIAL OPERATOR OPD
+                // ==========================================
+                else {
+                    // Cari OPD yang cocok berdasarkan username
+                    let cleanOpdCode = username.replace(/^opd_?/, '').replace(/_/g, ' ').trim();
+                    let targetOpd = null;
+
+                    if (!cleanOpdCode || username === 'opd' || username === 'operator') {
+                        // Default fallback OPD untuk pengujian umum
+                        targetOpd = OPD_LIST_KOMPLIT.find(o => o.id === 'DISDIK');
+                    } else {
+                        // Match by ID
+                        targetOpd = OPD_LIST_KOMPLIT.find(o => o.id.toLowerCase() === cleanOpdCode || o.id.toLowerCase() === username.replace(/^opd_?/, ''));
+
+                        // Match by Aliases
+                        if (!targetOpd) {
+                            targetOpd = OPD_LIST_KOMPLIT.find(o => o.aliases && o.aliases.some(a => a === cleanOpdCode || cleanOpdCode.includes(a)));
+                        }
+
+                        // Match by Nama OPD
+                        if (!targetOpd) {
+                            targetOpd = OPD_LIST_KOMPLIT.find(o => o.nama.toLowerCase().includes(cleanOpdCode));
+                        }
+                    }
+
+                    if (targetOpd) {
+                        // Password OPD yang sah
+                        const allowedPasswords = [
+                            'opd123',
+                            '123456',
+                            'admin',
+                            'bkpsdm2026',
+                            targetOpd.id.toLowerCase() + '123',
+                            targetOpd.id.toLowerCase()
+                        ];
+
+                        if (allowedPasswords.includes(password)) {
+                            isValid = true;
+                            userLevel = 2;
+                            userRole = 'opd';
+                            userOpdId = targetOpd.id;
+                            userOpdName = targetOpd.nama;
+                            userDisplayName = 'Operator ' + targetOpd.id;
+                        }
+                    }
+                }
+
+                if (isValid) {
+                    // Simpan sesi login di localStorage
                     localStorage.setItem('admin_session_active', 'true');
-                    localStorage.setItem('admin_user_display', username === 'admin' ? 'Admin BKPSDM' : 'NIP. 200210242025041002');
+                    localStorage.setItem('simonika_user_level', userLevel.toString());
+                    localStorage.setItem('simonika_user_role', userRole);
+                    localStorage.setItem('simonika_user_opd_id', userOpdId);
+                    localStorage.setItem('simonika_user_opd_name', userOpdName);
+                    localStorage.setItem('admin_user_display', userDisplayName);
 
-                    // Redirect to Dashboard
+                    // Redirect ke Dashboard
                     window.location.href = 'Dashboard.html';
                 } else {
                     // Restore Button State
@@ -368,17 +460,60 @@
                     btnText.classList.remove('hidden');
                     btnSpinner.classList.add('hidden');
 
-                    // Show Error Alert with Shake Animation
+                    // Tampilkan Error Alert dengan Animasi Shake
+                    errorMessage.textContent = 'NIP / Username atau Kata Sandi tidak sesuai. Silakan periksa kembali.';
                     errorAlert.classList.remove('hidden');
                     const formContainer = document.getElementById('login-form');
                     formContainer.classList.add('shake-animation');
 
-                    // Remove Shake class after animation completes
                     setTimeout(() => {
                         formContainer.classList.remove('shake-animation');
                     }, 500);
                 }
-            }, 1200);
+            }, 400);
+        }
+
+        function showLoginHelp() {
+            if (window.Swal) {
+                Swal.fire({
+                    title: '<span class="text-lg font-extrabold text-slate-800">Panduan Akses Masuk SIMONIKA</span>',
+                    html: `
+                        <div class="text-left text-xs space-y-3.5 mt-2">
+                            <div class="p-3.5 bg-indigo-50/80 rounded-xl border border-indigo-100">
+                                <div class="flex items-center gap-2 mb-1.5">
+                                    <span class="px-2 py-0.5 rounded-md bg-indigo-600 text-white font-extrabold text-[10px] uppercase">Level 1</span>
+                                    <strong class="text-slate-900 text-xs">Administrator BKPSDM</strong>
+                                </div>
+                                <p class="text-slate-600"><strong>Username:</strong> <code class="px-1.5 py-0.5 bg-white rounded border border-indigo-200 font-mono font-bold text-indigo-700">admin</code></p>
+                                <p class="text-slate-600 mt-1"><strong>Kata Sandi:</strong> <code class="px-1.5 py-0.5 bg-white rounded border border-indigo-200 font-mono font-bold text-indigo-700">admin</code> atau <code class="px-1.5 py-0.5 bg-white rounded border border-indigo-200 font-mono font-bold text-indigo-700">bkpsdm2026</code></p>
+                            </div>
+
+                            <div class="p-3.5 bg-emerald-50/80 rounded-xl border border-emerald-100">
+                                <div class="flex items-center gap-2 mb-1.5">
+                                    <span class="px-2 py-0.5 rounded-md bg-emerald-600 text-white font-extrabold text-[10px] uppercase">Level 2</span>
+                                    <strong class="text-slate-900 text-xs">Operator OPD / Kecamatan</strong>
+                                </div>
+                                <p class="text-slate-600"><strong>Username:</strong> Sesuai nama/kode unit kerja (contoh: <code class="px-1.5 py-0.5 bg-white rounded border border-emerald-200 font-mono font-bold text-emerald-700">opd_disdik</code>, <code class="px-1.5 py-0.5 bg-white rounded border border-emerald-200 font-mono font-bold text-emerald-700">opd_dinkes</code>, <code class="px-1.5 py-0.5 bg-white rounded border border-emerald-200 font-mono font-bold text-emerald-700">opd_setda</code>, dll)</p>
+                                <p class="text-slate-600 mt-1"><strong>Kata Sandi:</strong> <code class="px-1.5 py-0.5 bg-white rounded border border-emerald-200 font-mono font-bold text-emerald-700">opd123</code></p>
+                            </div>
+
+                            <p class="text-[11px] text-slate-400 italic text-center pt-1">
+                                Jika mengalami kendala login, silakan hubungi Administrator BKPSDM Kabupaten Aceh Timur.
+                            </p>
+                        </div>
+                    `,
+                    icon: 'info',
+                    iconColor: '#4f46e5',
+                    confirmButtonText: 'Saya Mengerti',
+                    customClass: {
+                        popup: 'rounded-2xl shadow-2xl border border-slate-100 p-6',
+                        confirmButton: 'py-2.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20'
+                    },
+                    buttonsStyling: false
+                });
+            } else {
+                alert("Informasi Akses SIMONIKA:\n\n1. Administrator BKPSDM:\n   - Username: admin\n   - Kata Sandi: admin / bkpsdm2026\n\n2. Operator OPD / Kecamatan:\n   - Username: opd_[kode_unit] (contoh: opd_disdik)\n   - Kata Sandi: opd123");
+            }
         }
     </script>
 </body>

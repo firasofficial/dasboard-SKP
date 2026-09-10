@@ -1,5 +1,5 @@
 -- ========================================================
--- SKRIP SETUP DATABASE SUPABASE (POSTGRESQL)
+-- SKRIP SETUP DATABASE SUPABASE (POSTGRESQL) - SIMONIKA
 -- Salin dan jalankan skrip ini di SQL Editor Supabase Anda
 -- ========================================================
 
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS master_opd (
     kategori TEXT NOT NULL CHECK (kategori IN ('DINAS', 'KECAMATAN'))
 );
 
--- 2. Membuat Tabel Rekap Bulanan
+-- 2. Membuat Tabel Rekap Bulanan (Agregasi per OPD)
 CREATE TABLE IF NOT EXISTS skp_rekap_bulanan (
     id BIGSERIAL PRIMARY KEY,
     opd_id TEXT NOT NULL REFERENCES master_opd(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -27,37 +27,45 @@ CREATE TABLE IF NOT EXISTS skp_rekap_bulanan (
     tidak_membuat_skp INT8 DEFAULT 0,
     nama_file TEXT DEFAULT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
     CONSTRAINT uq_periode_opd UNIQUE (opd_id, bulan, tahun)
 );
 
--- Skrip Migrasi (jika tabel skp_rekap_bulanan sudah ada sebelumnya):
-ALTER TABLE skp_rekap_bulanan ADD COLUMN IF NOT EXISTS tidak_membuat_skp INT8 DEFAULT 0;
+-- Indeks untuk pencarian cepat rekap per periode
+CREATE INDEX IF NOT EXISTS idx_rekap_periode ON skp_rekap_bulanan(bulan, tahun);
+CREATE INDEX IF NOT EXISTS idx_rekap_opd ON skp_rekap_bulanan(opd_id);
 
--- 3. Membuat Tabel Detail Pegawai
+-- 3. Membuat Tabel Detail ASN Nominatif (Rincian Seluruh Pegawai)
 CREATE TABLE IF NOT EXISTS skp_detail_pegawai (
     id BIGSERIAL PRIMARY KEY,
     nip TEXT DEFAULT NULL,
     nama_pegawai TEXT NOT NULL,
-    status_pegawai TEXT NOT NULL CHECK (status_pegawai IN ('PNS', 'PPPK', 'PPPK DW')),
     opd_id TEXT NOT NULL REFERENCES master_opd(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    predikat_kinerja TEXT NOT NULL,
     bulan TEXT NOT NULL,
     tahun INT8 NOT NULL,
+    predikat_kinerja TEXT NOT NULL,
+    hasil_kerja TEXT DEFAULT NULL,
+    perilaku_kerja TEXT DEFAULT NULL,
+    skp_jabatan TEXT DEFAULT NULL,
+    skp_unor TEXT DEFAULT NULL,
+    golru TEXT DEFAULT NULL,
+    status_pegawai TEXT DEFAULT 'PNS',
+    skp_jenis_jabatan TEXT DEFAULT NULL,
+    is_skp_plt_plh_pjb TEXT DEFAULT '0',
     nama_file TEXT DEFAULT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
--- 4. Menonaktifkan Row Level Security (RLS) agar dapat diakses dari frontend tanpa auth token kompleks
+-- Indeks untuk query pencarian cepat detail pegawai
+CREATE INDEX IF NOT EXISTS idx_detail_opd_periode ON skp_detail_pegawai(opd_id, bulan, tahun);
+CREATE INDEX IF NOT EXISTS idx_detail_nip ON skp_detail_pegawai(nip);
+
+-- 4. Menonaktifkan Row Level Security (RLS) agar dapat diakses dari frontend SIMONIKA
 ALTER TABLE master_opd DISABLE ROW LEVEL SECURITY;
 ALTER TABLE skp_rekap_bulanan DISABLE ROW LEVEL SECURITY;
 ALTER TABLE skp_detail_pegawai DISABLE ROW LEVEL SECURITY;
 
--- 5. Mengisi Data Master OPD
--- Migrasi ID OPD lama ke ID baru (jika sudah ada data sebelumnya) agar relasi CASCADE berjalan otomatis
-UPDATE master_opd SET id = 'DPMP2T', nama = 'Dinas Penanaman Modal dan Pelayanan Perizinan Terpadu (DPMP2T)' WHERE id = 'DPMPTSP';
-UPDATE master_opd SET id = 'DISBUNNAK', nama = 'Dinas Perkebunan dan Peternakan' WHERE id = 'DISTANBUN';
-UPDATE master_opd SET id = 'SET_MPA', nama = 'Sekretariat Majelis Pendidikan Aceh (MPA)' WHERE id = 'SET_MPD';
-
+-- 5. Mengisi Data Master 61 OPD & Kecamatan (100% Selaras dengan Aplikasi)
 INSERT INTO master_opd (id, nama, kategori) VALUES
 ('BKPSDM', 'Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM)', 'DINAS'),
 ('SETDA', 'Sekretariat Daerah', 'DINAS'),
@@ -85,12 +93,17 @@ INSERT INTO master_opd (id, nama, kategori) VALUES
 ('DISKOPUKM', 'Dinas Perdagangan, Koperasi, dan UKM', 'DINAS'),
 ('DISBUNNAK', 'Dinas Perkebunan dan Peternakan', 'DINAS'),
 ('DKP', 'Dinas Kelautan dan Perikanan', 'DINAS'),
-('DP3AKB', 'Dinas Pemberdayaan Perempuan, Perlindungan Anak, dan Keluarga Berencana (DP3AKB)', 'DINAS'),
+('DP3AKB', 'Dinas Pemberdayaan Perempuan, Perlindungan Anak, dan KB (DP3AKB)', 'DINAS'),
 ('DISPUSIP', 'Dinas Perpustakaan dan Kearsipan', 'DINAS'),
 ('PERTANAHAN', 'Dinas Pertanahan', 'DINAS'),
 ('DISTANTPH', 'Dinas Tanaman Pangan dan Hortikultura', 'DINAS'),
 ('DKPP', 'Dinas Ketahanan Pangan dan Penyuluhan', 'DINAS'),
 ('DISPERINNAKERTRANS', 'Dinas Perindustrian, Tenaga Kerja dan Transmigrasi', 'DINAS'),
+('SETWAN', 'Sekretariat Dewan Perwakilan Rakyat Kabupaten', 'DINAS'),
+('SET_BAITUL_MAL', 'Sekretariat Baitul Mal', 'DINAS'),
+('SET_MAA', 'Sekretariat Majelis Adat Aceh', 'DINAS'),
+('SET_MPA', 'Sekretariat Majelis Pendidikan Aceh (MPA)', 'DINAS'),
+('SET_MPU', 'Sekretariat Majelis Permusyawaratan Ulama', 'DINAS'),
 ('KEC_BANDA_ALAM', 'Kecamatan Banda Alam', 'KECAMATAN'),
 ('KEC_BIREM_BAYEUN', 'Kecamatan Birem Bayeun', 'KECAMATAN'),
 ('KEC_DARUL_AMAN', 'Kecamatan Darul Aman', 'KECAMATAN'),
@@ -114,23 +127,5 @@ INSERT INTO master_opd (id, nama, kategori) VALUES
 ('KEC_SERBAJADI', 'Kecamatan Serbajadi', 'KECAMATAN'),
 ('KEC_SIMPANG_JERNIH', 'Kecamatan Simpang Jernih', 'KECAMATAN'),
 ('KEC_SIMPANG_ULIM', 'Kecamatan Simpang Ulim', 'KECAMATAN'),
-('KEC_SUNGAI_RAYA', 'Kecamatan Sungai Raya', 'KECAMATAN'),
-('SETWAN', 'Sekretariat Dewan Perwakilan Rakyat Kabupaten', 'DINAS'),
-('SET_BAITUL_MAL', 'Sekretariat Baitul Mal', 'DINAS'),
-('SET_MAA', 'Sekretariat Majelis Adat Aceh', 'DINAS'),
-('SET_MPA', 'Sekretariat Majelis Pendidikan Aceh (MPA)', 'DINAS'),
-('SET_MPU', 'Sekretariat Majelis Permusyawaratan Ulama', 'DINAS')
+('KEC_SUNGAI_RAYA', 'Kecamatan Sungai Raya', 'KECAMATAN')
 ON CONFLICT (id) DO UPDATE SET nama = EXCLUDED.nama, kategori = EXCLUDED.kategori;
-
--- 6. Mengisi Data Awal Simulasi SKP (Tahun 2025 - Desember)
-INSERT INTO skp_rekap_bulanan 
-(opd_id, bulan, tahun, pns, pppk, pppk_dw, sangat_baik, baik, butuh_perbaikan, kurang, sangat_kurang, tidak_membuat_skp, nama_file) 
-VALUES
-('BKPSDM', 'DESEMBER', 2025, 45, 20, 16, 20, 60, 1, 0, 0, 0, 'skp_bkpsdm_final.xlsx'),
-('DINKES', 'DESEMBER', 2025, 210, 102, 100, 120, 260, 24, 6, 2, 0, 'skp_dinkes_final.xlsx'),
-('DISDIK', 'DESEMBER', 2025, 950, 500, 400, 580, 1100, 120, 40, 10, 0, 'skp_disdik_final.xlsx'),
-('DISDUKCAPIL', 'DESEMBER', 2025, 30, 15, 10, 15, 38, 2, 0, 0, 0, 'skp_disdukcapil_final.xlsx'),
-('SETDA', 'DESEMBER', 2025, 75, 25, 20, 45, 70, 5, 0, 0, 0, 'skp_setda_final.xlsx'),
-('KEC_IDI', 'DESEMBER', 2025, 25, 15, 5, 10, 28, 5, 2, 0, 0, 'skp_kec_idi_final.xlsx'),
-('KEC_PEUREULAK', 'DESEMBER', 2025, 30, 10, 10, 15, 30, 4, 1, 0, 0, 'skp_kec_peureulak_final.xlsx')
-ON CONFLICT (opd_id, bulan, tahun) DO NOTHING;
