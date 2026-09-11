@@ -2682,7 +2682,7 @@ async function unduhLaporanBulananPDF() {
             // KOP SURAT RESMI
             doc.setFont('times', 'bold');
             doc.setFontSize(11);
-            doc.text('PEMERINTAH DAERAH KABUPATEN ACEH TIMUR', 112, 14, { align: 'center' });
+            doc.text('PEMERINTAH KABUPATEN ACEH TIMUR', 112, 14, { align: 'center' });
             doc.setFontSize(12.5);
             doc.text('BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA', 112, 19.5, { align: 'center' });
             
@@ -2881,7 +2881,7 @@ async function unduhLaporanBulananPDF() {
             doc.text('PENGEMBANGAN SUMBER DAYA MANUSIA', 135, finalY + 7);
             doc.text('KABUPATEN ACEH TIMUR', 135, finalY + 10.5);
 
-            doc.text('Teuku Didi Farisha, S.STP,. M. AP', 135, finalY + 28);
+            doc.text('TEUKU DIDI FARISHA, S.STP,. M. AP', 135, finalY + 28);
             doc.setLineWidth(0.2);
             doc.line(135, finalY + 28.8, 187, finalY + 28.8);
             doc.setFont('times', 'normal');
@@ -3081,7 +3081,7 @@ async function exportLaporanBulananExcel() {
 
             // Kop Surat Resmi (Merge B:J, Center)
             ws.mergeCells('B1:J1');
-            ws.getCell('B1').value = 'PEMERINTAH DAERAH KABUPATEN ACEH TIMUR';
+            ws.getCell('B1').value = 'PEMERINTAH KABUPATEN ACEH TIMUR';
             ws.getCell('B1').font = { name: 'Times New Roman', size: 12, bold: true };
             ws.getCell('B1').alignment = { horizontal: 'center', vertical: 'middle' };
 
@@ -3235,7 +3235,7 @@ async function exportLaporanBulananExcel() {
             addSigLine(2, 'PENGEMBANGAN SUMBER DAYA MANUSIA', true, false, 10);
             addSigLine(3, 'KABUPATEN ACEH TIMUR', true, false, 10);
 
-            addSigLine(7, 'Teuku Didi Farisha, S.STP,. M. AP', true, true, 10);
+            addSigLine(7, 'TEUKU DIDI FARISHA, S.STP,. M. AP', true, true, 10);
             addSigLine(8, 'Pembina Utama Muda (IV/c)', false, false, 9.5);
             addSigLine(9, 'NIP. 198412302004121001', false, false, 9.5);
 
@@ -3264,7 +3264,7 @@ async function exportLaporanBulananExcel() {
     }
 
     const aoa = [
-        ["", "PEMERINTAH DAERAH KABUPATEN ACEH TIMUR"],
+        ["", "PEMERINTAH KABUPATEN ACEH TIMUR"],
         ["", "BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA"],
         ["", "Komplek Pusat Pemerintahan, Jalan Banda Aceh - Medan Km 370 Gedung No 12 Idi (Kode Pos 24454)"],
         [],
@@ -3311,7 +3311,7 @@ async function exportLaporanBulananExcel() {
     aoa.push(["", "", "", "", "", "", "KABUPATEN ACEH TIMUR"]);
     aoa.push([]);
     aoa.push([]);
-    aoa.push(["", "", "", "", "", "", "Teuku Didi Farisha, S.STP,. M. AP"]);
+    aoa.push(["", "", "", "", "", "", "TEUKU DIDI FARISHA, S.STP,. M. AP"]);
     aoa.push(["", "", "", "", "", "", "Pembina Utama Muda (IV/c)"]);
     aoa.push(["", "", "", "", "", "", "NIP. 198412302004121001"]);
 
