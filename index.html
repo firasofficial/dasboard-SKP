@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIMONIKA - Sistem Informasi MONitoring Kinerja ASN | Kabupaten Aceh Timur</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="./Lambang_Kabupaten_Aceh_Timur.png">
+    <link rel="shortcut icon" type="image/png" href="./Lambang_Kabupaten_Aceh_Timur.png">
+    <link rel="apple-touch-icon" href="./Lambang_Kabupaten_Aceh_Timur.png">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SweetAlert2 CDN for Modern Alerts -->
@@ -170,14 +174,34 @@
                     </div>
                 </div>
 
+                <!-- ROLE SWITCHER TABS -->
+                <div class="mb-5 p-1 bg-slate-100/90 rounded-2xl flex items-center border border-slate-200">
+                    <button type="button" id="tab-admin" onclick="switchLoginRole('admin')"
+                        class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 bg-white text-indigo-600 shadow-sm border border-slate-200/80">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span>Admin BKPSDM</span>
+                    </button>
+                    <button type="button" id="tab-opd" onclick="switchLoginRole('opd')"
+                        class="flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-900 transition-all flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <span>Operator OPD</span>
+                    </button>
+                </div>
+
                 <!-- LOGIN FORM -->
                 <form id="login-form" class="space-y-4" onsubmit="handleLogin(event)">
 
                     <!-- USERNAME INPUT -->
                     <div>
                         <label for="username" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                            <span>NIP / Username</span>
-                            <span class="text-[10px] text-slate-500 font-normal lowercase">contoh: admin atau opd_disdik</span>
+                            <span id="label-username">NIP / Username Admin</span>
+                            <span id="hint-username" class="text-[10px] text-slate-500 font-normal lowercase">contoh: admin</span>
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -187,7 +211,7 @@
                                 </svg>
                             </div>
                             <input type="text" id="username" name="username" required autofocus
-                                placeholder="Masukkan NIP atau username unit kerja..."
+                                placeholder="Masukkan NIP atau username admin..."
                                 class="block w-full pl-11 pr-4 py-3.5 text-sm font-medium bg-slate-50 border border-slate-300 hover:border-slate-400 rounded-xl text-slate-900 placeholder:text-slate-500 focus:bg-white focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all duration-200">
                         </div>
                     </div>
@@ -196,7 +220,7 @@
                     <div>
                         <label for="password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                             <span>Kata Sandi</span>
-                            <span class="text-[10px] text-slate-500 font-normal lowercase">kredensial resmi</span>
+                            <span id="hint-password" class="text-[10px] text-slate-500 font-normal lowercase">kredensial admin</span>
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -240,7 +264,7 @@
                     <!-- SUBMIT BUTTON -->
                     <button type="submit" id="btn-submit"
                         class="w-full py-3.5 px-5 bg-indigo-600 text-white font-bold text-sm rounded-xl hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-md shadow-indigo-600/25 hover:shadow-indigo-600/35 flex items-center justify-center gap-2 mt-2">
-                        <span id="btn-text">Masuk ke Dashboard</span>
+                        <span id="btn-text">Masuk sebagai Admin BKPSDM</span>
                         <div id="btn-spinner"
                             class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin">
                         </div>
@@ -331,6 +355,44 @@
             }
         });
 
+        let currentLoginRole = 'admin'; // 'admin' atau 'opd'
+
+        function switchLoginRole(role) {
+            currentLoginRole = role;
+            const tabAdmin = document.getElementById('tab-admin');
+            const tabOpd = document.getElementById('tab-opd');
+            const labelUser = document.getElementById('label-username');
+            const hintUser = document.getElementById('hint-username');
+            const userInput = document.getElementById('username');
+            const hintPass = document.getElementById('hint-password');
+            const btnText = document.getElementById('btn-text');
+            const errorAlert = document.getElementById('error-alert');
+
+            errorAlert.classList.add('hidden');
+
+            if (role === 'admin') {
+                tabAdmin.className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 bg-white text-indigo-600 shadow-sm border border-slate-200/80";
+                tabOpd.className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-900 transition-all flex items-center justify-center gap-2";
+
+                labelUser.textContent = "NIP / Username Admin";
+                hintUser.textContent = "contoh: admin";
+                userInput.placeholder = "Masukkan NIP atau username admin...";
+                hintPass.textContent = "kredensial admin";
+                btnText.textContent = "Masuk sebagai Admin BKPSDM";
+            } else {
+                tabOpd.className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 bg-white text-emerald-600 shadow-sm border border-slate-200/80";
+                tabAdmin.className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-900 transition-all flex items-center justify-center gap-2";
+
+                labelUser.textContent = "Username OPD / Unit Kerja";
+                hintUser.textContent = "contoh: opd_disdik atau disdik";
+                userInput.placeholder = "Masukkan nama/kode unit kerja (misal: opd_disdik)...";
+                hintPass.textContent = "kredensial OPD (cth: opd123)";
+                btnText.textContent = "Masuk sebagai Operator OPD";
+            }
+
+            userInput.focus();
+        }
+
         // Toggle Password Visibility
         function togglePasswordVisibility() {
             const passwordInput = document.getElementById('password');
@@ -381,48 +443,44 @@
                 let userDisplayName = 'Admin BKPSDM';
 
                 // ==========================================
-                // 1. CEK KREDENSIAL ADMIN BKPSDM
+                // 1. CEK JIKA DI TAB ADMIN BKPSDM
                 // ==========================================
-                if (
-                    (username === 'admin' && (password === 'admin' || password === 'admin123' || password === 'bkpsdm2026')) ||
-                    (username === '200210242025041002' && (password === 'bkpsdm2026' || password === 'admin' || password === 'admin123')) ||
-                    (username === 'bkpsdm_admin' && (password === 'admin' || password === 'admin123'))
-                ) {
-                    isValid = true;
-                    userLevel = 1;
-                    userRole = 'admin';
-                    userOpdId = 'ALL';
-                    userOpdName = 'Kabupaten Aceh Timur';
-                    userDisplayName = username === '200210242025041002' ? 'NIP. 200210242025041002' : 'Admin BKPSDM';
+                if (currentLoginRole === 'admin') {
+                    if (
+                        (username === 'admin' && (password === 'admin' || password === 'admin123' || password === 'bkpsdm2026')) ||
+                        (username === '200210242025041002' && (password === 'bkpsdm2026' || password === 'admin' || password === 'admin123')) ||
+                        (username === 'bkpsdm_admin' && (password === 'admin' || password === 'admin123'))
+                    ) {
+                        isValid = true;
+                        userLevel = 1;
+                        userRole = 'admin';
+                        userOpdId = 'ALL';
+                        userOpdName = 'Kabupaten Aceh Timur';
+                        userDisplayName = username === '200210242025041002' ? 'NIP. 200210242025041002' : 'Admin BKPSDM';
+                    }
                 } 
                 // ==========================================
-                // 2. CEK KREDENSIAL OPERATOR OPD
+                // 2. CEK JIKA DI TAB OPERATOR OPD
                 // ==========================================
                 else {
-                    // Cari OPD yang cocok berdasarkan username
                     let cleanOpdCode = username.replace(/^opd_?/, '').replace(/_/g, ' ').trim();
                     let targetOpd = null;
 
                     if (!cleanOpdCode || username === 'opd' || username === 'operator') {
-                        // Default fallback OPD untuk pengujian umum
                         targetOpd = OPD_LIST_KOMPLIT.find(o => o.id === 'DISDIK');
                     } else {
-                        // Match by ID
                         targetOpd = OPD_LIST_KOMPLIT.find(o => o.id.toLowerCase() === cleanOpdCode || o.id.toLowerCase() === username.replace(/^opd_?/, ''));
 
-                        // Match by Aliases
                         if (!targetOpd) {
                             targetOpd = OPD_LIST_KOMPLIT.find(o => o.aliases && o.aliases.some(a => a === cleanOpdCode || cleanOpdCode.includes(a)));
                         }
 
-                        // Match by Nama OPD
                         if (!targetOpd) {
                             targetOpd = OPD_LIST_KOMPLIT.find(o => o.nama.toLowerCase().includes(cleanOpdCode));
                         }
                     }
 
                     if (targetOpd) {
-                        // Password OPD yang sah
                         const allowedPasswords = [
                             'opd123',
                             '123456',
@@ -461,7 +519,9 @@
                     btnSpinner.classList.add('hidden');
 
                     // Tampilkan Error Alert dengan Animasi Shake
-                    errorMessage.textContent = 'NIP / Username atau Kata Sandi tidak sesuai. Silakan periksa kembali.';
+                    errorMessage.textContent = currentLoginRole === 'admin'
+                        ? 'NIP / Username Admin atau Kata Sandi tidak sesuai.'
+                        : 'Username OPD atau Kata Sandi OPD tidak sesuai.';
                     errorAlert.classList.remove('hidden');
                     const formContainer = document.getElementById('login-form');
                     formContainer.classList.add('shake-animation');
@@ -470,7 +530,7 @@
                         formContainer.classList.remove('shake-animation');
                     }, 500);
                 }
-            }, 400);
+            }, 350);
         }
 
         function showLoginHelp() {

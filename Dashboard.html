@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIMONIKA - Dashboard Kinerja ASN Kabupaten Aceh Timur</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="./Lambang_Kabupaten_Aceh_Timur.png">
+    <link rel="shortcut icon" type="image/png" href="./Lambang_Kabupaten_Aceh_Timur.png">
+    <link rel="apple-touch-icon" href="./Lambang_Kabupaten_Aceh_Timur.png">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN -->
@@ -12,11 +16,20 @@
     <!-- SheetJS untuk olah file excel di browser (Offline First) -->
     <script src="./xlsx.full.min.js"></script>
     <script>if (!window.XLSX) document.write('<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>');</script>
+    <!-- ExcelJS untuk Ekspor Excel Resmi dengan Logo & Styling Lengkap (Offline First) -->
+    <script src="./exceljs.min.js"></script>
+    <script>if (!window.ExcelJS) document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"><\/script>');</script>
     <!-- Supabase JS SDK CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- jsPDF & jsPDF-AutoTable untuk ekspor PDF resmi berkualitas tinggi (Vector PDF) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.autotable.min.js"></script>
+    <!-- jsPDF & jsPDF-AutoTable untuk Ekspor PDF Resmi Langsung (Offline First) -->
+    <script src="./jspdf.umd.min.js"></script>
+    <script src="./jspdf.plugin.autotable.min.js"></script>
+    <script>
+        if (!window.jspdf && typeof jsPDF === 'undefined') {
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>');
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"><\/script>');
+        }
+    </script>
     <!-- SweetAlert2 CDN untuk Notifikasi & Dialog Modern -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Google Fonts (Inter) -->
@@ -201,7 +214,9 @@
             }
 
             .print-table tfoot {
-                display: table-footer-group !important;
+                display: table-row-group !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
 
             .print-table tr {
@@ -530,13 +545,13 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- PPPK DW / PW -->
+                        <!-- PPPK PW -->
                         <div
                             class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden group">
                             <div class="absolute top-0 left-0 w-2 h-full bg-amber-500"></div>
                             <div class="flex justify-between items-start pl-2">
                                 <div>
-                                    <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-1">PPPK PW / DW</p>
+                                    <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-1">PPPK PW</p>
                                     <p class="text-3xl font-extrabold text-slate-800 tracking-tight" id="stat-pppk-dw">0</p>
                                 </div>
                                 <div
@@ -842,12 +857,61 @@
 
                     <!-- Main Section: Pilih Perangkat Daerah Card -->
                     <div class="bg-white rounded-2xl border border-slate-200/60 p-6 shadow-sm space-y-6">
-                        <div id="opd-single-select-container" class="max-w-xl">
-                            <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-2">Pilih Perangkat Daerah</label>
-                            <select id="opd-single-select" onchange="renderSelectedOpdDetail()"
-                                class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all cursor-pointer">
+                        <div id="opd-single-select-container" class="w-full space-y-1.5 relative">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider">Pilih Perangkat Daerah</label>
+                                <span id="opd-search-match-count" class="text-[11px] font-semibold text-slate-400">61 Unit Kerja</span>
+                            </div>
+
+                            <!-- Hidden Native Select (for compatibility) -->
+                            <select id="opd-single-select" class="hidden" onchange="renderSelectedOpdDetail()">
                                 <!-- Populated dynamically -->
                             </select>
+
+                            <!-- Custom Searchable Dropdown Container -->
+                            <div class="relative" id="opd-custom-dropdown-container">
+                                <!-- Trigger Button (Looks like a select box) -->
+                                <button type="button" id="opd-custom-dropdown-trigger" onclick="toggleOpdCustomDropdown()"
+                                    class="w-full flex items-center justify-between border border-slate-200 hover:border-indigo-400 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 bg-slate-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all cursor-pointer shadow-xs">
+                                    <div class="flex items-center gap-2.5 truncate pr-2">
+                                        <span id="opd-custom-dropdown-badge" class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-indigo-50 text-indigo-700 border border-indigo-100 shrink-0">DINAS</span>
+                                        <span id="opd-custom-dropdown-label" class="truncate font-semibold text-slate-800">Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM)</span>
+                                    </div>
+                                    <svg id="opd-custom-dropdown-arrow" class="w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+
+                                <!-- Dropdown Menu Popup with Built-in Search -->
+                                <div id="opd-custom-dropdown-menu"
+                                    class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden transform transition-all duration-150">
+                                    
+                                    <!-- Search Input Header Inside Dropdown -->
+                                    <div class="p-2.5 bg-slate-50/90 border-b border-slate-100">
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                </svg>
+                                            </div>
+                                            <input type="text" id="opd-custom-search-input" oninput="filterOpdCustomDropdown(this.value)"
+                                                placeholder="🔍 Cari nama dinas atau kecamatan..."
+                                                class="w-full pl-8 pr-7 py-2 text-xs rounded-xl border border-slate-200 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:outline-none transition-colors text-slate-800 font-medium">
+                                            <button type="button" id="opd-custom-search-clear" onclick="clearOpdCustomSearch()" title="Hapus pencarian"
+                                                class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 focus:outline-none">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Scrollable OPD List Items -->
+                                    <div id="opd-custom-dropdown-list" class="max-h-60 overflow-y-auto divide-y divide-slate-50 p-1 space-y-0.5">
+                                        <!-- Dynamically Populated -->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Detail Card OPD Terpilih (Sesuai Sketsa BKPSDM [Unduh]) -->
@@ -865,7 +929,7 @@
                                 <!-- Tombol Aksi Unduh -->
                                 <div class="flex flex-wrap items-center gap-2.5 shrink-0">
                                     <button onclick="unduhDataAsnLengkapExcel()"
-                                        class="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/20 active:scale-[0.98] transition-all focus:outline-none">
+                                        class="flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/20 active:scale-[0.98] transition-all focus:outline-none cursor-pointer">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -874,22 +938,13 @@
                                     </button>
 
                                     <button onclick="unduhRekapOpdExcel()"
-                                        class="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition-all focus:outline-none">
+                                        class="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition-all focus:outline-none cursor-pointer">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                         <span>Unduh Rekap Statistik</span>
                                     </button>
-
-                                    <a href="./Format%20Rekap%20SKP%20per%20OPD.xlsx" download="Format Rekap SKP per OPD.xlsx"
-                                        class="flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:border-slate-300 rounded-xl transition-all focus:outline-none">
-                                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                        <span>Template</span>
-                                    </a>
                                 </div>
                             </div>
 
@@ -908,7 +963,7 @@
                                     <p id="selected-opd-pppk" class="text-xl font-extrabold text-blue-600 mt-1">0</p>
                                 </div>
                                 <div class="bg-white p-4 rounded-xl border border-slate-100">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase">PPPK PW / DW</p>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase">PPPK PW</p>
                                     <p id="selected-opd-pppkdw" class="text-xl font-extrabold text-amber-600 mt-1">0</p>
                                 </div>
                             </div>
@@ -960,7 +1015,7 @@
                                             <option value="ALL">Semua Status</option>
                                             <option value="PNS">PNS</option>
                                             <option value="PPPK">PPPK</option>
-                                            <option value="PPPK_DW">PPPK DW / PW</option>
+                                            <option value="PPPK_DW">PPPK PW</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1219,13 +1274,24 @@
                                 </div>
                             </div>
 
-                            <button onclick="cetakLaporanBulananPDF()"
+                            <!-- Tombol Unduh PDF Resmi -->
+                            <button onclick="unduhLaporanBulananPDF()"
                                 class="flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 shadow-md shadow-indigo-600/20 rounded-xl transition-all focus:outline-none shrink-0 cursor-pointer whitespace-nowrap">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                 </svg>
-                                <span>Cetak PDF Resmi</span>
+                                <span>Unduh PDF Resmi</span>
+                            </button>
+
+                            <!-- Tombol Unduh Excel Resmi -->
+                            <button onclick="exportLaporanBulananExcel()"
+                                class="flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 active:scale-95 shadow-sm rounded-xl transition-all focus:outline-none shrink-0 cursor-pointer whitespace-nowrap">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span>Unduh Excel</span>
                             </button>
                         </div>
                     </div>
