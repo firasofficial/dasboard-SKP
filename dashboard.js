@@ -2761,7 +2761,6 @@ async function unduhLaporanBulananPDF() {
                     tableRows.push([
                         index + 1,
                         opd.nama,
-                        'Terisi',
                         formatNumber(total),
                         formatNumber(sb),
                         formatNumber(b),
@@ -2774,25 +2773,17 @@ async function unduhLaporanBulananPDF() {
                     tableRows.push([
                         index + 1,
                         opd.nama,
-                        'Belum',
                         '0', '0', '0', '0', '0', '0', '0'
                     ]);
                 }
             });
 
-            // Teks Ringkasan di atas tabel
-            doc.setFont('times', 'normal');
-            doc.setFontSize(8);
-            doc.text(`1. Jumlah Unit Kerja Mengisi : ${totalOpdFilled} dari ${opdListToRender.length} Unit Kerja`, 14, 48.5);
-            doc.text(`2. Total Pegawai Terdata       : ${formatNumber(totalPegawaiAcc)} ASN (PNS: ${formatNumber(countPns)} | PPPK: ${formatNumber(countPppk)} | PPPK PW: ${formatNumber(countPppkPw)})`, 14, 52);
-
             // Parameter Tabel AutoTable
             const autoTableConfig = {
-                startY: 55.5,
+                startY: 48,
                 head: [[
                     'No',
                     'Nama Unit Kerja / OPD',
-                    'Status',
                     'Total\nPegawai',
                     'Sangat\nBaik',
                     'Baik',
@@ -2805,7 +2796,6 @@ async function unduhLaporanBulananPDF() {
                 foot: [[
                     'TOTAL',
                     isOpdRole ? `TOTAL REKAPITULASI ${USER_OPD_ID}` : 'TOTAL REKAPITULASI KESELURUHAN',
-                    `${totalOpdFilled} OPD`,
                     formatNumber(totalPegawaiAcc),
                     formatNumber(totalSangatBaikAcc),
                     formatNumber(totalBaikAcc),
@@ -2839,15 +2829,14 @@ async function unduhLaporanBulananPDF() {
                 },
                 columnStyles: {
                     0: { halign: 'center', cellWidth: 7 },
-                    1: { halign: 'left', cellWidth: 59 },
-                    2: { halign: 'center', cellWidth: 12 },
-                    3: { halign: 'right', cellWidth: 15 },
-                    4: { halign: 'right', cellWidth: 13 },
-                    5: { halign: 'right', cellWidth: 11 },
-                    6: { halign: 'right', cellWidth: 18 },
-                    7: { halign: 'right', cellWidth: 12 },
-                    8: { halign: 'right', cellWidth: 15 },
-                    9: { halign: 'right', cellWidth: 20 }
+                    1: { halign: 'left', cellWidth: 65 },
+                    2: { halign: 'right', cellWidth: 15 },
+                    3: { halign: 'right', cellWidth: 14 },
+                    4: { halign: 'right', cellWidth: 12 },
+                    5: { halign: 'right', cellWidth: 18 },
+                    6: { halign: 'right', cellWidth: 12 },
+                    7: { halign: 'right', cellWidth: 15 },
+                    8: { halign: 'right', cellWidth: 24 }
                 },
                 margin: { left: 14, right: 14, top: 12, bottom: 14 }
             };
@@ -3115,15 +3104,8 @@ async function exportLaporanBulananExcel() {
             ws.getCell('A7').font = { name: 'Times New Roman', size: 10, italic: true };
             ws.getCell('A7').alignment = { horizontal: 'center', vertical: 'middle' };
 
-            // Ringkasan Data Atas
-            ws.getCell('A9').value = `1. Jumlah Unit Kerja Mengisi : ${totalOpdFilled} dari ${maxOpdDisplay} Unit Kerja`;
-            ws.getCell('A9').font = { name: 'Times New Roman', size: 10 };
-
-            ws.getCell('A10').value = `2. Total Pegawai Terdata       : ${formatNumber(totalPegawaiAcc)} ASN (PNS: ${formatNumber(countPns)} | PPPK: ${formatNumber(countPppk)} | PPPK PW: ${formatNumber(countPppkPw)})`;
-            ws.getCell('A10').font = { name: 'Times New Roman', size: 10 };
-
-            // Header Tabel (Baris 12)
-            const headerRow = ws.getRow(12);
+            // Header Tabel (Baris 9)
+            const headerRow = ws.getRow(9);
             headerRow.values = [
                 'No', 'Nama Unit Kerja / OPD', 'Total Pegawai',
                 'Sangat Baik', 'Baik', 'Butuh Perbaikan', 'Kurang', 'Sangat Kurang', 'Tidak Membuat SKP'
@@ -3141,8 +3123,8 @@ async function exportLaporanBulananExcel() {
                 };
             });
 
-            // Data Rows (Mulai Baris 13)
-            let currentRowNum = 13;
+            // Data Rows (Mulai Baris 10)
+            let currentRowNum = 10;
             dataRows.forEach((r) => {
                 const row = ws.getRow(currentRowNum);
                 row.values = r;
@@ -3260,9 +3242,6 @@ async function exportLaporanBulananExcel() {
         [],
         ["LAPORAN REKAPITULASI CAPAIAN PREDIKAT KINERJA SKP ASN"],
         [`PERIODE BULAN: ${selectedBulan.toUpperCase()} TAHUN: ${selectedYear}`],
-        [],
-        [`1. Jumlah Unit Kerja Mengisi : ${totalOpdFilled} dari ${maxOpdDisplay} Unit Kerja`],
-        [`2. Total Pegawai Terdata       : ${formatNumber(totalPegawaiAcc)} ASN (PNS: ${formatNumber(countPns)} | PPPK: ${formatNumber(countPppk)} | PPPK PW: ${formatNumber(countPppkPw)})`],
         [],
         [
             "No",
