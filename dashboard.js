@@ -3,7 +3,7 @@
 // ==========================================
 // KONFIGURASI STORAGE & DATABASE
 // ==========================================
-let STORAGE_MODE = localStorage.getItem('simonika_storage_mode') || 'local';
+let STORAGE_MODE = 'supabase';
 
 let SUPABASE_URL = 'https://hjinzrpqbcrjrllylrth.supabase.co';
 let SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqaW56cnBxYmNyanJsbHlscnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MDk2NzUsImV4cCI6MjA5OTQ4NTY3NX0.zBTeSstK6ft82yyGRbr-A90mmRT14TSCj4dOvM0vzDw';
@@ -19,6 +19,7 @@ let supabaseClient = null;
 if (window.supabase && SUPABASE_URL && SUPABASE_KEY) {
     try {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log("SIMONIKA: Supabase Client berhasil terhubung ke Cloud Database.");
     } catch (e) {
         console.warn("Gagal inisialisasi Supabase SDK, beralih ke Mode Lokal:", e);
         STORAGE_MODE = 'local';
@@ -272,6 +273,47 @@ function upsertLocalRekap(payload) {
     saveLocalRekapList(list);
 }
 
+// Sinkronisasi Data Rekapitulasi dari Cloud Supabase
+async function syncFromCloudDatabase() {
+    if (!supabaseClient) return false;
+    try {
+        const { data, error } = await supabaseClient
+            .from('skp_rekap_bulanan')
+            .select('*');
+
+        if (error) {
+            console.warn("Supabase skp_rekap_bulanan query notice:", error.message || error);
+            return false;
+        }
+
+        if (data && data.length > 0) {
+            const mapped = data.map(item => ({
+                opd_id: item.opd_id,
+                bulan: item.bulan,
+                tahun: parseInt(item.tahun),
+                pns: parseInt(item.pns || 0),
+                pppk: parseInt(item.pppk || 0),
+                pppk_dw: parseInt(item.pppk_dw || 0),
+                sangat_baik: parseInt(item.sangat_baik || 0),
+                baik: parseInt(item.baik || 0),
+                butuh_perbaikan: parseInt(item.butuh_perbaikan || 0),
+                kurang: parseInt(item.kurang || 0),
+                sangat_kurang: parseInt(item.sangat_kurang || 0),
+                tidak_membuat_skp: parseInt(item.tidak_membuat_skp || 0),
+                nama_file: item.nama_file || null,
+                updated_at: item.updated_at || new Date().toISOString()
+            }));
+            saveLocalRekapList(mapped);
+            console.log(`SIMONIKA: Berhasil mengunduh ${mapped.length} data rekapitulasi dari Supabase.`);
+            return true;
+        }
+    } catch (e) {
+        console.warn("Gagal sinkronisasi data dari Cloud Supabase:", e);
+    }
+    return false;
+}
+window.syncFromCloudDatabase = syncFromCloudDatabase;
+
 // Pre-build Flat Aliases Sorted by Longest Length Descending
 let CACHED_OPD_ALIAS_PAIRS = null;
 function getCachedOpdAliasPairs() {
@@ -330,25 +372,17 @@ function matchOpdFromText(unorInduk, unor, jabatan) {
 const REAL_MASTER_PRESEEDED = [];
 
 async function ensureInitialRealSeed() {
-    // Pastikan database dimulai dalam kondisi bersih (kosong) agar pengguna dapat mencoba mengunggah dataset master secara mandiri.
-    if (localStorage.getItem('simonika_db_clean_v2') !== 'true') {
-        localStorage.removeItem(LOCAL_STORAGE_KEY_REKAP);
-        localStorage.setItem('simonika_db_clean_v2', 'true');
-        try {
-            const db = await openSimonikaDB();
-            if (db && db.objectStoreNames.contains(STORE_ASN)) {
-                const tx = db.transaction([STORE_ASN], 'readwrite');
-                const store = tx.objectStore(STORE_ASN);
-                store.clear();
-            }
-        } catch (e) {}
+    // Sinkronisasi data dari Cloud Supabase saat pertama kali inisialisasi
+    if (supabaseClient) {
+        return await syncFromCloudDatabase();
     }
+    return false;
 }
 
 async function resetAllSimonikaData() {
     const confirmRes = await simonikaConfirm({
         title: 'Kosongkan Seluruh Database?',
-        text: 'Tindakan ini akan menghapus seluruh dataset master, rincian ASN nominatif, dan rekapitulasi yang tersimpan di sistem.',
+        text: 'Tindakan ini akan menghapus seluruh dataset master, rincian ASN nominatif, dan rekapitulasi yang tersimpan di sistem dan Cloud Supabase.',
         icon: 'warning',
         confirmText: 'Ya, Kosongkan Sekarang',
         cancelText: 'Batalkan',
@@ -365,11 +399,22 @@ async function resetAllSimonikaData() {
             const store = tx.objectStore(STORE_ASN);
             store.clear();
         }
+
+        // Hapus dari Supabase jika terhubung
+        if (supabaseClient) {
+            try {
+                await supabaseClient.from('skp_detail_pegawai').delete().neq('id', 0);
+                await supabaseClient.from('skp_rekap_bulanan').delete().neq('id', 0);
+            } catch (supErr) {
+                console.warn("Gagal mengosongkan Supabase:", supErr);
+            }
+        }
+
         populateFilters();
         refreshAllData();
         simonikaAlert({
             title: 'Database Dikosongkan!',
-            text: 'Seluruh dataset master dan data nominatif ASN berhasil dibersihkan dari sistem.',
+            text: 'Seluruh dataset master dan data nominatif ASN berhasil dibersihkan dari sistem lokal dan Cloud Supabase.',
             icon: 'success'
         });
     } catch (err) {
@@ -1079,26 +1124,76 @@ async function saveAsnRecordsBatch(records, bulan, tahun) {
 
 async function getAsnRecordsByOpd(opdId, bulan, tahun) {
     const db = await openSimonikaDB();
-    if (!db) return [];
+    let records = [];
 
-    return new Promise((resolve) => {
-        try {
-            const tx = db.transaction([STORE_ASN], 'readonly');
-            const store = tx.objectStore(STORE_ASN);
-            const index = store.index('by_period_opd');
-            const keyRange = IDBKeyRange.only([parseInt(tahun), bulan, opdId]);
-            const request = index.getAll(keyRange);
+    if (db) {
+        records = await new Promise((resolve) => {
+            try {
+                const tx = db.transaction([STORE_ASN], 'readonly');
+                const store = tx.objectStore(STORE_ASN);
+                const index = store.index('by_period_opd');
+                const keyRange = IDBKeyRange.only([parseInt(tahun), bulan, opdId]);
+                const request = index.getAll(keyRange);
 
-            request.onsuccess = function () {
-                resolve(request.result || []);
-            };
-            request.onerror = function () {
+                request.onsuccess = function () {
+                    resolve(request.result || []);
+                };
+                request.onerror = function () {
+                    resolve([]);
+                };
+            } catch (e) {
                 resolve([]);
-            };
-        } catch (e) {
-            resolve([]);
+            }
+        });
+    }
+
+    // Jika di IndexedDB lokal belum ada, ambil dari Cloud Supabase
+    if ((!records || records.length === 0) && supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('skp_detail_pegawai')
+                .select('*')
+                .eq('opd_id', opdId)
+                .eq('bulan', bulan)
+                .eq('tahun', parseInt(tahun));
+
+            if (!error && data && data.length > 0) {
+                records = data.map((item, idx) => ({
+                    opd_id: item.opd_id,
+                    bulan: item.bulan,
+                    tahun: parseInt(item.tahun),
+                    no: idx + 1,
+                    nip: item.nip || '',
+                    nama: item.nama_pegawai || '',
+                    skp_unor: item.skp_unor || '',
+                    skp_unor_induk: item.skp_unor || '',
+                    skp_jabatan: item.skp_jabatan || '',
+                    hasil_kerja: item.hasil_kerja || '',
+                    perilaku_kerja: item.perilaku_kerja || '',
+                    hasil_akhir: item.predikat_kinerja || 'Tidak membuat SKP',
+                    golru: item.golru || '',
+                    jenis_pegawai: item.status_pegawai || 'pns',
+                    skp_jenis_jabatan: item.skp_jenis_jabatan || '',
+                    is_skp_plt_plh_pjb: item.is_skp_plt_plh_pjb || '0'
+                }));
+
+                // Cache ke IndexedDB agar pencarian berikutnya instan tanpa network call
+                if (db) {
+                    try {
+                        const tx = db.transaction([STORE_ASN], 'readwrite');
+                        const store = tx.objectStore(STORE_ASN);
+                        records.forEach(r => store.add(r));
+                    } catch (cacheErr) {
+                        console.warn("Gagal menyimpan cache ke IndexedDB:", cacheErr);
+                    }
+                }
+            }
+        } catch (supErr) {
+            console.warn("Gagal mengambil data nominatif dari Supabase:", supErr);
         }
-    });
+    }
+
+    return records;
 }
 
 // Generator ASN Demo Sintetis (Bila belum ada file dataset asli yang diunggah)
@@ -2164,7 +2259,7 @@ function processMasterDatasetExcel(file) {
         percentText.textContent = '45%';
         statusText.textContent = 'Mengurai baris pegawai & unit kerja...';
 
-        setTimeout(() => {
+        setTimeout(async () => {
             try {
                 if (!window.XLSX) throw new Error("SheetJS (XLSX) belum dimuat.");
 
@@ -2356,9 +2451,86 @@ function processMasterDatasetExcel(file) {
                 });
 
                 // Simpan Seluruh Rincian Baris ASN ke IndexedDB
-                saveAsnRecordsBatch(allAsnRecords, finalMonth, finalYear).then(() => {
-                    console.log(`Berhasil menyimpan ${allAsnRecords.length} baris nominatif ASN ke IndexedDB.`);
-                });
+                await saveAsnRecordsBatch(allAsnRecords, finalMonth, finalYear);
+                console.log(`Berhasil menyimpan ${allAsnRecords.length} baris nominatif ASN ke IndexedDB.`);
+
+                // Simpan ke Supabase Cloud Database jika terhubung
+                if (supabaseClient) {
+                    try {
+                        progressBar.style.width = '75%';
+                        percentText.textContent = '75%';
+                        statusText.textContent = 'Menyinkronkan rekapitulasi ke Cloud Supabase...';
+
+                        const rekapRows = Object.values(opdAggregates).map(item => ({
+                            opd_id: item.opd_id,
+                            bulan: item.bulan,
+                            tahun: parseInt(item.tahun),
+                            pns: parseInt(item.pns || 0),
+                            pppk: parseInt(item.pppk || 0),
+                            pppk_dw: parseInt(item.pppk_dw || 0),
+                            sangat_baik: parseInt(item.sangat_baik || 0),
+                            baik: parseInt(item.baik || 0),
+                            butuh_perbaikan: parseInt(item.butuh_perbaikan || 0),
+                            kurang: parseInt(item.kurang || 0),
+                            sangat_kurang: parseInt(item.sangat_kurang || 0),
+                            tidak_membuat_skp: parseInt(item.tidak_membuat_skp || 0),
+                            nama_file: file.name,
+                            updated_at: new Date().toISOString()
+                        }));
+
+                        const { error: rekapErr } = await supabaseClient
+                            .from('skp_rekap_bulanan')
+                            .upsert(rekapRows, { onConflict: 'opd_id,bulan,tahun' });
+
+                        if (rekapErr) {
+                            console.warn("Supabase upsert rekap notice:", rekapErr.message || rekapErr);
+                        }
+
+                        progressBar.style.width = '85%';
+                        percentText.textContent = '85%';
+                        statusText.textContent = 'Menyinkronkan nominatif ASN ke Cloud Supabase...';
+
+                        // Bersihkan baris detail periode ini sebelum menimpa data baru
+                        await supabaseClient
+                            .from('skp_detail_pegawai')
+                            .delete()
+                            .eq('bulan', finalMonth)
+                            .eq('tahun', parseInt(finalYear));
+
+                        const chunkSize = 500;
+                        const mappedDetail = allAsnRecords.map(r => ({
+                            nip: r.nip,
+                            nama_pegawai: r.nama,
+                            opd_id: r.opd_id,
+                            bulan: r.bulan,
+                            tahun: parseInt(r.tahun),
+                            predikat_kinerja: r.hasil_akhir,
+                            hasil_kerja: r.hasil_kerja,
+                            perilaku_kerja: r.perilaku_kerja,
+                            skp_jabatan: r.skp_jabatan,
+                            skp_unor: r.skp_unor,
+                            golru: r.golru,
+                            status_pegawai: r.jenis_pegawai,
+                            skp_jenis_jabatan: r.skp_jenis_jabatan,
+                            is_skp_plt_plh_pjb: r.is_skp_plt_plh_pjb,
+                            nama_file: file.name
+                        }));
+
+                        for (let i = 0; i < mappedDetail.length; i += chunkSize) {
+                            const chunk = mappedDetail.slice(i, i + chunkSize);
+                            const { error: chunkErr } = await supabaseClient
+                                .from('skp_detail_pegawai')
+                                .insert(chunk);
+                            if (chunkErr) {
+                                console.warn("Supabase insert detail chunk error:", chunkErr);
+                                break;
+                            }
+                        }
+                        console.log("SIMONIKA: Berhasil sinkronisasi master dataset ke Cloud Supabase.");
+                    } catch (supSyncErr) {
+                        console.warn("Gagal sinkronisasi data ke Cloud Supabase:", supSyncErr);
+                    }
+                }
 
                 // Sinkronisasi Filter Bulan & Tahun jika berubah
                 const filterBulan = document.getElementById('filter-bulan');
@@ -3651,8 +3823,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Seed Demo
-    ensureInitialRealSeed();
+    // Seed & Cloud Database Sync
+    ensureInitialRealSeed().then((synced) => {
+        if (synced) {
+            populateFilters();
+            renderOpdList();
+            renderSelectedOpdDetail();
+            updateDashboardDynamic();
+            if (typeof renderLaporanBulanan === 'function') renderLaporanBulanan();
+        }
+    });
 
     // Populate & Start
     populateFilters();
