@@ -47,6 +47,7 @@ function applyUserLevelPermissions() {
     const headerAvatar = document.getElementById('header-avatar');
     const adminNavSection = document.getElementById('section-admin-nav');
     const navMasterData = document.getElementById('nav-master-data');
+    const navLaporanBulanan = document.getElementById('nav-laporan-bulanan');
     const dashboardFilterSec = document.getElementById('dashboard-opd-filter-section');
     const opdAllListSec = document.getElementById('section-daftar-seluruh-opd');
     const opdSingleContainer = document.getElementById('opd-single-select-container');
@@ -66,9 +67,10 @@ function applyUserLevelPermissions() {
         if (sidebarAvatar) sidebarAvatar.textContent = (USER_OPD_ID || 'OP').substring(0, 2);
         if (headerAvatar) headerAvatar.textContent = (USER_OPD_ID || 'OP').substring(0, 2);
 
-        // 1. Hide Master Data from Sidebar for Level 2
+        // 1. Hide Master Data & Rekap Laporan from Sidebar for Level 2
         if (adminNavSection) adminNavSection.style.display = 'none';
         if (navMasterData) navMasterData.style.display = 'none';
+        if (navLaporanBulanan) navLaporanBulanan.style.display = 'none';
 
         // 2. Hide OPD selection dropdown on Dashboard (Level 2 is locked to their OPD)
         if (dashboardFilterSec) dashboardFilterSec.style.display = 'none';
@@ -95,6 +97,7 @@ function applyUserLevelPermissions() {
 
         if (adminNavSection) adminNavSection.style.display = 'block';
         if (navMasterData) navMasterData.style.display = 'flex';
+        if (navLaporanBulanan) navLaporanBulanan.style.display = 'flex';
         if (dashboardFilterSec) dashboardFilterSec.style.display = 'flex';
         if (opdAllListSec) opdAllListSec.style.display = 'block';
         if (opdSingleContainer) opdSingleContainer.style.display = 'block';
@@ -3513,13 +3516,13 @@ window.setCategoryFilter = setCategoryFilter;
 
 function switchView(viewName) {
 window.switchView = switchView;
-    if (USER_LEVEL === 2 && viewName === 'master-data') {
+    if (USER_LEVEL === 2 && (viewName === 'master-data' || viewName === 'laporan-bulanan')) {
         simonikaAlert({
-        title: 'Akses Terbatas',
-        html: `<p class="text-xs text-slate-600 leading-relaxed">Halaman <strong>Master Data e-Kinerja</strong> hanya dapat diakses oleh <strong>Administrator BKPSDM (Level 1)</strong>.</p>`,
-        icon: 'warning',
-        confirmText: 'Saya Mengerti'
-    });
+            title: 'Akses Terbatas',
+            html: `<p class="text-xs text-slate-600 leading-relaxed">Halaman ini hanya dapat diakses oleh <strong>Administrator BKPSDM (Level 1)</strong>.</p>`,
+            icon: 'warning',
+            confirmText: 'Saya Mengerti'
+        });
         return;
     }
 
