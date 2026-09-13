@@ -3051,7 +3051,7 @@ async function unduhLaporanBulananPDF() {
             doc.text('PENGEMBANGAN SUMBER DAYA MANUSIA', 135, finalY + 7);
             doc.text('KABUPATEN ACEH TIMUR', 135, finalY + 10.5);
 
-            doc.text('TEUKU DIDI FARISHA, S.STP,. M. AP', 135, finalY + 28);
+            doc.text('TEUKU DIDI FARISHA, S.STP, M.AP', 135, finalY + 28);
             doc.setLineWidth(0.2);
             doc.line(135, finalY + 28.8, 187, finalY + 28.8);
             doc.setFont('times', 'normal');
@@ -3411,7 +3411,7 @@ async function exportLaporanBulananExcel() {
             addSigLine(2, 'PENGEMBANGAN SUMBER DAYA MANUSIA', true, false, 10);
             addSigLine(3, 'KABUPATEN ACEH TIMUR', true, false, 10);
 
-            addSigLine(7, 'TEUKU DIDI FARISHA, S.STP,. M. AP', true, true, 10);
+            addSigLine(7, 'TEUKU DIDI FARISHA, S.STP, M.AP', true, true, 10);
             addSigLine(8, 'Pembina Utama Muda (IV/c)', false, false, 9.5);
             addSigLine(9, 'NIP. 198412302004121001', false, false, 9.5);
 
@@ -3429,7 +3429,7 @@ async function exportLaporanBulananExcel() {
             showToast('Laporan Excel resmi berhasil diunduh!', 'success');
             return;
         } catch (excelErr) {
-            console.error('ExcelJS generation failed, fallback to SheetJS:', excelErr);
+            console.warn('Gagal ekspor ExcelJS, beralih ke SheetJS fallback:', excelErr);
         }
     }
 
@@ -3486,7 +3486,7 @@ async function exportLaporanBulananExcel() {
     aoa.push(["", "", "", "", "", "KABUPATEN ACEH TIMUR"]);
     aoa.push([]);
     aoa.push([]);
-    aoa.push(["", "", "", "", "", "TEUKU DIDI FARISHA, S.STP,. M. AP"]);
+    aoa.push(["", "", "", "", "", "TEUKU DIDI FARISHA, S.STP, M.AP"]);
     aoa.push(["", "", "", "", "", "Pembina Utama Muda (IV/c)"]);
     aoa.push(["", "", "", "", "", "NIP. 198412302004121001"]);
 
