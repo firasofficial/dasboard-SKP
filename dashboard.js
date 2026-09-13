@@ -2972,8 +2972,11 @@ async function unduhLaporanBulananPDF() {
                 ]],
                 body: tableRows,
                 foot: [[
-                    'TOTAL',
-                    isOpdRole ? `TOTAL REKAPITULASI ${USER_OPD_ID}` : 'TOTAL REKAPITULASI KESELURUHAN',
+                    {
+                        content: isOpdRole ? `TOTAL REKAPITULASI ${USER_OPD_ID}` : 'TOTAL REKAPITULASI KESELURUHAN',
+                        colSpan: 2,
+                        styles: { halign: 'center', fontStyle: 'bold' }
+                    },
                     formatNumber(totalPegawaiAcc),
                     formatNumber(totalSangatBaikAcc),
                     formatNumber(totalBaikAcc),
@@ -3462,9 +3465,10 @@ async function exportLaporanBulananExcel() {
 
     dataRows.forEach(row => aoa.push(row));
 
+    const totalRowIndex = aoa.length;
     aoa.push([
-        "TOTAL",
         isOpdRole ? `TOTAL REKAPITULASI ${USER_OPD_ID}` : "TOTAL REKAPITULASI KESELURUHAN",
+        "",
         totalPegawaiAcc,
         totalSangatBaikAcc,
         totalBaikAcc,
@@ -3493,7 +3497,8 @@ async function exportLaporanBulananExcel() {
         { s: { r: 1, c: 1 }, e: { r: 1, c: 8 } },
         { s: { r: 2, c: 1 }, e: { r: 2, c: 8 } },
         { s: { r: 4, c: 0 }, e: { r: 4, c: 8 } },
-        { s: { r: 5, c: 0 }, e: { r: 5, c: 8 } }
+        { s: { r: 5, c: 0 }, e: { r: 5, c: 8 } },
+        { s: { r: totalRowIndex, c: 0 }, e: { r: totalRowIndex, c: 1 } }
     ];
 
     ws['!cols'] = [
