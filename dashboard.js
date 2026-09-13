@@ -187,7 +187,7 @@ const MASTER_OPD_LIST = [
     { id: 'DISPARPORA', nama: 'Dinas Pariwisata, Pemuda, dan Olahraga', kategori: 'DINAS', aliases: ['disparpora', 'pariwisata pemuda dan olahraga', 'pariwisata pemuda', 'pariwisata', 'pemuda dan olahraga', 'pemuda dan olah raga'] },
     { id: 'DISKOPUKM', nama: 'Dinas Perdagangan, Koperasi, dan UKM', kategori: 'DINAS', aliases: ['perdagangan koperasi dan usaha kecil menengah', 'perdagangan koperasi', 'diskopukm', 'koperasi dan ukm', 'usaha kecil menengah', 'perdagangan koperasi dan ukm', 'perdagangan'] },
     { id: 'DISBUNNAK', nama: 'Dinas Perkebunan dan Peternakan', kategori: 'DINAS', aliases: ['disbunnak', 'perkebunan dan peternakan', 'perkebunan dan perternakan', 'perkebunan', 'peternakan', 'perternakan'] },
-    { id: 'DKP', nama: 'Dinas Kelautan dan Perikanan', kategori: 'DINAS', aliases: ['kelautan dan perikanan', 'dinas perikanan', 'perikanan', 'kelautan', 'dkp'] },
+    { id: 'DKP', nama: 'Dinas Perikanan', kategori: 'DINAS', aliases: ['dinas perikanan', 'perikanan', 'kelautan dan perikanan', 'dinas kelautan dan perikanan', 'kelautan', 'dkp'] },
     { id: 'DP3AKB', nama: 'Dinas Pemberdayaan Perempuan, Perlindungan Anak, dan KB', kategori: 'DINAS', aliases: ['dp3akb', 'pemberdayaan perempuan perlindungan anak dan keluarga berencana', 'pemberdayaan perempuan', 'perlindungan anak', 'keluarga berencana'] },
     { id: 'DISPUSIP', nama: 'Dinas Perpustakaan dan Kearsipan', kategori: 'DINAS', aliases: ['dispusip', 'perpustakaan dan kearsipan', 'perpustakaan', 'kearsipan'] },
     { id: 'PERTANAHAN', nama: 'Dinas Pertanahan', kategori: 'DINAS', aliases: ['dinas pertanahan', 'pertanahan'] },

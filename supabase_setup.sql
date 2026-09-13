@@ -92,7 +92,7 @@ INSERT INTO master_opd (id, nama, kategori) VALUES
 ('DISPARPORA', 'Dinas Pariwisata, Pemuda, dan Olahraga', 'DINAS'),
 ('DISKOPUKM', 'Dinas Perdagangan, Koperasi, dan UKM', 'DINAS'),
 ('DISBUNNAK', 'Dinas Perkebunan dan Peternakan', 'DINAS'),
-('DKP', 'Dinas Kelautan dan Perikanan', 'DINAS'),
+('DKP', 'Dinas Perikanan', 'DINAS'),
 ('DP3AKB', 'Dinas Pemberdayaan Perempuan, Perlindungan Anak, dan KB', 'DINAS'),
 ('DISPUSIP', 'Dinas Perpustakaan dan Kearsipan', 'DINAS'),
 ('PERTANAHAN', 'Dinas Pertanahan', 'DINAS'),
