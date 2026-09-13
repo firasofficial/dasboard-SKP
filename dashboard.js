@@ -982,12 +982,12 @@ function renderDashboardDOM(data) {
             else if (item.nama === 'Tidak membuat SKP') badgeClass = 'bg-slate-100 text-slate-700 border-slate-300';
 
             row.innerHTML = `
-                <td class="py-3.5 px-5 font-semibold text-slate-700 flex items-center gap-2.5">
-                    <span>${item.emoji}</span>
-                    <span class="px-2 py-0.5 rounded-lg border text-xs ${badgeClass}">${item.nama}</span>
+                <td class="py-1.5 px-3 font-semibold text-slate-700 flex items-center gap-2">
+                    <span class="text-xs">${item.emoji}</span>
+                    <span class="px-1.5 py-0.5 rounded border text-[11px] font-bold ${badgeClass}">${item.nama}</span>
                 </td>
-                <td class="py-3.5 px-4 text-right font-extrabold text-slate-800">${formatNumber(item.jumlah)}</td>
-                <td class="py-3.5 px-5 text-right font-medium text-slate-500">${item.persen.toFixed(2)}%</td>
+                <td class="py-1.5 px-3 text-right font-extrabold text-slate-800 text-xs">${formatNumber(item.jumlah)}</td>
+                <td class="py-1.5 px-3 text-right font-medium text-slate-500 text-xs">${item.persen.toFixed(2)}%</td>
             `;
             tbody.appendChild(row);
         });
