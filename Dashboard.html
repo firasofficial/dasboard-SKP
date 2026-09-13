@@ -357,6 +357,16 @@
                         </svg>
                         <span class="text-sm">Master Data</span>
                     </a>
+
+                    <!-- Manajemen Akun & Password Menu (Level 1 only) -->
+                    <a href="javascript:void(0)" id="nav-manajemen-pengguna" onclick="switchView('manajemen-pengguna')"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-100 font-medium transition-all group">
+                        <svg class="w-5 h-5 text-slate-500 group-hover:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <span class="text-sm">Manajemen Akun</span>
+                    </a>
                 </div>
 
                 <a href="#" onclick="handleLogout()"
@@ -424,6 +434,17 @@
                             AD
                         </div>
                     </div>
+
+                    <!-- Change Password Button -->
+                    <button onclick="openChangePasswordModal()" title="Ganti Kata Sandi Akun Anda"
+                        class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 rounded-lg transition-all duration-200 focus:outline-none flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                        <span class="text-[10px] font-bold hidden md:inline">Ganti Sandi</span>
+                    </button>
+
                     <!-- Logout button next to profile -->
                     <button onclick="handleLogout()" title="Keluar dari Sistem"
                         class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-100 rounded-lg transition-all duration-200 focus:outline-none">
@@ -1365,6 +1386,106 @@
                     </div>
                 </div> <!-- End #view-laporan-bulanan -->
 
+                <!-- 4. VIEW MANAJEMEN PENGGUNA & PASSWORD (KHUSUS ADMIN LEVEL 1) -->
+                <div id="view-manajemen-pengguna" class="space-y-3 hidden">
+                    <!-- Page Header Card -->
+                    <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-md bg-indigo-50 border border-indigo-100 text-[10px] font-extrabold text-indigo-700 uppercase tracking-wider">Akses Khusus Admin</span>
+                                <span class="text-xs text-slate-300">•</span>
+                                <span class="text-xs font-bold text-slate-500">62 Total Akun Pengguna</span>
+                            </div>
+                            <h2 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight mt-1">Manajemen Akun & Kata Sandi</h2>
+                            <p class="text-xs text-slate-500 mt-0.5">Kelola akses login, ubah password pengguna, dan reset kata sandi Operator OPD se-Kabupaten Aceh Timur.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="syncUsersFromCloud(true)" class="py-2 px-3.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border border-indigo-200">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                <span>Sinkronkan Data Cloud</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Highlight Cards -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        <div class="bg-white p-3 rounded-xl border border-slate-200/80 shadow-xs flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Akun</p>
+                                <p class="text-base font-extrabold text-slate-800" id="user-stat-total">62</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200/80 shadow-xs flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Admin BKPSDM</p>
+                                <p class="text-base font-extrabold text-violet-700" id="user-stat-admin">1</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200/80 shadow-xs flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Operator OPD</p>
+                                <p class="text-base font-extrabold text-emerald-700" id="user-stat-opd">61</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200/80 shadow-xs flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sandi Kustom</p>
+                                <p class="text-base font-extrabold text-amber-700" id="user-stat-custom">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Toolbar Filter & Search -->
+                    <div class="bg-white p-3 rounded-xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div class="relative w-full sm:w-80">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </div>
+                            <input type="text" id="user-search-input" oninput="filterUserManagementTable()" placeholder="Cari nama OPD atau username..." class="block w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all">
+                        </div>
+                        <div class="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto p-1 bg-slate-100 rounded-xl border border-slate-200/60">
+                            <button type="button" id="tab-user-cat-semua" onclick="setUserManagementCategory('SEMUA')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-700 shadow-xs">Semua</button>
+                            <button type="button" id="tab-user-cat-dinas" onclick="setUserManagementCategory('DINAS')" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900">Dinas / Badan</button>
+                            <button type="button" id="tab-user-cat-kecamatan" onclick="setUserManagementCategory('KECAMATAN')" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900">Kecamatan</button>
+                            <button type="button" id="tab-user-cat-admin" onclick="setUserManagementCategory('ADMIN')" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900">Admin</button>
+                        </div>
+                    </div>
+
+                    <!-- User Table Card -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-200 text-[11px] uppercase tracking-wider">
+                                        <th class="py-3 px-4 w-12 text-center">No</th>
+                                        <th class="py-3 px-4">Nama Akun / Unit Kerja</th>
+                                        <th class="py-3 px-4">Username Login</th>
+                                        <th class="py-3 px-4">Kategori</th>
+                                        <th class="py-3 px-4">Hak Akses</th>
+                                        <th class="py-3 px-4">Status Sandi</th>
+                                        <th class="py-3 px-4 text-center">Aksi Manajemen</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="user-management-table-body" class="divide-y divide-slate-100 text-slate-700 font-medium">
+                                    <!-- Dynamic rows generated by renderUserManagementList() -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div> <!-- End #view-manajemen-pengguna -->
+
             </main>
         </div>
     </div>
@@ -1372,6 +1493,96 @@
     
     <!-- FLOATING TOAST NOTIFICATION CONTAINER -->
     <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- MODAL GANTI PASSWORD SENDIRI (SEMUA USER) -->
+    <div id="modal-ganti-password" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs hidden p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform transition-all duration-200 scale-100 animate-in fade-in zoom-in-95">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 leading-tight">Ganti Kata Sandi Akun</h3>
+                        <p id="modal-ganti-pass-subtitle" class="text-[11px] text-slate-500 mt-0.5">Admin BKPSDM</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeChangePasswordModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form id="form-ganti-password" onsubmit="submitChangePassword(event)" class="space-y-4 pt-4">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Kata Sandi Saat Ini</label>
+                    <input type="password" id="self-current-password" required placeholder="Masukkan kata sandi saat ini..." class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Kata Sandi Baru</label>
+                    <input type="password" id="self-new-password" required minlength="4" placeholder="Masukkan kata sandi baru (minimal 4 karakter)..." class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Konfirmasi Kata Sandi Baru</label>
+                    <input type="password" id="self-confirm-password" required minlength="4" placeholder="Ketik ulang kata sandi baru..." class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all">
+                </div>
+
+                <div class="flex items-center gap-2 pt-1">
+                    <input type="checkbox" id="toggle-self-pass-vis" onchange="toggleSelfPasswordVisibility()" class="w-3.5 h-3.5 rounded text-indigo-600 border-slate-300">
+                    <label for="toggle-self-pass-vis" class="text-xs text-slate-600 select-none cursor-pointer">Tampilkan Kata Sandi</label>
+                </div>
+
+                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeChangePasswordModal()" class="py-2.5 px-4 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Batal</button>
+                    <button type="submit" id="btn-submit-self-pass" class="py-2.5 px-5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/25 transition-all">Simpan Sandi Baru</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ADMIN UBAH PASSWORD PENGGUNA -->
+    <div id="modal-admin-ubah-password" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs hidden p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform transition-all duration-200 scale-100 animate-in fade-in zoom-in-95">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center border border-violet-100 shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 leading-tight">Ubah Kata Sandi Akun</h3>
+                        <p id="admin-edit-target-label" class="text-[11px] text-slate-500 mt-0.5">Dinas Pendidikan</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeAdminEditPasswordModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form id="form-admin-ubah-password" onsubmit="submitAdminEditPassword(event)" class="space-y-4 pt-4">
+                <input type="hidden" id="admin-edit-target-id" value="">
+                
+                <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs space-y-1">
+                    <div class="flex justify-between text-slate-500">
+                        <span>Username Login:</span>
+                        <strong class="text-slate-800 font-mono" id="admin-edit-target-username">opd_disdik</strong>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Kata Sandi Baru</label>
+                    <input type="password" id="admin-edit-new-password" required minlength="4" placeholder="Masukkan kata sandi baru untuk akun ini..." class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:ring-2 focus:ring-violet-600/20 focus:border-violet-600 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Konfirmasi Kata Sandi Baru</label>
+                    <input type="password" id="admin-edit-confirm-password" required minlength="4" placeholder="Ketik ulang kata sandi baru..." class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:ring-2 focus:ring-violet-600/20 focus:border-violet-600 outline-none transition-all">
+                </div>
+
+                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeAdminEditPasswordModal()" class="py-2.5 px-4 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Batal</button>
+                    <button type="submit" id="btn-submit-admin-edit" class="py-2.5 px-5 rounded-xl text-xs font-bold text-white bg-violet-600 hover:bg-violet-700 shadow-md shadow-violet-600/25 transition-all">Terapkan Sandi</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- CUSTOM LOGOUT CONFIRMATION MODAL -->
     <div id="modal-logout-confirm" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs hidden p-4">

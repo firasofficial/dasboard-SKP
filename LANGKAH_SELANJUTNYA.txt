@@ -3,7 +3,7 @@
 ================================================================================
 
 Berikut adalah langkah-langkah yang perlu Anda lakukan untuk menguji dan
-mengoperasikan sinkronisasi Cloud Database Supabase antar komputer/perangkat:
+mengoperasikan sinkronisasi Cloud Database Supabase serta Manajemen Akun/Password:
 
 --------------------------------------------------------------------------------
 1. JALANKAN SKRIP SQL DI SUPABASE (Hanya Perlu 1 Kali Saja)
@@ -16,11 +16,25 @@ c. Buka file "supabase_setup.sql" yang ada di folder proyek ini.
 d. Salin (Copy) seluruh isi file tersebut, lalu Tempel (Paste) ke SQL Editor Supabase.
 e. Klik tombol "RUN" (atau tekan Ctrl+Enter).
 f. Pastikan muncul status "Success / No rows returned".
-   (Tabel 'master_opd', 'skp_rekap_bulanan', 'skp_detail_pegawai' serta master 
-    61 OPD & Kecamatan Kabupaten Aceh Timur telah selesai dibuat).
+   (Tabel 'master_opd', 'skp_rekap_bulanan', 'skp_detail_pegawai', dan
+    'simonika_users' serta master 61 OPD & Kecamatan telah selesai dibuat).
 
 --------------------------------------------------------------------------------
-2. UJI COBA UNGGAH MASTER DATA (DARI KOMPUTER ADMIN)
+2. FITUR GANTI PASSWORD & MANAJEMEN PENGGUNA (BARU)
+--------------------------------------------------------------------------------
+A. Ganti Kata Sandi Mandiri (Semua Pengguna):
+   - Klik tombol "Ganti Sandi" di samping profil pengguna (kanan atas).
+   - Masukkan kata sandi lama dan kata sandi baru.
+   - Kata sandi langsung tersimpan ke Cloud Supabase dan aktif di semua perangkat.
+
+B. Manajemen Password & Akun oleh Admin (Khusus Admin BKPSDM):
+   - Masuk ke menu "Manajemen Akun" pada sidebar kiri.
+   - Admin dapat melihat status kata sandi seluruh 61 OPD + Admin.
+   - Admin dapat mengubah kata sandi OPD mana pun jika OPD lupa kata sandi.
+   - Admin dapat me-reset kata sandi OPD kembali ke default ('opd123') kapan saja.
+
+--------------------------------------------------------------------------------
+3. UJI COBA UNGGAH MASTER DATA (DARI KOMPUTER ADMIN)
 --------------------------------------------------------------------------------
 a. Buka aplikasi SIMONIKA di browser Anda.
 b. Login sebagai "Administrator BKPSDM" (Super Admin).
@@ -31,7 +45,7 @@ f. Tunggu proses pembacaan dan sinkronisasi ke Cloud Supabase hingga progress ba
    mencapai 100% dan muncul pesan "Impor & Pemilahan Berhasil!".
 
 --------------------------------------------------------------------------------
-3. UJI COBA AKSES DARI KOMPUTER / BROWSER LAIN (SEBAGAI OPD)
+4. UJI COBA AKSES DARI KOMPUTER / BROWSER LAIN (SEBAGAI OPD)
 --------------------------------------------------------------------------------
 a. Buka browser lain (atau jendela Mode Samaran / Incognito / Komputer lain).
 b. Akses halaman SIMONIKA.
@@ -42,7 +56,7 @@ d. Periksa Halaman:
    - Tombol Download: Operator OPD dapat langsung mengunduh nominatif format Excel/PDF.
 
 --------------------------------------------------------------------------------
-4. OPSIONAL: DEPLOYMENT KE INTERNET (ONLINE HOSTING)
+5. OPSIONAL: DEPLOYMENT KE INTERNET (ONLINE HOSTING)
 --------------------------------------------------------------------------------
 Agar SIMONIKA bisa diakses seluruh OPD se-Kabupaten Aceh Timur tanpa perlu jaringan lokal:
 - Anda dapat mengaktifkan "GitHub Pages" pada repository:

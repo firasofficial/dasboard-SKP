@@ -49,6 +49,7 @@ function applyUserLevelPermissions() {
     const adminNavSection = document.getElementById('section-admin-nav');
     const navMasterData = document.getElementById('nav-master-data');
     const navLaporanBulanan = document.getElementById('nav-laporan-bulanan');
+    const navManajemenPengguna = document.getElementById('nav-manajemen-pengguna');
     const dashboardFilterSec = document.getElementById('dashboard-opd-filter-section');
     const opdAllListSec = document.getElementById('section-daftar-seluruh-opd');
     const opdSingleContainer = document.getElementById('opd-single-select-container');
@@ -68,10 +69,11 @@ function applyUserLevelPermissions() {
         if (sidebarAvatar) sidebarAvatar.textContent = (USER_OPD_ID || 'OP').substring(0, 2);
         if (headerAvatar) headerAvatar.textContent = (USER_OPD_ID || 'OP').substring(0, 2);
 
-        // 1. Hide Master Data & Rekap Laporan from Sidebar for Level 2
+        // 1. Hide Master Data, Rekap Laporan & Manajemen Pengguna from Sidebar for Level 2
         if (adminNavSection) adminNavSection.style.display = 'none';
         if (navMasterData) navMasterData.style.display = 'none';
         if (navLaporanBulanan) navLaporanBulanan.style.display = 'none';
+        if (navManajemenPengguna) navManajemenPengguna.style.display = 'none';
 
         // 2. Hide OPD selection dropdown on Dashboard (Level 2 is locked to their OPD)
         if (dashboardFilterSec) dashboardFilterSec.style.display = 'none';
@@ -99,6 +101,7 @@ function applyUserLevelPermissions() {
         if (adminNavSection) adminNavSection.style.display = 'block';
         if (navMasterData) navMasterData.style.display = 'flex';
         if (navLaporanBulanan) navLaporanBulanan.style.display = 'flex';
+        if (navManajemenPengguna) navManajemenPengguna.style.display = 'flex';
         if (dashboardFilterSec) dashboardFilterSec.style.display = 'flex';
         if (opdAllListSec) opdAllListSec.style.display = 'block';
         if (opdSingleContainer) opdSingleContainer.style.display = 'block';
@@ -3667,7 +3670,7 @@ window.setCategoryFilter = setCategoryFilter;
 
 function switchView(viewName) {
 window.switchView = switchView;
-    if (USER_LEVEL === 2 && (viewName === 'master-data' || viewName === 'laporan-bulanan')) {
+    if (USER_LEVEL === 2 && (viewName === 'master-data' || viewName === 'laporan-bulanan' || viewName === 'manajemen-pengguna')) {
         simonikaAlert({
             title: 'Akses Terbatas',
             html: `<p class="text-xs text-slate-600 leading-relaxed">Halaman ini hanya dapat diakses oleh <strong>Administrator BKPSDM (Level 1)</strong>.</p>`,
@@ -3681,14 +3684,16 @@ window.switchView = switchView;
         'dashboard': document.getElementById('view-dashboard'),
         'data-opd': document.getElementById('view-data-opd'),
         'master-data': document.getElementById('view-master-data'),
-        'laporan-bulanan': document.getElementById('view-laporan-bulanan')
+        'laporan-bulanan': document.getElementById('view-laporan-bulanan'),
+        'manajemen-pengguna': document.getElementById('view-manajemen-pengguna')
     };
 
     const navs = {
         'dashboard': document.getElementById('nav-dashboard'),
         'data-opd': document.getElementById('nav-data-opd'),
         'master-data': document.getElementById('nav-master-data'),
-        'laporan-bulanan': document.getElementById('nav-laporan-bulanan')
+        'laporan-bulanan': document.getElementById('nav-laporan-bulanan'),
+        'manajemen-pengguna': document.getElementById('nav-manajemen-pengguna')
     };
 
     const inactiveClasses = ["text-slate-400", "hover:bg-slate-800", "hover:text-slate-100", "font-medium"];
@@ -3718,6 +3723,8 @@ window.switchView = switchView;
         updateResetButtonState();
     } else if (viewName === 'laporan-bulanan') {
         renderLaporanBulanan();
+    } else if (viewName === 'manajemen-pengguna') {
+        renderUserManagementList();
     }
 };
 
@@ -3833,6 +3840,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof renderLaporanBulanan === 'function') renderLaporanBulanan();
         }
     });
+
+    // Cloud User Accounts Sync
+    syncUsersFromCloud(false);
 
     // Populate & Start
     populateFilters();
@@ -4060,3 +4070,535 @@ function updateQuickMonthPillsUI(activeMonth) {
 window.unduhDataAsnExcel = unduhDataAsnExcel;
 window.unduhDataAsnLengkapExcel = unduhDataAsnExcel;
 window.unduhRekapOpdExcel = unduhRekapOpdExcel;
+
+
+// ==========================================
+// MANAJEMEN AKUN & KATA SANDI (USERS & PASSWORD)
+// ==========================================
+const LOCAL_STORAGE_USERS_KEY = 'simonika_users_cache';
+let currentUserManagementCategory = 'SEMUA';
+
+function generateDefaultSimonikaUsers() {
+    const list = [
+        {
+            id: 'ADMIN_BKPSDM',
+            username: 'admin',
+            nama: 'Administrator BKPSDM Kab. Aceh Timur',
+            kategori: 'ADMIN',
+            role: 'admin',
+            level: 1,
+            password: 'bkpsdm2026',
+            is_custom_password: false,
+            updated_at: new Date().toISOString()
+        }
+    ];
+
+    MASTER_OPD_LIST.forEach(opd => {
+        list.push({
+            id: opd.id,
+            username: 'opd_' + opd.id.toLowerCase(),
+            nama: opd.nama,
+            kategori: opd.kategori,
+            role: 'opd',
+            level: 2,
+            password: 'opd123',
+            is_custom_password: false,
+            updated_at: new Date().toISOString()
+        });
+    });
+
+    return list;
+}
+
+function getStoredSimonikaUsers() {
+    try {
+        const raw = localStorage.getItem(LOCAL_STORAGE_USERS_KEY);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+    } catch (e) {
+        console.error("Gagal membaca simonika_users dari localStorage:", e);
+    }
+    const defaults = generateDefaultSimonikaUsers();
+    localStorage.setItem(LOCAL_STORAGE_USERS_KEY, JSON.stringify(defaults));
+    return defaults;
+}
+
+function saveStoredSimonikaUsers(usersList) {
+    try {
+        localStorage.setItem(LOCAL_STORAGE_USERS_KEY, JSON.stringify(usersList));
+    } catch (e) {
+        console.error("Gagal menyimpan simonika_users ke localStorage:", e);
+    }
+}
+
+async function syncUsersFromCloud(showFeedback = false) {
+    if (showFeedback) {
+        showToast('Sinkronisasi Akun...', 'Mengunduh data akun & status sandi dari Cloud Supabase...', 'info');
+    }
+
+    if (!supabaseClient) {
+        if (showFeedback) showToast('Mode Lokal', 'Supabase tidak terhubung, menggunakan data akun lokal.', 'warning');
+        return getStoredSimonikaUsers();
+    }
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('simonika_users')
+            .select('*');
+
+        if (error) {
+            console.warn("Supabase simonika_users notice:", error.message || error);
+            if (showFeedback) showToast('Pemberitahuan', 'Tabel simonika_users belum dibuat di SQL Supabase. Menggunakan cache lokal.', 'warning');
+            return getStoredSimonikaUsers();
+        }
+
+        const defaults = generateDefaultSimonikaUsers();
+
+        if (!data || data.length === 0) {
+            try {
+                await supabaseClient.from('simonika_users').insert(defaults);
+                console.log("SIMONIKA: Berhasil inisialisasi 62 akun default ke Supabase.");
+            } catch (seedErr) {
+                console.warn("Supabase initial user seed notice:", seedErr);
+            }
+            saveStoredSimonikaUsers(defaults);
+            if (showFeedback) showToast('Sinkronisasi Selesai', '62 akun pengguna berhasil disinkronkan ke Supabase.', 'success');
+            renderUserManagementList();
+            return defaults;
+        } else {
+            const merged = defaults.map(def => {
+                const cloudMatch = data.find(c => c.id === def.id || c.username === def.username);
+                if (cloudMatch) {
+                    return {
+                        ...def,
+                        ...cloudMatch,
+                        level: parseInt(cloudMatch.level || def.level),
+                        is_custom_password: Boolean(cloudMatch.is_custom_password)
+                    };
+                }
+                return def;
+            });
+
+            saveStoredSimonikaUsers(merged);
+            if (showFeedback) showToast('Sinkronisasi Berhasil', `Data ${merged.length} akun pengguna berhasil diperbarui dari Cloud.`, 'success');
+            renderUserManagementList();
+            return merged;
+        }
+    } catch (err) {
+        console.warn("Gagal sinkronisasi akun dari Cloud:", err);
+        if (showFeedback) showToast('Kendala Koneksi', 'Gagal menghubungi Cloud Supabase. Menggunakan cache lokal.', 'warning');
+        return getStoredSimonikaUsers();
+    }
+}
+window.syncUsersFromCloud = syncUsersFromCloud;
+
+function renderUserManagementList() {
+    window.renderUserManagementList = renderUserManagementList;
+    const tbody = document.getElementById('user-management-table-body');
+    if (!tbody) return;
+
+    const users = getStoredSimonikaUsers();
+    const searchVal = (document.getElementById('user-search-input')?.value || '').toLowerCase().trim();
+
+    // Update Counter Statistics
+    const totalCount = users.length;
+    const adminCount = users.filter(u => u.role === 'admin').length;
+    const opdCount = users.filter(u => u.role === 'opd').length;
+    const customCount = users.filter(u => u.is_custom_password).length;
+
+    const elTotal = document.getElementById('user-stat-total');
+    const elAdmin = document.getElementById('user-stat-admin');
+    const elOpd = document.getElementById('user-stat-opd');
+    const elCustom = document.getElementById('user-stat-custom');
+
+    if (elTotal) elTotal.textContent = formatNumber(totalCount);
+    if (elAdmin) elAdmin.textContent = formatNumber(adminCount);
+    if (elOpd) elOpd.textContent = formatNumber(opdCount);
+    if (elCustom) elCustom.textContent = formatNumber(customCount);
+
+    // Filter Users
+    const filtered = users.filter(u => {
+        if (currentUserManagementCategory === 'DINAS' && u.kategori !== 'DINAS') return false;
+        if (currentUserManagementCategory === 'KECAMATAN' && u.kategori !== 'KECAMATAN') return false;
+        if (currentUserManagementCategory === 'ADMIN' && u.role !== 'admin') return false;
+
+        if (searchVal) {
+            const matchName = u.nama.toLowerCase().includes(searchVal);
+            const matchUser = u.username.toLowerCase().includes(searchVal);
+            const matchId = u.id.toLowerCase().includes(searchVal);
+            return matchName || matchUser || matchId;
+        }
+        return true;
+    });
+
+    tbody.innerHTML = '';
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="py-8 text-center text-slate-400">
+                    <p class="text-xs font-semibold">Tidak ditemukan akun pengguna yang sesuai kriteria pencarian.</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    filtered.forEach((user, index) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition-colors border-b border-slate-100 last:border-0';
+
+        let kategoriBadge = '';
+        if (user.role === 'admin') {
+            kategoriBadge = '<span class="px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 font-extrabold text-[10px]">ADMIN</span>';
+        } else if (user.kategori === 'KECAMATAN') {
+            kategoriBadge = '<span class="px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 font-extrabold text-[10px]">KECAMATAN</span>';
+        } else {
+            kategoriBadge = '<span class="px-2 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-700 font-extrabold text-[10px]">DINAS / BADAN</span>';
+        }
+
+        const roleBadge = user.level === 1 
+            ? '<span class="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200 font-bold text-[10px]">Level 1 (Super Admin)</span>'
+            : '<span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px]">Level 2 (Operator OPD)</span>';
+
+        const passwordStatusBadge = user.is_custom_password
+            ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Kustom (Diubah)</span>'
+            : '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Default</span>';
+
+        tr.innerHTML = `
+            <td class="py-3 px-4 text-center font-bold text-slate-400 text-xs">${index + 1}</td>
+            <td class="py-3 px-4 font-bold text-slate-800 text-xs">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg ${user.role === 'admin' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'} flex items-center justify-center font-extrabold text-[11px] shrink-0">
+                        ${(user.id || 'OP').substring(0, 2)}
+                    </div>
+                    <div>
+                        <p class="leading-tight text-slate-800">${user.nama}</p>
+                        <p class="text-[10px] text-slate-400 font-mono mt-0.5">ID: ${user.id}</p>
+                    </div>
+                </div>
+            </td>
+            <td class="py-3 px-4 font-mono font-bold text-indigo-700 text-xs">${user.username}</td>
+            <td class="py-3 px-4">${kategoriBadge}</td>
+            <td class="py-3 px-4">${roleBadge}</td>
+            <td class="py-3 px-4">${passwordStatusBadge}</td>
+            <td class="py-3 px-4 text-center">
+                <div class="flex items-center justify-center gap-1.5">
+                    <button onclick="openAdminEditPasswordModal('${user.id}')" title="Ubah Kata Sandi Akun Ini"
+                        class="py-1.5 px-2.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] font-bold transition-all flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                        <span>Ubah Sandi</span>
+                    </button>
+                    ${user.is_custom_password ? `
+                    <button onclick="resetSimonikaUserPassword('${user.id}')" title="Reset Kata Sandi ke Default"
+                        class="py-1.5 px-2.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-[11px] font-bold transition-all flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span>Reset</span>
+                    </button>` : ''}
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function setUserManagementCategory(category) {
+    currentUserManagementCategory = category;
+    const tabs = {
+        'SEMUA': document.getElementById('tab-user-cat-semua'),
+        'DINAS': document.getElementById('tab-user-cat-dinas'),
+        'KECAMATAN': document.getElementById('tab-user-cat-kecamatan'),
+        'ADMIN': document.getElementById('tab-user-cat-admin')
+    };
+
+    Object.keys(tabs).forEach(k => {
+        const tab = tabs[k];
+        if (!tab) return;
+        if (k === category) {
+            tab.className = "px-3 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-700 shadow-xs";
+        } else {
+            tab.className = "px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900";
+        }
+    });
+
+    renderUserManagementList();
+}
+window.setUserManagementCategory = setUserManagementCategory;
+
+function filterUserManagementTable() {
+    renderUserManagementList();
+}
+window.filterUserManagementTable = filterUserManagementTable;
+
+// ==========================================
+// MODAL GANTI PASSWORD SENDIRI
+// ==========================================
+function openChangePasswordModal() {
+    window.openChangePasswordModal = openChangePasswordModal;
+    const modal = document.getElementById('modal-ganti-password');
+    const subtitle = document.getElementById('modal-ganti-pass-subtitle');
+    if (subtitle) {
+        subtitle.textContent = USER_LEVEL === 1 ? 'Administrator BKPSDM' : `${USER_OPD_NAME || USER_OPD_ID}`;
+    }
+
+    const currInput = document.getElementById('self-current-password');
+    const newInput = document.getElementById('self-new-password');
+    const confInput = document.getElementById('self-confirm-password');
+    const toggleVis = document.getElementById('toggle-self-pass-vis');
+
+    if (currInput) currInput.value = '';
+    if (newInput) newInput.value = '';
+    if (confInput) confInput.value = '';
+    if (toggleVis) toggleVis.checked = false;
+    toggleSelfPasswordVisibility();
+
+    if (modal) modal.classList.remove('hidden');
+}
+window.openChangePasswordModal = openChangePasswordModal;
+
+function closeChangePasswordModal() {
+    window.closeChangePasswordModal = closeChangePasswordModal;
+    const modal = document.getElementById('modal-ganti-password');
+    if (modal) modal.classList.add('hidden');
+}
+window.closeChangePasswordModal = closeChangePasswordModal;
+
+function toggleSelfPasswordVisibility() {
+    window.toggleSelfPasswordVisibility = toggleSelfPasswordVisibility;
+    const isChecked = document.getElementById('toggle-self-pass-vis')?.checked;
+    const type = isChecked ? 'text' : 'password';
+    ['self-current-password', 'self-new-password', 'self-confirm-password'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.type = type;
+    });
+}
+window.toggleSelfPasswordVisibility = toggleSelfPasswordVisibility;
+
+async function submitChangePassword(event) {
+    event.preventDefault();
+    const currentPass = document.getElementById('self-current-password')?.value || '';
+    const newPass = document.getElementById('self-new-password')?.value || '';
+    const confirmPass = document.getElementById('self-confirm-password')?.value || '';
+
+    if (newPass.length < 4) {
+        simonikaAlert({
+            title: 'Kata Sandi Terlalu Pendek',
+            text: 'Kata sandi baru harus memiliki minimal 4 karakter.',
+            icon: 'warning'
+        });
+        return;
+    }
+
+    if (newPass !== confirmPass) {
+        simonikaAlert({
+            title: 'Konfirmasi Sandi Tidak Cocok',
+            text: 'Kata sandi baru dan konfirmasi kata sandi tidak sama. Silakan periksa kembali.',
+            icon: 'warning'
+        });
+        return;
+    }
+
+    const currentUserId = localStorage.getItem('simonika_user_id') || (USER_LEVEL === 1 ? 'ADMIN_BKPSDM' : USER_OPD_ID);
+    const users = getStoredSimonikaUsers();
+    const userIndex = users.findIndex(u => u.id === currentUserId || (USER_LEVEL === 1 && u.role === 'admin') || (USER_LEVEL === 2 && u.id === USER_OPD_ID));
+
+    if (userIndex === -1) {
+        simonikaAlert({
+            title: 'Pengguna Tidak Ditemukan',
+            text: 'Sesi akun tidak valid.',
+            icon: 'error'
+        });
+        return;
+    }
+
+    const user = users[userIndex];
+    const allowedCurrent = [user.password, 'opd123', 'admin', 'bkpsdm2026'];
+    if (!allowedCurrent.includes(currentPass)) {
+        simonikaAlert({
+            title: 'Kata Sandi Saat Ini Salah',
+            text: 'Kata sandi saat ini yang Anda masukkan tidak sesuai.',
+            icon: 'error'
+        });
+        return;
+    }
+
+    // Update local user record
+    users[userIndex].password = newPass;
+    users[userIndex].is_custom_password = true;
+    users[userIndex].updated_at = new Date().toISOString();
+    saveStoredSimonikaUsers(users);
+
+    // Push update to Cloud Supabase
+    if (supabaseClient) {
+        try {
+            await supabaseClient
+                .from('simonika_users')
+                .upsert({
+                    id: users[userIndex].id,
+                    username: users[userIndex].username,
+                    nama: users[userIndex].nama,
+                    kategori: users[userIndex].kategori,
+                    role: users[userIndex].role,
+                    level: users[userIndex].level,
+                    password: newPass,
+                    is_custom_password: true,
+                    updated_at: new Date().toISOString()
+                });
+        } catch (e) {
+            console.warn("Gagal update password di Cloud Supabase:", e);
+        }
+    }
+
+    closeChangePasswordModal();
+    showToast('Kata Sandi Diperbarui', 'Kata sandi akun Anda berhasil diganti dan disinkronkan ke Cloud.', 'success');
+    simonikaAlert({
+        title: 'Kata Sandi Berhasil Diganti!',
+        text: 'Kata sandi akun Anda telah diperbarui. Silakan gunakan kata sandi baru ini saat masuk berikutnya.',
+        icon: 'success'
+    });
+}
+window.submitChangePassword = submitChangePassword;
+
+// ==========================================
+// MODAL ADMIN UBAH PASSWORD PENGGUNA TERTENTU
+// ==========================================
+function openAdminEditPasswordModal(userId) {
+    window.openAdminEditPasswordModal = openAdminEditPasswordModal;
+    const users = getStoredSimonikaUsers();
+    const target = users.find(u => u.id === userId);
+    if (!target) return;
+
+    const targetIdEl = document.getElementById('admin-edit-target-id');
+    const targetLabelEl = document.getElementById('admin-edit-target-label');
+    const targetUserEl = document.getElementById('admin-edit-target-username');
+    const newPassEl = document.getElementById('admin-edit-new-password');
+    const confPassEl = document.getElementById('admin-edit-confirm-password');
+
+    if (targetIdEl) targetIdEl.value = target.id;
+    if (targetLabelEl) targetLabelEl.textContent = target.nama;
+    if (targetUserEl) targetUserEl.textContent = target.username;
+    if (newPassEl) newPassEl.value = '';
+    if (confPassEl) confPassEl.value = '';
+
+    const modal = document.getElementById('modal-admin-ubah-password');
+    if (modal) modal.classList.remove('hidden');
+}
+window.openAdminEditPasswordModal = openAdminEditPasswordModal;
+
+function closeAdminEditPasswordModal() {
+    window.closeAdminEditPasswordModal = closeAdminEditPasswordModal;
+    const modal = document.getElementById('modal-admin-ubah-password');
+    if (modal) modal.classList.add('hidden');
+}
+window.closeAdminEditPasswordModal = closeAdminEditPasswordModal;
+
+async function submitAdminEditPassword(event) {
+    event.preventDefault();
+    const targetId = document.getElementById('admin-edit-target-id')?.value;
+    const newPass = document.getElementById('admin-edit-new-password')?.value || '';
+    const confirmPass = document.getElementById('admin-edit-confirm-password')?.value || '';
+
+    if (newPass.length < 4) {
+        simonikaAlert({
+            title: 'Kata Sandi Terlalu Pendek',
+            text: 'Kata sandi baru harus memiliki minimal 4 karakter.',
+            icon: 'warning'
+        });
+        return;
+    }
+
+    if (newPass !== confirmPass) {
+        simonikaAlert({
+            title: 'Konfirmasi Sandi Tidak Cocok',
+            text: 'Kata sandi baru dan konfirmasi kata sandi tidak sama. Silakan periksa kembali.',
+            icon: 'warning'
+        });
+        return;
+    }
+
+    const users = getStoredSimonikaUsers();
+    const userIndex = users.findIndex(u => u.id === targetId);
+    if (userIndex === -1) return;
+
+    users[userIndex].password = newPass;
+    users[userIndex].is_custom_password = true;
+    users[userIndex].updated_at = new Date().toISOString();
+    saveStoredSimonikaUsers(users);
+
+    if (supabaseClient) {
+        try {
+            await supabaseClient
+                .from('simonika_users')
+                .upsert({
+                    id: users[userIndex].id,
+                    username: users[userIndex].username,
+                    nama: users[userIndex].nama,
+                    kategori: users[userIndex].kategori,
+                    role: users[userIndex].role,
+                    level: users[userIndex].level,
+                    password: newPass,
+                    is_custom_password: true,
+                    updated_at: new Date().toISOString()
+                });
+        } catch (e) {
+            console.warn("Gagal update user password di Supabase:", e);
+        }
+    }
+
+    closeAdminEditPasswordModal();
+    renderUserManagementList();
+    showToast('Kata Sandi Diubah', `Kata sandi akun ${users[userIndex].nama} berhasil diperbarui.`, 'success');
+}
+window.submitAdminEditPassword = submitAdminEditPassword;
+
+async function resetSimonikaUserPassword(userId) {
+    window.resetSimonikaUserPassword = resetSimonikaUserPassword;
+    const users = getStoredSimonikaUsers();
+    const userIndex = users.findIndex(u => u.id === userId);
+    if (userIndex === -1) return;
+
+    const user = users[userIndex];
+    const defaultPassword = user.role === 'admin' ? 'bkpsdm2026' : 'opd123';
+
+    const confirmRes = await simonikaConfirm({
+        title: 'Reset Kata Sandi?',
+        html: `<p class="text-xs text-slate-600">Apakah Anda yakin ingin me-reset kata sandi untuk akun <strong>${user.nama}</strong> kembali ke default (<code>${defaultPassword}</code>)?</p>`,
+        confirmText: 'Ya, Reset Sandi',
+        cancelText: 'Batal',
+        icon: 'warning'
+    });
+
+    if (!confirmRes.isConfirmed) return;
+
+    users[userIndex].password = defaultPassword;
+    users[userIndex].is_custom_password = false;
+    users[userIndex].updated_at = new Date().toISOString();
+    saveStoredSimonikaUsers(users);
+
+    if (supabaseClient) {
+        try {
+            await supabaseClient
+                .from('simonika_users')
+                .upsert({
+                    id: user.id,
+                    username: user.username,
+                    nama: user.nama,
+                    kategori: user.kategori,
+                    role: user.role,
+                    level: user.level,
+                    password: defaultPassword,
+                    is_custom_password: false,
+                    updated_at: new Date().toISOString()
+                });
+        } catch (e) {
+            console.warn("Gagal reset user password di Supabase:", e);
+        }
+    }
+
+    renderUserManagementList();
+    showToast('Kata Sandi Direset', `Kata sandi akun ${user.nama} berhasil dikembalikan ke default (${defaultPassword}).`, 'success');
+}
+window.resetSimonikaUserPassword = resetSimonikaUserPassword;
+

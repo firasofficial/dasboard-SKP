@@ -129,3 +129,86 @@ INSERT INTO master_opd (id, nama, kategori) VALUES
 ('KEC_SIMPANG_ULIM', 'Kecamatan Simpang Ulim', 'KECAMATAN'),
 ('KEC_SUNGAI_RAYA', 'Kecamatan Sungai Raya', 'KECAMATAN')
 ON CONFLICT (id) DO UPDATE SET nama = EXCLUDED.nama, kategori = EXCLUDED.kategori;
+
+-- 6. Membuat Tabel Manajemen Pengguna & Kata Sandi (User Accounts & Password Management)
+CREATE TABLE IF NOT EXISTS simonika_users (
+    id TEXT PRIMARY KEY,
+    username TEXT NOT NULL UNIQUE,
+    nama TEXT NOT NULL,
+    kategori TEXT NOT NULL DEFAULT 'DINAS',
+    role TEXT NOT NULL DEFAULT 'opd',
+    level INT4 NOT NULL DEFAULT 2,
+    password TEXT NOT NULL,
+    is_custom_password BOOLEAN DEFAULT FALSE,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+-- Menonaktifkan RLS untuk tabel simonika_users
+ALTER TABLE simonika_users DISABLE ROW LEVEL SECURITY;
+
+-- 7. Inisialisasi Akun Default Administrator BKPSDM & 61 OPD se-Kabupaten Aceh Timur
+INSERT INTO simonika_users (id, username, nama, kategori, role, level, password, is_custom_password) VALUES
+('ADMIN_BKPSDM', 'admin', 'Administrator BKPSDM Kab. Aceh Timur', 'ADMIN', 'admin', 1, 'bkpsdm2026', FALSE),
+('BKPSDM', 'opd_bkpsdm', 'Badan Kepegawaian dan Pengembangan Sumber Daya Manusia', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('SETDA', 'opd_setda', 'Sekretariat Daerah', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('BPKD', 'opd_bpkd', 'Badan Pengelolaan Keuangan Daerah', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('BAPPEDA', 'opd_bappeda', 'Badan Perencanaan Pembangunan Daerah', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('BPBD', 'opd_bpbd', 'Badan Penanggulangan Bencana Daerah', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('KESBANGPOL', 'opd_kesbangpol', 'Badan Kesatuan Bangsa dan Politik', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('INSPEKTORAT', 'opd_inspektorat', 'Inspektorat Daerah', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('SATPOL_PP_WH', 'opd_satpol_pp_wh', 'Satuan Polisi Pamong Praja dan Wilayatul Hisbah', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('RSUD_ZM', 'opd_rsud_zm', 'Rumah Sakit Umum Daerah dr. Zubir Mahmud', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('RSUD_SAAS', 'opd_rsud_saas', 'Rumah Sakit Umum Daerah Sultan Abdul Aziz Syah Peureulak', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DISDIK', 'opd_disdik', 'Dinas Pendidikan dan Kebudayaan', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DINKES', 'opd_dinkes', 'Dinas Kesehatan', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('PUPR', 'opd_pupr', 'Dinas Pekerjaan Umum dan Perumahan Rakyat', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DINSOS', 'opd_dinsos', 'Dinas Sosial', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DISDUKCAPIL', 'opd_disdukcapil', 'Dinas Kependudukan dan Pencatatan Sipil', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DPMG', 'opd_dpmg', 'Dinas Pemberdayaan Masyarakat dan Gampong', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DSI', 'opd_dsi', 'Dinas Syariat Islam', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DINAS_DAYAH', 'opd_dinas_dayah', 'Dinas Pendidikan Dayah', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DPMP2T', 'opd_dpmp2t', 'Dinas Penanaman Modal dan Pelayanan Perizinan Terpadu', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DISKOMINFO', 'opd_diskominfo', 'Dinas Komunikasi dan Informatika', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DISHUB', 'opd_dishub', 'Dinas Perhubungan', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DLH', 'opd_dlh', 'Dinas Lingkungan Hidup', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DISPARPORA', 'opd_disparpora', 'Dinas Pariwisata, Pemuda, dan Olahraga', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DISKOPUKM', 'opd_diskopukm', 'Dinas Perdagangan, Koperasi, dan UKM', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DISBUNNAK', 'opd_disbunnak', 'Dinas Perkebunan dan Peternakan', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DKP', 'opd_dkp', 'Dinas Perikanan', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DP3AKB', 'opd_dp3akb', 'Dinas Pemberdayaan Perempuan, Perlindungan Anak, dan KB', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DISPUSIP', 'opd_dispusip', 'Dinas Perpustakaan dan Kearsipan', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('PERTANAHAN', 'opd_pertanahan', 'Dinas Pertanahan', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DISTANTPH', 'opd_distantph', 'Dinas Tanaman Pangan dan Hortikultura', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DKPP', 'opd_dkpp', 'Dinas Ketahanan Pangan dan Penyuluhan', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('DISPERINNAKERTRANS', 'opd_disperinnakertrans', 'Dinas Perindustrian, Tenaga Kerja dan Transmigrasi', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('SETWAN', 'opd_setwan', 'Sekretariat Dewan Perwakilan Rakyat Kabupaten', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('SET_BAITUL_MAL', 'opd_set_baitul_mal', 'Sekretariat Baitul Mal', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('SET_MAA', 'opd_set_maa', 'Sekretariat Majelis Adat Aceh', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('SET_MPA', 'opd_set_mpa', 'Sekretariat Majelis Pendidikan Aceh', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('SET_MPU', 'opd_set_mpu', 'Sekretariat Majelis Permusyawaratan Ulama', 'DINAS', 'opd', 2, 'opd123', FALSE),
+('KEC_BANDA_ALAM', 'opd_kec_banda_alam', 'Kecamatan Banda Alam', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_BIREM_BAYEUN', 'opd_kec_birem_bayeun', 'Kecamatan Birem Bayeun', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_DARUL_AMAN', 'opd_kec_darul_aman', 'Kecamatan Darul Aman', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_DARUL_FALAH', 'opd_kec_darul_falah', 'Kecamatan Darul Falah', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_DARUL_IHSAN', 'opd_kec_darul_ihsan', 'Kecamatan Darul Ihsan', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_IDI', 'opd_kec_idi', 'Kecamatan Idi Rayeuk', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_IDI_TIMUR', 'opd_kec_idi_timur', 'Kecamatan Idi Timur', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_IDI_TUNONG', 'opd_kec_idi_tunong', 'Kecamatan Idi Tunong', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_INDRA_MAKMU', 'opd_kec_indra_makmu', 'Kecamatan Indra Makmu', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_JULOK', 'opd_kec_julok', 'Kecamatan Julok', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_MADAT', 'opd_kec_madat', 'Kecamatan Madat', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_NURUSSALAM', 'opd_kec_nurussalam', 'Kecamatan Nurussalam', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_PANTE_BIDARI', 'opd_kec_pante_bidari', 'Kecamatan Pante Bidari', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_PEUDAWA', 'opd_kec_peudawa', 'Kecamatan Peudawa', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_PEUNARON', 'opd_kec_peunaron', 'Kecamatan Peunaron', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_PEUREULAK', 'opd_kec_peureulak', 'Kecamatan Peureulak', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_PEUREULAK_BARAT', 'opd_kec_peureulak_barat', 'Kecamatan Peureulak Barat', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_PEUREULAK_TIMUR', 'opd_kec_peureulak_timur', 'Kecamatan Peureulak Timur', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_RANTO_PEUREULAK', 'opd_kec_ranto_peureulak', 'Kecamatan Ranto Peureulak', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_RANTAU_SELAMAT', 'opd_kec_rantau_selamat', 'Kecamatan Rantau Selamat', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_SERBAJADI', 'opd_kec_serbajadi', 'Kecamatan Serbajadi', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_SIMPANG_JERNIH', 'opd_kec_simpang_jernih', 'Kecamatan Simpang Jernih', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_SIMPANG_ULIM', 'opd_kec_simpang_ulim', 'Kecamatan Simpang Ulim', 'KECAMATAN', 'opd', 2, 'opd123', FALSE),
+('KEC_SUNGAI_RAYA', 'opd_kec_sungai_raya', 'Kecamatan Sungai Raya', 'KECAMATAN', 'opd', 2, 'opd123', FALSE)
+ON CONFLICT (id) DO NOTHING;
+

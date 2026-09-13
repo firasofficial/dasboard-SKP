@@ -13,6 +13,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SweetAlert2 CDN for Modern Alerts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Google Fonts (Inter & Outfit) -->
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
@@ -402,8 +404,20 @@
             }
         }
 
+        // Supabase Client for Cloud Auth
+        const SUPABASE_URL = 'https://hjinzrpqbcrjrllylrth.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqaW56cnBxYmNyanJsbHlscnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MDk2NzUsImV4cCI6MjA5OTQ4NTY3NX0.zBTeSstK6ft82yyGRbr-A90mmRT14TSCj4dOvM0vzDw';
+        let supabaseClient = null;
+        if (window.supabase && SUPABASE_URL && SUPABASE_KEY) {
+            try {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            } catch (e) {
+                console.warn("Gagal inisialisasi Supabase login:", e);
+            }
+        }
+
         // Handle Login Submission
-        function handleLogin(event) {
+        async function handleLogin(event) {
             event.preventDefault();
 
             const usernameField = document.getElementById('username');
@@ -426,69 +440,120 @@
             btnText.classList.add('hidden');
             btnSpinner.classList.remove('hidden');
 
-            setTimeout(() => {
+            try {
                 let isValid = false;
                 let userLevel = 1;
                 let userRole = 'admin';
                 let userOpdId = 'ALL';
                 let userOpdName = 'Kabupaten Aceh Timur';
                 let userDisplayName = 'Admin BKPSDM';
+                let userId = 'ADMIN_BKPSDM';
+
+                // Cek data akun kustom dari Supabase / Local Cache jika ada
+                let cloudUser = null;
+                if (supabaseClient) {
+                    try {
+                        const { data } = await supabaseClient
+                            .from('simonika_users')
+                            .select('*');
+                        if (data && data.length > 0) {
+                            localStorage.setItem('simonika_users_cache', JSON.stringify(data));
+                            // Cari kecocokan username
+                            cloudUser = data.find(u => 
+                                u.username.toLowerCase() === username || 
+                                u.id.toLowerCase() === username || 
+                                ('opd_' + u.id.toLowerCase()) === username
+                            );
+                        }
+                    } catch (err) {
+                        console.warn("Supabase auth check error:", err);
+                    }
+                }
+
+                if (!cloudUser) {
+                    try {
+                        const cached = localStorage.getItem('simonika_users_cache');
+                        if (cached) {
+                            const list = JSON.parse(cached);
+                            cloudUser = list.find(u => 
+                                u.username.toLowerCase() === username || 
+                                u.id.toLowerCase() === username || 
+                                ('opd_' + u.id.toLowerCase()) === username
+                            );
+                        }
+                    } catch (e) {}
+                }
 
                 // ==========================================
-                // 1. CEK JIKA DI TAB ADMIN BKPSDM
+                // 1. CEK DENGAN CLOUD USER JIKA ADA MATCH PASSWORD
                 // ==========================================
-                if (currentLoginRole === 'admin') {
-                    if (
-                        (username === 'admin' && (password === 'admin' || password === 'admin123' || password === 'bkpsdm2026')) ||
-                        (username === '200210242025041002' && (password === 'bkpsdm2026' || password === 'admin' || password === 'admin123')) ||
-                        (username === 'bkpsdm_admin' && (password === 'admin' || password === 'admin123'))
-                    ) {
+                if (cloudUser) {
+                    if (cloudUser.password === password) {
                         isValid = true;
-                        userLevel = 1;
-                        userRole = 'admin';
-                        userOpdId = 'ALL';
-                        userOpdName = 'Kabupaten Aceh Timur';
-                        userDisplayName = username === '200210242025041002' ? 'NIP. 200210242025041002' : 'Admin BKPSDM';
+                        userLevel = parseInt(cloudUser.level || 2);
+                        userRole = cloudUser.role || 'opd';
+                        userId = cloudUser.id;
+                        userOpdId = cloudUser.role === 'admin' ? 'ALL' : cloudUser.id;
+                        userOpdName = cloudUser.nama;
+                        userDisplayName = cloudUser.role === 'admin' ? 'Admin BKPSDM' : ('Operator ' + cloudUser.id);
                     }
-                } 
+                }
+
                 // ==========================================
-                // 2. CEK JIKA DI TAB OPERATOR OPD
+                // 2. CEK DEFAULT FALLBACK (JIKA BELUM MATCH DENGAN CLOUD)
                 // ==========================================
-                else {
-                    let cleanOpdCode = username.replace(/^opd_?/, '').replace(/_/g, ' ').trim();
-                    let targetOpd = null;
-
-                    if (!cleanOpdCode || username === 'opd' || username === 'operator') {
-                        targetOpd = OPD_LIST_KOMPLIT.find(o => o.id === 'DISDIK');
-                    } else {
-                        targetOpd = OPD_LIST_KOMPLIT.find(o => o.id.toLowerCase() === cleanOpdCode || o.id.toLowerCase() === username.replace(/^opd_?/, ''));
-
-                        if (!targetOpd) {
-                            targetOpd = OPD_LIST_KOMPLIT.find(o => o.aliases && o.aliases.some(a => a === cleanOpdCode || cleanOpdCode.includes(a)));
-                        }
-
-                        if (!targetOpd) {
-                            targetOpd = OPD_LIST_KOMPLIT.find(o => o.nama.toLowerCase().includes(cleanOpdCode));
-                        }
-                    }
-
-                    if (targetOpd) {
-                        const allowedPasswords = [
-                            'opd123',
-                            '123456',
-                            'admin',
-                            'bkpsdm2026',
-                            targetOpd.id.toLowerCase() + '123',
-                            targetOpd.id.toLowerCase()
-                        ];
-
-                        if (allowedPasswords.includes(password)) {
+                if (!isValid) {
+                    if (currentLoginRole === 'admin') {
+                        if (
+                            (username === 'admin' && (password === 'admin' || password === 'admin123' || password === 'bkpsdm2026')) ||
+                            (username === '200210242025041002' && (password === 'bkpsdm2026' || password === 'admin' || password === 'admin123')) ||
+                            (username === 'bkpsdm_admin' && (password === 'admin' || password === 'admin123'))
+                        ) {
                             isValid = true;
-                            userLevel = 2;
-                            userRole = 'opd';
-                            userOpdId = targetOpd.id;
-                            userOpdName = targetOpd.nama;
-                            userDisplayName = 'Operator ' + targetOpd.id;
+                            userLevel = 1;
+                            userRole = 'admin';
+                            userId = 'ADMIN_BKPSDM';
+                            userOpdId = 'ALL';
+                            userOpdName = 'Kabupaten Aceh Timur';
+                            userDisplayName = username === '200210242025041002' ? 'NIP. 200210242025041002' : 'Admin BKPSDM';
+                        }
+                    } else {
+                        let cleanOpdCode = username.replace(/^opd_?/, '').replace(/_/g, ' ').trim();
+                        let targetOpd = null;
+
+                        if (!cleanOpdCode || username === 'opd' || username === 'operator') {
+                            targetOpd = OPD_LIST_KOMPLIT.find(o => o.id === 'DISDIK');
+                        } else {
+                            targetOpd = OPD_LIST_KOMPLIT.find(o => o.id.toLowerCase() === cleanOpdCode || o.id.toLowerCase() === username.replace(/^opd_?/, ''));
+
+                            if (!targetOpd) {
+                                targetOpd = OPD_LIST_KOMPLIT.find(o => o.aliases && o.aliases.some(a => a === cleanOpdCode || cleanOpdCode.includes(a)));
+                            }
+
+                            if (!targetOpd) {
+                                targetOpd = OPD_LIST_KOMPLIT.find(o => o.nama.toLowerCase().includes(cleanOpdCode));
+                            }
+                        }
+
+                        if (targetOpd) {
+                            const allowedPasswords = [
+                                'opd123',
+                                '123456',
+                                'admin',
+                                'bkpsdm2026',
+                                targetOpd.id.toLowerCase() + '123',
+                                targetOpd.id.toLowerCase()
+                            ];
+
+                            if (allowedPasswords.includes(password)) {
+                                isValid = true;
+                                userLevel = 2;
+                                userRole = 'opd';
+                                userId = targetOpd.id;
+                                userOpdId = targetOpd.id;
+                                userOpdName = targetOpd.nama;
+                                userDisplayName = 'Operator ' + targetOpd.id;
+                            }
                         }
                     }
                 }
@@ -496,6 +561,7 @@
                 if (isValid) {
                     // Simpan sesi login di localStorage
                     localStorage.setItem('admin_session_active', 'true');
+                    localStorage.setItem('simonika_user_id', userId);
                     localStorage.setItem('simonika_user_level', userLevel.toString());
                     localStorage.setItem('simonika_user_role', userRole);
                     localStorage.setItem('simonika_user_opd_id', userOpdId);
@@ -522,7 +588,12 @@
                         formContainer.classList.remove('shake-animation');
                     }, 500);
                 }
-            }, 350);
+            } catch (err) {
+                console.error("Login exception:", err);
+                submitBtn.disabled = false;
+                btnText.classList.remove('hidden');
+                btnSpinner.classList.add('hidden');
+            }
         }
 
         function showLoginHelp() {
