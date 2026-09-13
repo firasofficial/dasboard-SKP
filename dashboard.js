@@ -3483,9 +3483,9 @@ window.setCategoryFilter = setCategoryFilter;
         const tab = tabs[k];
         if (!tab) return;
         if (k === category) {
-            tab.className = "px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-slate-800 shadow-sm focus:outline-none";
+            tab.className = "px-2 py-0.5 text-[10px] font-bold rounded-md transition-all bg-white text-slate-800 shadow-xs focus:outline-none";
         } else {
-            tab.className = "px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-500 hover:text-slate-850 focus:outline-none";
+            tab.className = "px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all text-slate-500 hover:text-slate-850 focus:outline-none";
         }
     });
 
