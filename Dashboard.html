@@ -1173,23 +1173,24 @@
                 </div> <!-- End #view-master-data -->
 
 
-                <!-- 4. VIEW LAPORAN BULANAN (Sesuai Sketsa Gambar 1 Bawah) -->
-                <div id="view-laporan-bulanan" class="space-y-6 hidden">
+                <!-- 4. VIEW LAPORAN BULANAN (Rekap Laporan) -->
+                <div id="view-laporan-bulanan" class="space-y-2.5 sm:space-y-3 hidden">
                     <!-- Page Title Area with Sticky Glowing Month Filter (no-print) -->
                     <div
-                        class="sticky top-16 z-20 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white/95 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-md shadow-slate-200/40 transition-all no-print">
-                        <div>
-                            <div class="text-xs font-semibold text-indigo-600 tracking-wider uppercase mb-0.5">SIMONIKA</div>
-                            <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight uppercase">LAPORAN BULANAN SKP PERANGKAT DAERAH</h2>
+                        class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white px-3 py-1.5 sm:py-2 rounded-xl border border-slate-200/80 shadow-xs transition-all no-print">
+                        <div class="min-w-0 flex items-center gap-2 flex-1 overflow-hidden">
+                            <span class="px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-100 text-[10px] font-extrabold text-indigo-700 uppercase tracking-wider shrink-0">Rekap Laporan</span>
+                            <span class="text-slate-300 text-xs hidden sm:inline">•</span>
+                            <h2 class="text-xs sm:text-sm font-bold text-slate-800 tracking-tight uppercase truncate">LAPORAN BULANAN SKP PERANGKAT DAERAH</h2>
                         </div>
 
-                        <!-- Glowing Month Selector Widget & Export Actions (1 Baris Rapi) -->
-                        <div class="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-nowrap self-start lg:self-auto">
+                        <!-- Glowing Month Selector Widget & Export Actions -->
+                        <div class="flex items-center gap-2 shrink-0 flex-wrap self-start sm:self-auto">
                             <div id="month-widget-container-4"
-                                class="flex items-center gap-2 p-2 sm:p-2.5 rounded-xl border-2 border-indigo-400 bg-white shadow-md shadow-indigo-500/10 transition-all duration-200">
+                                class="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-indigo-400 bg-white shadow-xs transition-all duration-200">
                                 
-                                <div class="p-1.5 rounded-lg bg-indigo-600 text-white shadow-xs shrink-0 flex items-center justify-center">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="p-1 rounded bg-indigo-600 text-white shadow-xs shrink-0 flex items-center justify-center">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
@@ -1197,37 +1198,37 @@
 
                                 <div class="flex items-center gap-1">
                                     <select id="laporan-filter-bulan" onchange="onMonthDropdownChange(this.value)"
-                                        class="border-0 bg-transparent text-xs sm:text-sm font-bold text-slate-800 focus:ring-0 cursor-pointer focus:outline-none py-0.5">
+                                        class="border-0 bg-transparent text-xs font-bold text-slate-800 focus:ring-0 cursor-pointer focus:outline-none py-0">
                                     </select>
-                                    <span class="text-slate-300 font-bold">/</span>
+                                    <span class="text-slate-300 font-bold text-xs">/</span>
                                     <select id="laporan-filter-tahun" onchange="onYearDropdownChange(this.value)"
-                                        class="border-0 bg-transparent text-xs sm:text-sm font-bold text-slate-800 focus:ring-0 cursor-pointer focus:outline-none py-0.5">
+                                        class="border-0 bg-transparent text-xs font-bold text-slate-800 focus:ring-0 cursor-pointer focus:outline-none py-0">
                                         <option value="2026">2026</option>
                                         <option value="2025">2025</option>
                                     </select>
                                 </div>
 
                                 <div id="month-status-badge-4"
-                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                     <span id="month-status-text-4">61 OPD</span>
                                 </div>
                             </div>
 
                             <!-- Tombol Unduh PDF Resmi -->
                             <button onclick="unduhLaporanBulananPDF()"
-                                class="flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 shadow-md shadow-indigo-600/20 rounded-xl transition-all focus:outline-none shrink-0 cursor-pointer whitespace-nowrap">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 shadow-xs rounded-lg transition-all focus:outline-none shrink-0 cursor-pointer whitespace-nowrap">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                 </svg>
-                                <span>Unduh PDF Resmi</span>
+                                <span>Unduh PDF</span>
                             </button>
 
                             <!-- Tombol Unduh Excel Resmi -->
                             <button onclick="exportLaporanBulananExcel()"
-                                class="flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 active:scale-95 shadow-sm rounded-xl transition-all focus:outline-none shrink-0 cursor-pointer whitespace-nowrap">
-                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 active:scale-95 shadow-2xs rounded-lg transition-all focus:outline-none shrink-0 cursor-pointer whitespace-nowrap">
+                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
@@ -1236,62 +1237,62 @@
                         </div>
                     </div>
 
-                        <!-- Main Table Card for Web View -->
-                        <div
-                            class="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col no-print">
-                            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-                                <div>
-                                    <h3 class="font-extrabold text-slate-900 tracking-tight text-sm uppercase">DETAIL REKAPITULASI SKP BULANAN</h3>
-                                    <p class="text-xs text-slate-400">Tabel Rekapitulasi Penilaian Kinerja ASN Seluruh Unit Kerja</p>
-                                </div>
-                                <span
-                                    class="text-[10px] font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full uppercase"
-                                    id="laporan-web-subtitle">BULANAN</span>
+                    <!-- Main Table Card for Web View -->
+                    <div
+                        class="bg-white rounded-xl border border-slate-200/70 shadow-xs overflow-hidden flex flex-col no-print">
+                        <div class="p-2.5 px-3.5 border-b border-slate-100 flex items-center justify-between">
+                            <div>
+                                <h3 class="font-extrabold text-slate-900 tracking-tight text-xs uppercase leading-none">DETAIL REKAPITULASI SKP BULANAN</h3>
+                                <p class="text-[10px] text-slate-400 mt-0.5">Tabel Rekapitulasi Penilaian Kinerja ASN Seluruh Unit Kerja</p>
                             </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-xs border-collapse">
-                                    <thead>
-                                        <tr
-                                            class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold text-[9px] tracking-wider uppercase">
-                                            <th class="py-3 px-4 text-center">No</th>
-                                            <th class="py-3 px-4">Nama Unit Kerja / OPD</th>
-                                            <th class="py-3 px-4 text-center">Status</th>
-                                            <th class="py-3 px-4 text-right">Pegawai</th>
-                                            <th class="py-3 px-3 text-right text-emerald-600">Sangat Baik</th>
-                                            <th class="py-3 px-3 text-right text-blue-600">Baik</th>
-                                            <th class="py-3 px-3 text-right text-yellow-600">Butuh Perbaikan</th>
-                                            <th class="py-3 px-3 text-right text-orange-500">Kurang</th>
-                                            <th class="py-3 px-3 text-right text-red-500">Sangat Kurang</th>
-                                            <th class="py-3 px-3 text-right text-slate-500">Tidak membuat SKP</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="laporan-table-body"
-                                        class="divide-y divide-slate-100 font-medium text-slate-700">
-                                    </tbody>
-                                    <tfoot>
-                                        <tr
-                                            class="bg-slate-50 font-bold border-t border-slate-200 text-slate-800 text-[10px]">
-                                            <td colspan="2" class="py-3.5 px-4">TOTAL KESELURUHAN</td>
-                                            <td id="laporan-total-status"
-                                                class="py-3.5 px-4 text-center text-slate-500">0 OPD</td>
-                                            <td id="laporan-total-pegawai" class="py-3.5 px-4 text-right">0</td>
-                                            <td id="laporan-total-sangatbaik"
-                                                class="py-3.5 px-3 text-right text-emerald-600">0</td>
-                                            <td id="laporan-total-baik" class="py-3.5 px-3 text-right text-blue-600">0</td>
-                                            <td id="laporan-total-butuhperbaikan"
-                                                class="py-3.5 px-3 text-right text-yellow-600">0</td>
-                                            <td id="laporan-total-kurang"
-                                                class="py-3.5 px-3 text-right text-orange-500">0</td>
-                                            <td id="laporan-total-sangatkurang"
-                                                class="py-3.5 px-3 text-right text-red-500">0</td>
-                                            <td id="laporan-total-tidakmembuatskp"
-                                                class="py-3.5 px-3 text-right text-slate-600">0</td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
+                            <span
+                                class="text-[9px] font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full uppercase"
+                                id="laporan-web-subtitle">BULANAN</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr
+                                        class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold text-[9px] tracking-wider uppercase">
+                                        <th class="py-1.5 px-3 text-center">No</th>
+                                        <th class="py-1.5 px-3">Nama Unit Kerja / OPD</th>
+                                        <th class="py-1.5 px-3 text-center">Status</th>
+                                        <th class="py-1.5 px-3 text-right">Pegawai</th>
+                                        <th class="py-1.5 px-2.5 text-right text-emerald-600">Sangat Baik</th>
+                                        <th class="py-1.5 px-2.5 text-right text-blue-600">Baik</th>
+                                        <th class="py-1.5 px-2.5 text-right text-yellow-600">Butuh Perbaikan</th>
+                                        <th class="py-1.5 px-2.5 text-right text-orange-500">Kurang</th>
+                                        <th class="py-1.5 px-2.5 text-right text-red-500">Sangat Kurang</th>
+                                        <th class="py-1.5 px-2.5 text-right text-slate-500">Tidak membuat SKP</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="laporan-table-body"
+                                    class="divide-y divide-slate-100 font-medium text-slate-700">
+                                </tbody>
+                                <tfoot>
+                                    <tr
+                                        class="bg-slate-50 font-bold border-t border-slate-200 text-slate-800 text-[10px]">
+                                        <td colspan="2" class="py-2 px-3">TOTAL KESELURUHAN</td>
+                                        <td id="laporan-total-status"
+                                            class="py-2 px-3 text-center text-slate-500">0 OPD</td>
+                                        <td id="laporan-total-pegawai" class="py-2 px-3 text-right">0</td>
+                                        <td id="laporan-total-sangatbaik"
+                                            class="py-2 px-2.5 text-right text-emerald-600">0</td>
+                                        <td id="laporan-total-baik" class="py-2 px-2.5 text-right text-blue-600">0</td>
+                                        <td id="laporan-total-butuhperbaikan"
+                                            class="py-2 px-2.5 text-right text-yellow-600">0</td>
+                                        <td id="laporan-total-kurang"
+                                            class="py-2 px-2.5 text-right text-orange-500">0</td>
+                                        <td id="laporan-total-sangatkurang"
+                                            class="py-2 px-2.5 text-right text-red-500">0</td>
+                                        <td id="laporan-total-tidakmembuatskp"
+                                            class="py-2 px-2.5 text-right text-slate-600">0</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </div>
                     </div>
+                </div>
 
                     <!-- Print View Container (print-only) -->
                     <div class="print-only" id="laporan-print-container">

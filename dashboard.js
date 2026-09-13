@@ -2550,23 +2550,23 @@ function renderLaporanBulanan() {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50 border-b border-slate-100 last:border-0';
         const statusHtml = hasData
-            ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">Terisi</span>`
-            : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-100">Belum Ada</span>`;
+            ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">Terisi</span>`
+            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-rose-50 text-rose-600 border border-rose-100">Belum</span>`;
 
         tr.innerHTML = `
-            <td class="py-3 px-4 text-center text-slate-400 font-semibold">${index + 1}</td>
-            <td class="py-3 px-4">
-                <div class="font-bold text-slate-800">${opd.nama}</div>
-                <div class="text-[9px] text-slate-500 uppercase font-semibold mt-0.5">${opd.kategori}</div>
+            <td class="py-1.5 px-3 text-center text-slate-400 font-semibold text-[11px]">${index + 1}</td>
+            <td class="py-1.5 px-3">
+                <div class="font-bold text-slate-800 text-xs">${opd.nama}</div>
+                <div class="text-[9px] text-slate-400 uppercase font-semibold leading-none mt-0.5">${opd.kategori}</div>
             </td>
-            <td class="py-3 px-4 text-center">${statusHtml}</td>
-            <td class="py-3 px-4 text-right font-bold">${hasData ? formatNumber(totalPegawai) : '-'}</td>
-            <td class="py-3 px-3 text-right text-emerald-600 font-semibold">${hasData ? formatNumber(sangatBaik) : '-'}</td>
-            <td class="py-3 px-3 text-right text-blue-600 font-semibold">${hasData ? formatNumber(baik) : '-'}</td>
-            <td class="py-3 px-3 text-right text-yellow-600 font-semibold">${hasData ? formatNumber(butuhPerbaikan) : '-'}</td>
-            <td class="py-3 px-3 text-right text-orange-500 font-semibold">${hasData ? formatNumber(kurang) : '-'}</td>
-            <td class="py-3 px-3 text-right text-red-500 font-semibold">${hasData ? formatNumber(sangatKurang) : '-'}</td>
-            <td class="py-3 px-3 text-right text-slate-500 font-semibold">${hasData ? formatNumber(tidakMembuatSkp) : '-'}</td>
+            <td class="py-1.5 px-3 text-center">${statusHtml}</td>
+            <td class="py-1.5 px-3 text-right font-bold text-slate-800 text-xs">${hasData ? formatNumber(totalPegawai) : '-'}</td>
+            <td class="py-1.5 px-2.5 text-right text-emerald-600 font-semibold text-xs">${hasData ? formatNumber(sangatBaik) : '-'}</td>
+            <td class="py-1.5 px-2.5 text-right text-blue-600 font-semibold text-xs">${hasData ? formatNumber(baik) : '-'}</td>
+            <td class="py-1.5 px-2.5 text-right text-yellow-600 font-semibold text-xs">${hasData ? formatNumber(butuhPerbaikan) : '-'}</td>
+            <td class="py-1.5 px-2.5 text-right text-orange-500 font-semibold text-xs">${hasData ? formatNumber(kurang) : '-'}</td>
+            <td class="py-1.5 px-2.5 text-right text-red-500 font-semibold text-xs">${hasData ? formatNumber(sangatKurang) : '-'}</td>
+            <td class="py-1.5 px-2.5 text-right text-slate-500 font-semibold text-xs">${hasData ? formatNumber(tidakMembuatSkp) : '-'}</td>
         `;
         tableBody.appendChild(tr);
 
