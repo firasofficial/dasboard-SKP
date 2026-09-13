@@ -2549,9 +2549,6 @@ function renderLaporanBulanan() {
         // Web Table Row
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50 border-b border-slate-100 last:border-0';
-        const statusHtml = hasData
-            ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">Terisi</span>`
-            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-rose-50 text-rose-600 border border-rose-100">Belum</span>`;
 
         tr.innerHTML = `
             <td class="py-1.5 px-3 text-center text-slate-400 font-semibold text-[11px]">${index + 1}</td>
@@ -2559,7 +2556,6 @@ function renderLaporanBulanan() {
                 <div class="font-bold text-slate-800 text-xs">${opd.nama}</div>
                 <div class="text-[9px] text-slate-400 uppercase font-semibold leading-none mt-0.5">${opd.kategori}</div>
             </td>
-            <td class="py-1.5 px-3 text-center">${statusHtml}</td>
             <td class="py-1.5 px-3 text-right font-bold text-slate-800 text-xs">${hasData ? formatNumber(totalPegawai) : '-'}</td>
             <td class="py-1.5 px-2.5 text-right text-emerald-600 font-semibold text-xs">${hasData ? formatNumber(sangatBaik) : '-'}</td>
             <td class="py-1.5 px-2.5 text-right text-blue-600 font-semibold text-xs">${hasData ? formatNumber(baik) : '-'}</td>
@@ -2575,7 +2571,6 @@ function renderLaporanBulanan() {
         printTr.innerHTML = `
             <td style="text-align: center;">${index + 1}</td>
             <td>${opd.nama}</td>
-            <td style="text-align: center; font-weight: bold; color: ${hasData ? 'green' : 'red'};">${hasData ? 'Terisi' : 'Belum'}</td>
             <td style="text-align: right;">${hasData ? formatNumber(totalPegawai) : '0'}</td>
             <td style="text-align: right;">${hasData ? formatNumber(sangatBaik) : '0'}</td>
             <td style="text-align: right;">${hasData ? formatNumber(baik) : '0'}</td>
@@ -2590,7 +2585,8 @@ function renderLaporanBulanan() {
     const maxOpdDisplay = (USER_LEVEL === 2 && USER_OPD_ID) ? 1 : MASTER_OPD_LIST.length;
 
     // Summary Labels
-    document.getElementById('laporan-total-status').textContent = `${totalOpdFilled} / ${maxOpdDisplay} OPD`;
+    const totalStatusEl = document.getElementById('laporan-total-status');
+    if (totalStatusEl) totalStatusEl.textContent = `${totalOpdFilled} / ${maxOpdDisplay} OPD`;
     document.getElementById('laporan-total-pegawai').textContent = formatNumber(totalPegawaiAcc);
     document.getElementById('laporan-total-sangatbaik').textContent = formatNumber(totalSangatBaikAcc);
     document.getElementById('laporan-total-baik').textContent = formatNumber(totalBaikAcc);
@@ -2601,7 +2597,8 @@ function renderLaporanBulanan() {
     if (webTidakMembuat) webTidakMembuat.textContent = formatNumber(totalTidakMembuatSkpAcc);
 
     // Print Labels
-    document.getElementById('print-total-status').textContent = `${totalOpdFilled} OPD`;
+    const printTotalStatus = document.getElementById('print-total-status');
+    if (printTotalStatus) printTotalStatus.textContent = `${totalOpdFilled} OPD`;
     document.getElementById('print-total-pegawai').textContent = formatNumber(totalPegawaiAcc);
     document.getElementById('print-total-sangatbaik').textContent = formatNumber(totalSangatBaikAcc);
     document.getElementById('print-total-baik').textContent = formatNumber(totalBaikAcc);
@@ -3016,7 +3013,6 @@ async function exportLaporanBulananExcel() {
             dataRows.push([
                 idx + 1,
                 opd.nama,
-                "Terisi",
                 totalPegawai,
                 sangatBaik,
                 baik,
@@ -3029,7 +3025,6 @@ async function exportLaporanBulananExcel() {
             dataRows.push([
                 idx + 1,
                 opd.nama,
-                "Belum Ada",
                 0, 0, 0, 0, 0, 0, 0
             ]);
         }
@@ -3049,11 +3044,10 @@ async function exportLaporanBulananExcel() {
                 views: [{ showGridLines: true }]
             });
 
-            // Set Lebar Kolom
+            // Set Lebar Kolom (9 Kolom)
             ws.columns = [
                 { key: 'no', width: 6 },
                 { key: 'opd', width: 55 },
-                { key: 'status', width: 14 },
                 { key: 'total', width: 15 },
                 { key: 'sb', width: 14 },
                 { key: 'b', width: 12 },
@@ -3079,41 +3073,41 @@ async function exportLaporanBulananExcel() {
                 }
             }
 
-            // Kop Surat Resmi (Merge B:J, Center)
-            ws.mergeCells('B1:J1');
+            // Kop Surat Resmi (Merge B:I, Center)
+            ws.mergeCells('B1:I1');
             ws.getCell('B1').value = 'PEMERINTAH KABUPATEN ACEH TIMUR';
             ws.getCell('B1').font = { name: 'Times New Roman', size: 12, bold: true };
             ws.getCell('B1').alignment = { horizontal: 'center', vertical: 'middle' };
 
-            ws.mergeCells('B2:J2');
+            ws.mergeCells('B2:I2');
             ws.getCell('B2').value = 'BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA';
             ws.getCell('B2').font = { name: 'Times New Roman', size: 13, bold: true };
             ws.getCell('B2').alignment = { horizontal: 'center', vertical: 'middle' };
 
-            ws.mergeCells('B3:J3');
+            ws.mergeCells('B3:I3');
             ws.getCell('B3').value = 'KOMPLEK PUSAT PEMERINTAHAN, JALAN BANDA ACEH - MEDAN KM 370 GEDUNG NO 12 IDI (KODE POS 24454)';
             ws.getCell('B3').font = { name: 'Times New Roman', size: 9 };
             ws.getCell('B3').alignment = { horizontal: 'center', vertical: 'middle' };
 
-            ws.mergeCells('B4:J4');
+            ws.mergeCells('B4:I4');
             ws.getCell('B4').value = 'Telepon (0646) 7020166, Email: bkpsdm.acehtimur@gmail.com';
             ws.getCell('B4').font = { name: 'Times New Roman', size: 9 };
             ws.getCell('B4').alignment = { horizontal: 'center', vertical: 'middle' };
 
             // Garis Ganda Kop Surat
-            for (let c = 1; c <= 10; c++) {
+            for (let c = 1; c <= 9; c++) {
                 ws.getRow(4).getCell(c).border = {
                     bottom: { style: 'double' }
                 };
             }
 
             // Judul Dokumen
-            ws.mergeCells('A6:J6');
+            ws.mergeCells('A6:I6');
             ws.getCell('A6').value = 'LAPORAN REKAPITULASI CAPAIAN PREDIKAT KINERJA SKP ASN';
             ws.getCell('A6').font = { name: 'Times New Roman', size: 12, bold: true, underline: true };
             ws.getCell('A6').alignment = { horizontal: 'center', vertical: 'middle' };
 
-            ws.mergeCells('A7:J7');
+            ws.mergeCells('A7:I7');
             ws.getCell('A7').value = `PERIODE BULAN: ${selectedBulan.toUpperCase()} TAHUN: ${selectedYear}`;
             ws.getCell('A7').font = { name: 'Times New Roman', size: 10, italic: true };
             ws.getCell('A7').alignment = { horizontal: 'center', vertical: 'middle' };
@@ -3128,7 +3122,7 @@ async function exportLaporanBulananExcel() {
             // Header Tabel (Baris 12)
             const headerRow = ws.getRow(12);
             headerRow.values = [
-                'No', 'Nama Unit Kerja / OPD', 'Status', 'Total Pegawai',
+                'No', 'Nama Unit Kerja / OPD', 'Total Pegawai',
                 'Sangat Baik', 'Baik', 'Butuh Perbaikan', 'Kurang', 'Sangat Kurang', 'Tidak Membuat SKP'
             ];
             headerRow.height = 25;
@@ -3154,17 +3148,16 @@ async function exportLaporanBulananExcel() {
                 // Formatting per kolom
                 row.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' }; // No
                 row.getCell(2).alignment = { horizontal: 'left', vertical: 'middle' };   // OPD
-                row.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' }; // Status
 
-                // Numeric columns (4 to 10)
-                for (let c = 4; c <= 10; c++) {
+                // Numeric columns (3 to 9)
+                for (let c = 3; c <= 9; c++) {
                     const numCell = row.getCell(c);
                     numCell.alignment = { horizontal: 'right', vertical: 'middle' };
                     numCell.numFmt = '#,##0';
                 }
 
                 // Border dan Font
-                for (let c = 1; c <= 10; c++) {
+                for (let c = 1; c <= 9; c++) {
                     const cell = row.getCell(c);
                     cell.font = { name: 'Times New Roman', size: 10 };
                     cell.border = {
@@ -3188,19 +3181,13 @@ async function exportLaporanBulananExcel() {
             cellTotalLabel.alignment = { horizontal: 'center', vertical: 'middle' };
             cellTotalLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F3F6' } };
 
-            const cellTotalOpd = ws.getCell(`C${currentRowNum}`);
-            cellTotalOpd.value = `${totalOpdFilled} OPD`;
-            cellTotalOpd.font = { name: 'Times New Roman', size: 10, bold: true };
-            cellTotalOpd.alignment = { horizontal: 'center', vertical: 'middle' };
-            cellTotalOpd.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F3F6' } };
-
             const totalValues = [
                 totalPegawaiAcc, totalSangatBaikAcc, totalBaikAcc,
                 totalButuhPerbaikanAcc, totalKurangAcc, totalSangatKurangAcc, totalTidakMembuatSkpAcc
             ];
 
             totalValues.forEach((val, idx) => {
-                const colIdx = 4 + idx;
+                const colIdx = 3 + idx;
                 const cell = totalRow.getCell(colIdx);
                 cell.value = val;
                 cell.numFmt = '#,##0';
@@ -3209,7 +3196,7 @@ async function exportLaporanBulananExcel() {
                 cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F3F6' } };
             });
 
-            for (let c = 1; c <= 10; c++) {
+            for (let c = 1; c <= 9; c++) {
                 totalRow.getCell(c).border = {
                     top: { style: 'thin' },
                     left: { style: 'thin' },
@@ -3218,13 +3205,13 @@ async function exportLaporanBulananExcel() {
                 };
             }
 
-            // Blok Tanda Tangan Resmi (Kolom G:J)
+            // Blok Tanda Tangan Resmi (Kolom F:I)
             const sigStart = currentRowNum + 2;
 
             function addSigLine(rowOffset, text, isBold = false, isUnderline = false, size = 10) {
                 const rNum = sigStart + rowOffset;
-                ws.mergeCells(`G${rNum}:J${rNum}`);
-                const cell = ws.getCell(`G${rNum}`);
+                ws.mergeCells(`F${rNum}:I${rNum}`);
+                const cell = ws.getCell(`F${rNum}`);
                 cell.value = text;
                 cell.font = { name: 'Times New Roman', size: size, bold: isBold, underline: isUnderline };
                 cell.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -3277,7 +3264,6 @@ async function exportLaporanBulananExcel() {
         [
             "No",
             "Nama Unit Kerja / OPD",
-            "Status",
             "Total Pegawai",
             "Sangat Baik",
             "Baik",
@@ -3293,7 +3279,6 @@ async function exportLaporanBulananExcel() {
     aoa.push([
         "TOTAL",
         isOpdRole ? `TOTAL REKAPITULASI ${USER_OPD_ID}` : "TOTAL REKAPITULASI KESELURUHAN",
-        `${totalOpdFilled} OPD`,
         totalPegawaiAcc,
         totalSangatBaikAcc,
         totalBaikAcc,
@@ -3305,30 +3290,29 @@ async function exportLaporanBulananExcel() {
 
     aoa.push([]);
     aoa.push([]);
-    aoa.push(["", "", "", "", "", "", `Idi,       ${monthTitle} ${selectedYear}`]);
-    aoa.push(["", "", "", "", "", "", "KEPALA BADAN KEPEGAWAIAN DAN"]);
-    aoa.push(["", "", "", "", "", "", "PENGEMBANGAN SUMBER DAYA MANUSIA"]);
-    aoa.push(["", "", "", "", "", "", "KABUPATEN ACEH TIMUR"]);
+    aoa.push(["", "", "", "", "", `Idi,       ${monthTitle} ${selectedYear}`]);
+    aoa.push(["", "", "", "", "", "KEPALA BADAN KEPEGAWAIAN DAN"]);
+    aoa.push(["", "", "", "", "", "PENGEMBANGAN SUMBER DAYA MANUSIA"]);
+    aoa.push(["", "", "", "", "", "KABUPATEN ACEH TIMUR"]);
     aoa.push([]);
     aoa.push([]);
-    aoa.push(["", "", "", "", "", "", "TEUKU DIDI FARISHA, S.STP,. M. AP"]);
-    aoa.push(["", "", "", "", "", "", "Pembina Utama Muda (IV/c)"]);
-    aoa.push(["", "", "", "", "", "", "NIP. 198412302004121001"]);
+    aoa.push(["", "", "", "", "", "TEUKU DIDI FARISHA, S.STP,. M. AP"]);
+    aoa.push(["", "", "", "", "", "Pembina Utama Muda (IV/c)"]);
+    aoa.push(["", "", "", "", "", "NIP. 198412302004121001"]);
 
     const ws = XLSX.utils.aoa_to_sheet(aoa);
 
     ws['!merges'] = [
-        { s: { r: 0, c: 1 }, e: { r: 0, c: 9 } },
-        { s: { r: 1, c: 1 }, e: { r: 1, c: 9 } },
-        { s: { r: 2, c: 1 }, e: { r: 2, c: 9 } },
-        { s: { r: 4, c: 0 }, e: { r: 4, c: 9 } },
-        { s: { r: 5, c: 0 }, e: { r: 5, c: 9 } }
+        { s: { r: 0, c: 1 }, e: { r: 0, c: 8 } },
+        { s: { r: 1, c: 1 }, e: { r: 1, c: 8 } },
+        { s: { r: 2, c: 1 }, e: { r: 2, c: 8 } },
+        { s: { r: 4, c: 0 }, e: { r: 4, c: 8 } },
+        { s: { r: 5, c: 0 }, e: { r: 5, c: 8 } }
     ];
 
     ws['!cols'] = [
         { wch: 6 },
         { wch: 55 },
-        { wch: 14 },
         { wch: 15 },
         { wch: 14 },
         { wch: 12 },
