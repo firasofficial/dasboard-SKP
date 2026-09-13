@@ -699,10 +699,10 @@
                     </div>
 
                     <!-- 5. Data Table & Chart Section -->
-                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-2 sm:gap-2.5">
+                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-2 sm:gap-2.5 items-stretch">
                         <!-- Left Side: Data Table (2 cols) -->
                         <div
-                            class="bg-white rounded-xl border border-slate-200/60 shadow-xs overflow-hidden lg:col-span-2 flex flex-col">
+                            class="bg-white rounded-xl border border-slate-200/60 shadow-xs overflow-hidden lg:col-span-2 flex flex-col justify-between">
                             <div class="p-2 px-3 border-b border-slate-100 flex items-center justify-between">
                                 <h3 class="font-extrabold text-slate-900 tracking-tight text-xs uppercase">Capaian Predikat SKP</h3>
                                 <span id="table-total-asn"
@@ -727,15 +727,15 @@
 
                         <!-- Right Side: Grafik Batang (3 cols) -->
                         <div
-                            class="bg-white rounded-xl border border-slate-200/60 shadow-xs p-2.5 lg:col-span-3 flex flex-col">
-                            <div class="flex items-center justify-between mb-1 pb-1 border-b border-slate-100">
-                                <div>
-                                    <h3 class="font-extrabold text-slate-900 tracking-tight text-xs uppercase leading-none">Grafik Distribusi SKP</h3>
-                                    <p class="text-[9px] text-slate-400 mt-0.5 leading-none">Visualisasi diagram batang berdasarkan kategori predikat</p>
-                                </div>
+                            class="bg-white rounded-xl border border-slate-200/60 shadow-xs overflow-hidden lg:col-span-3 flex flex-col justify-between">
+                            <div class="p-2 px-3 border-b border-slate-100 flex items-center justify-between">
+                                <h3 class="font-extrabold text-slate-900 tracking-tight text-xs uppercase">Grafik Distribusi SKP</h3>
+                                <span class="text-[9px] font-bold text-slate-400 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-full">
+                                    Diagram Batang
+                                </span>
                             </div>
-                            <div class="flex-1 relative w-full h-[155px] min-h-[140px] max-h-[165px] pt-1">
-                                <canvas id="kinerjaChart"></canvas>
+                            <div class="flex-1 p-2 sm:p-2.5 relative w-full flex items-center justify-center min-h-[190px]">
+                                <canvas id="kinerjaChart" class="w-full h-full"></canvas>
                             </div>
                         </div>
                     </div>
