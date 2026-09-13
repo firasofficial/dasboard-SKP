@@ -556,24 +556,24 @@ function updateMonthStatusBadge(selectedMonth, selectedYear) {
         if (badge && text) {
             const dot = badge.querySelector('span:first-child');
             if (hasData) {
-                badge.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0';
-                if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+                badge.className = 'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0';
+                if (dot) dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse';
                 text.textContent = filledCount + ' OPD';
             } else {
-                badge.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-semibold uppercase bg-slate-100 text-slate-500 border border-slate-200 shrink-0';
-                if (dot) dot.className = 'w-2 h-2 rounded-full bg-slate-400';
+                badge.className = 'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase bg-slate-100 text-slate-500 border border-slate-200 shrink-0';
+                if (dot) dot.className = 'w-1.5 h-1.5 rounded-full bg-slate-400';
                 text.textContent = 'Kosong';
             }
         }
 
         if (cont) {
-            const iconBox = cont.querySelector('div.rounded-lg');
+            const iconBox = cont.querySelector('div');
             if (hasData) {
-                cont.className = 'flex items-center gap-2 p-2 sm:p-2.5 rounded-xl border-2 border-indigo-500 bg-white shadow-md shadow-indigo-500/15 transition-all duration-200';
-                if (iconBox) iconBox.className = 'p-1.5 rounded-lg bg-indigo-600 text-white shadow-xs shrink-0 flex items-center justify-center transition-colors';
+                cont.className = 'flex items-center gap-1.5 px-2 py-1 rounded-lg border border-indigo-500 bg-white shadow-xs transition-all duration-200';
+                if (iconBox) iconBox.className = 'p-1 rounded bg-indigo-600 text-white shadow-xs shrink-0 flex items-center justify-center transition-colors';
             } else {
-                cont.className = 'flex items-center gap-2 p-2 sm:p-2.5 rounded-xl border border-slate-200 bg-slate-50/70 shadow-none transition-all duration-200';
-                if (iconBox) iconBox.className = 'p-1.5 rounded-lg bg-slate-200 text-slate-400 shrink-0 flex items-center justify-center transition-colors';
+                cont.className = 'flex items-center gap-1.5 px-2 py-1 rounded-lg border border-slate-200 bg-slate-50/70 shadow-none transition-all duration-200';
+                if (iconBox) iconBox.className = 'p-1 rounded bg-slate-200 text-slate-400 shrink-0 flex items-center justify-center transition-colors';
             }
         }
     });
