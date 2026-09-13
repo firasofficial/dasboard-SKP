@@ -1,0 +1,55 @@
+================================================================================
+  PANDUAN LANGKAH SELANJUTNYA & PENGUJIAN SISTEM SIMONIKA (MULTI-DEVICE SYNC)
+================================================================================
+
+Berikut adalah langkah-langkah yang perlu Anda lakukan untuk menguji dan
+mengoperasikan sinkronisasi Cloud Database Supabase antar komputer/perangkat:
+
+--------------------------------------------------------------------------------
+1. JALANKAN SKRIP SQL DI SUPABASE (Hanya Perlu 1 Kali Saja)
+--------------------------------------------------------------------------------
+Jika Anda belum mengeksekusi skrip SQL di Supabase:
+a. Buka dashboard Supabase di peramban (browser):
+   https://supabase.com/dashboard
+b. Masuk ke proyek Anda dan klik menu "SQL Editor" pada menu sebelah kiri.
+c. Buka file "supabase_setup.sql" yang ada di folder proyek ini.
+d. Salin (Copy) seluruh isi file tersebut, lalu Tempel (Paste) ke SQL Editor Supabase.
+e. Klik tombol "RUN" (atau tekan Ctrl+Enter).
+f. Pastikan muncul status "Success / No rows returned".
+   (Tabel 'master_opd', 'skp_rekap_bulanan', 'skp_detail_pegawai' serta master 
+    61 OPD & Kecamatan Kabupaten Aceh Timur telah selesai dibuat).
+
+--------------------------------------------------------------------------------
+2. UJI COBA UNGGAH MASTER DATA (DARI KOMPUTER ADMIN)
+--------------------------------------------------------------------------------
+a. Buka aplikasi SIMONIKA di browser Anda.
+b. Login sebagai "Administrator BKPSDM" (Super Admin).
+c. Masuk ke menu "Master Data" di sidebar kiri.
+d. Pilih/pastikan periode bulan & tahun yang sesuai (misalnya: Mei 2026).
+e. Klik area upload dan pilih file Excel Master Dataset BKN e-Kinerja Anda.
+f. Tunggu proses pembacaan dan sinkronisasi ke Cloud Supabase hingga progress bar 
+   mencapai 100% dan muncul pesan "Impor & Pemilahan Berhasil!".
+
+--------------------------------------------------------------------------------
+3. UJI COBA AKSES DARI KOMPUTER / BROWSER LAIN (SEBAGAI OPD)
+--------------------------------------------------------------------------------
+a. Buka browser lain (atau jendela Mode Samaran / Incognito / Komputer lain).
+b. Akses halaman SIMONIKA.
+c. Login sebagai "Operator OPD" (contoh: Dinas Pendidikan / Dinas Kesehatan / Kecamatan).
+d. Periksa Halaman:
+   - Dashboard: Grafik dan total ASN akan otomatis terisi data terbaru dari Supabase.
+   - Data OPD: Data nominatif ASN unit kerja tersebut akan otomatis termuat dari Cloud.
+   - Tombol Download: Operator OPD dapat langsung mengunduh nominatif format Excel/PDF.
+
+--------------------------------------------------------------------------------
+4. OPSIONAL: DEPLOYMENT KE INTERNET (ONLINE HOSTING)
+--------------------------------------------------------------------------------
+Agar SIMONIKA bisa diakses seluruh OPD se-Kabupaten Aceh Timur tanpa perlu jaringan lokal:
+- Anda dapat mengaktifkan "GitHub Pages" pada repository:
+  Repository Settings -> Pages -> Branch: main -> Save.
+- Atau hubungkan repository GitHub ke platform hosting seperti Vercel / Netlify / Cloudflare Pages.
+
+================================================================================
+SIMONIKA - Sistem Informasi Monitoring Kinerja ASN
+Pemerintah Kabupaten Aceh Timur
+================================================================================
