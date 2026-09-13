@@ -3227,16 +3227,16 @@ async function exportLaporanBulananExcel() {
                 { key: 'tms', width: 18 }
             ];
 
-            // Set Row Heights untuk Area Kop Surat & Judul
-            ws.getRow(1).height = 18;
-            ws.getRow(2).height = 20;
-            ws.getRow(3).height = 20;
-            ws.getRow(4).height = 15;
-            ws.getRow(5).height = 15;
-            ws.getRow(6).height = 16;
+            // Set Row Heights untuk Area Kop Surat & Judul (Baris 1 - 6 = 13)
+            ws.getRow(1).height = 13;
+            ws.getRow(2).height = 13;
+            ws.getRow(3).height = 13;
+            ws.getRow(4).height = 13;
+            ws.getRow(5).height = 13;
+            ws.getRow(6).height = 13;
             ws.getRow(7).height = 8;
-            ws.getRow(8).height = 20;
-            ws.getRow(9).height = 16;
+            ws.getRow(8).height = 18;
+            ws.getRow(9).height = 15;
             ws.getRow(10).height = 8;
 
             // Tambahkan Logo Pemkab Aceh Timur di sudut kiri atas kop (Proporsional 500x490)
@@ -3247,8 +3247,8 @@ async function exportLaporanBulananExcel() {
                         extension: 'png'
                     });
                     ws.addImage(imageId, {
-                        tl: { col: 0.15, row: 0.25 },
-                        ext: { width: 94, height: 92 },
+                        tl: { col: 0.15, row: 0.15 },
+                        ext: { width: 75, height: 73.5 },
                         editAs: 'oneCell'
                     });
                 } catch (imgErr) {
@@ -3259,17 +3259,17 @@ async function exportLaporanBulananExcel() {
             // Kop Surat Resmi (Merge B:I, Center) - 6 Baris Sesuai Format Standar
             ws.mergeCells('B1:I1');
             ws.getCell('B1').value = 'PEMERINTAH KABUPATEN ACEH TIMUR';
-            ws.getCell('B1').font = { name: 'Times New Roman', size: 11, bold: true };
+            ws.getCell('B1').font = { name: 'Times New Roman', size: 10, bold: true };
             ws.getCell('B1').alignment = { horizontal: 'center', vertical: 'middle' };
 
             ws.mergeCells('B2:I2');
             ws.getCell('B2').value = 'BADAN KEPEGAWAIAN DAN PENGEMBANGAN';
-            ws.getCell('B2').font = { name: 'Times New Roman', size: 13, bold: true };
+            ws.getCell('B2').font = { name: 'Times New Roman', size: 11.5, bold: true };
             ws.getCell('B2').alignment = { horizontal: 'center', vertical: 'middle' };
 
             ws.mergeCells('B3:I3');
             ws.getCell('B3').value = 'SUMBER DAYA MANUSIA';
-            ws.getCell('B3').font = { name: 'Times New Roman', size: 13, bold: true };
+            ws.getCell('B3').font = { name: 'Times New Roman', size: 11.5, bold: true };
             ws.getCell('B3').alignment = { horizontal: 'center', vertical: 'middle' };
 
             ws.mergeCells('B4:I4');
