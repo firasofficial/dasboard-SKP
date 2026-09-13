@@ -2845,10 +2845,10 @@ async function unduhLaporanBulananPDF() {
         try {
             showToast('Sedang memproses unduhan PDF resmi...', 'info');
 
-            // Logo Pemkab Aceh Timur (di sebelah kiri kop surat - proporsional)
+            // Logo Pemkab Aceh Timur (Proporsional sesuai rasio asli 500x490)
             if (typeof LOGO_ACEH_TIMUR_BASE64 !== 'undefined' && LOGO_ACEH_TIMUR_BASE64) {
                 try {
-                    doc.addImage(LOGO_ACEH_TIMUR_BASE64, 'PNG', 14, 10, 18, 23);
+                    doc.addImage(LOGO_ACEH_TIMUR_BASE64, 'PNG', 14, 9.8, 23.5, 23);
                 } catch (imgErr) {
                     console.warn('Gagal memuat logo ke PDF:', imgErr);
                 }
@@ -2857,17 +2857,17 @@ async function unduhLaporanBulananPDF() {
             // KOP SURAT RESMI (6 Baris Sesuai Format Standar)
             doc.setFont('times', 'bold');
             doc.setFontSize(11);
-            doc.text('PEMERINTAH KABUPATEN ACEH TIMUR', 112, 12.5, { align: 'center' });
+            doc.text('PEMERINTAH KABUPATEN ACEH TIMUR', 114, 12.5, { align: 'center' });
             doc.setFontSize(13);
-            doc.text('BADAN KEPEGAWAIAN DAN PENGEMBANGAN', 112, 17, { align: 'center' });
-            doc.text('SUMBER DAYA MANUSIA', 112, 21.5, { align: 'center' });
+            doc.text('BADAN KEPEGAWAIAN DAN PENGEMBANGAN', 114, 17, { align: 'center' });
+            doc.text('SUMBER DAYA MANUSIA', 114, 21.5, { align: 'center' });
             
             doc.setFont('times', 'normal');
             doc.setFontSize(8.5);
-            doc.text('Komplek Pusat Pemerintahan', 112, 25.5, { align: 'center' });
+            doc.text('Komplek Pusat Pemerintahan', 114, 25.5, { align: 'center' });
             doc.setFontSize(7.5);
-            doc.text('Jalan Banda Aceh-Medan km. 370 Gedung No 12 Idi Rayeuk, Aceh Timur, Aceh', 112, 29, { align: 'center' });
-            doc.text('Telepon (0646) 21115 email bkpsdm.acehtimur@gmail.com Kode Pos 24454', 112, 32.5, { align: 'center' });
+            doc.text('Jalan Banda Aceh-Medan km. 370 Gedung No 12 Idi Rayeuk, Aceh Timur, Aceh', 114, 29, { align: 'center' });
+            doc.text('Telepon (0646) 21115 email bkpsdm.acehtimur@gmail.com Kode Pos 24454', 114, 32.5, { align: 'center' });
 
             // Garis Ganda Kop Surat
             doc.setLineWidth(0.6);
