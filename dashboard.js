@@ -2848,37 +2848,40 @@ async function unduhLaporanBulananPDF() {
             // Logo Pemkab Aceh Timur (di sebelah kiri kop surat - proporsional)
             if (typeof LOGO_ACEH_TIMUR_BASE64 !== 'undefined' && LOGO_ACEH_TIMUR_BASE64) {
                 try {
-                    doc.addImage(LOGO_ACEH_TIMUR_BASE64, 'PNG', 14, 11.5, 17.5, 17.2);
+                    doc.addImage(LOGO_ACEH_TIMUR_BASE64, 'PNG', 14, 10, 18, 23);
                 } catch (imgErr) {
                     console.warn('Gagal memuat logo ke PDF:', imgErr);
                 }
             }
 
-            // KOP SURAT RESMI
+            // KOP SURAT RESMI (6 Baris Sesuai Format Standar)
             doc.setFont('times', 'bold');
             doc.setFontSize(11);
-            doc.text('PEMERINTAH KABUPATEN ACEH TIMUR', 112, 14, { align: 'center' });
-            doc.setFontSize(12.5);
-            doc.text('BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA', 112, 19.5, { align: 'center' });
+            doc.text('PEMERINTAH KABUPATEN ACEH TIMUR', 112, 12.5, { align: 'center' });
+            doc.setFontSize(13);
+            doc.text('BADAN KEPEGAWAIAN DAN PENGEMBANGAN', 112, 17, { align: 'center' });
+            doc.text('SUMBER DAYA MANUSIA', 112, 21.5, { align: 'center' });
             
             doc.setFont('times', 'normal');
+            doc.setFontSize(8.5);
+            doc.text('Komplek Pusat Pemerintahan', 112, 25.5, { align: 'center' });
             doc.setFontSize(7.5);
-            doc.text('KOMPLEK PUSAT PEMERINTAHAN, JALAN BANDA ACEH - MEDAN KM 370 GEDUNG NO 12 IDI (KODE POS 24454)', 112, 24, { align: 'center' });
-            doc.text('Telepon (0646) 7020166, Email: bkpsdm.acehtimur@gmail.com', 112, 27.5, { align: 'center' });
+            doc.text('Jalan Banda Aceh-Medan km. 370 Gedung No 12 Idi Rayeuk, Aceh Timur, Aceh', 112, 29, { align: 'center' });
+            doc.text('Telepon (0646) 21115 email bkpsdm.acehtimur@gmail.com Kode Pos 24454', 112, 32.5, { align: 'center' });
 
             // Garis Ganda Kop Surat
             doc.setLineWidth(0.6);
-            doc.line(14, 32, 196, 32);
+            doc.line(14, 35, 196, 35);
             doc.setLineWidth(0.2);
-            doc.line(14, 32.8, 196, 32.8);
+            doc.line(14, 35.8, 196, 35.8);
 
             // Judul Dokumen
             doc.setFont('times', 'bold');
             doc.setFontSize(10.5);
-            doc.text('LAPORAN REKAPITULASI CAPAIAN PREDIKAT KINERJA SKP ASN', 105, 38.5, { align: 'center' });
+            doc.text('LAPORAN REKAPITULASI CAPAIAN PREDIKAT KINERJA SKP ASN', 105, 41, { align: 'center' });
             doc.setFont('times', 'italic');
             doc.setFontSize(8.5);
-            doc.text(`PERIODE BULAN: ${selectedBulan.toUpperCase()} TAHUN: ${selectedYear}`, 105, 43, { align: 'center' });
+            doc.text(`PERIODE BULAN: ${selectedBulan.toUpperCase()} TAHUN: ${selectedYear}`, 105, 45.5, { align: 'center' });
 
             // Ringkasan Data
             const localList = getLocalRekapList();
@@ -2955,7 +2958,7 @@ async function unduhLaporanBulananPDF() {
 
             // Parameter Tabel AutoTable
             const autoTableConfig = {
-                startY: 48,
+                startY: 50,
                 head: [[
                     'No',
                     'Nama Unit Kerja / OPD',
@@ -3240,47 +3243,57 @@ async function exportLaporanBulananExcel() {
                 }
             }
 
-            // Kop Surat Resmi (Merge B:I, Center)
+            // Kop Surat Resmi (Merge B:I, Center) - 6 Baris Sesuai Format Standar
             ws.mergeCells('B1:I1');
             ws.getCell('B1').value = 'PEMERINTAH KABUPATEN ACEH TIMUR';
-            ws.getCell('B1').font = { name: 'Times New Roman', size: 12, bold: true };
+            ws.getCell('B1').font = { name: 'Times New Roman', size: 11, bold: true };
             ws.getCell('B1').alignment = { horizontal: 'center', vertical: 'middle' };
 
             ws.mergeCells('B2:I2');
-            ws.getCell('B2').value = 'BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA';
+            ws.getCell('B2').value = 'BADAN KEPEGAWAIAN DAN PENGEMBANGAN';
             ws.getCell('B2').font = { name: 'Times New Roman', size: 13, bold: true };
             ws.getCell('B2').alignment = { horizontal: 'center', vertical: 'middle' };
 
             ws.mergeCells('B3:I3');
-            ws.getCell('B3').value = 'KOMPLEK PUSAT PEMERINTAHAN, JALAN BANDA ACEH - MEDAN KM 370 GEDUNG NO 12 IDI (KODE POS 24454)';
-            ws.getCell('B3').font = { name: 'Times New Roman', size: 9 };
+            ws.getCell('B3').value = 'SUMBER DAYA MANUSIA';
+            ws.getCell('B3').font = { name: 'Times New Roman', size: 13, bold: true };
             ws.getCell('B3').alignment = { horizontal: 'center', vertical: 'middle' };
 
             ws.mergeCells('B4:I4');
-            ws.getCell('B4').value = 'Telepon (0646) 7020166, Email: bkpsdm.acehtimur@gmail.com';
-            ws.getCell('B4').font = { name: 'Times New Roman', size: 9 };
+            ws.getCell('B4').value = 'Komplek Pusat Pemerintahan';
+            ws.getCell('B4').font = { name: 'Times New Roman', size: 8.5 };
             ws.getCell('B4').alignment = { horizontal: 'center', vertical: 'middle' };
+
+            ws.mergeCells('B5:I5');
+            ws.getCell('B5').value = 'Jalan Banda Aceh-Medan km. 370 Gedung No 12 Idi Rayeuk, Aceh Timur, Aceh';
+            ws.getCell('B5').font = { name: 'Times New Roman', size: 8 };
+            ws.getCell('B5').alignment = { horizontal: 'center', vertical: 'middle' };
+
+            ws.mergeCells('B6:I6');
+            ws.getCell('B6').value = 'Telepon (0646) 21115 email bkpsdm.acehtimur@gmail.com Kode Pos 24454';
+            ws.getCell('B6').font = { name: 'Times New Roman', size: 8 };
+            ws.getCell('B6').alignment = { horizontal: 'center', vertical: 'middle' };
 
             // Garis Ganda Kop Surat
             for (let c = 1; c <= 9; c++) {
-                ws.getRow(4).getCell(c).border = {
+                ws.getRow(6).getCell(c).border = {
                     bottom: { style: 'double' }
                 };
             }
 
             // Judul Dokumen
-            ws.mergeCells('A6:I6');
-            ws.getCell('A6').value = 'LAPORAN REKAPITULASI CAPAIAN PREDIKAT KINERJA SKP ASN';
-            ws.getCell('A6').font = { name: 'Times New Roman', size: 12, bold: true, underline: true };
-            ws.getCell('A6').alignment = { horizontal: 'center', vertical: 'middle' };
+            ws.mergeCells('A8:I8');
+            ws.getCell('A8').value = 'LAPORAN REKAPITULASI CAPAIAN PREDIKAT KINERJA SKP ASN';
+            ws.getCell('A8').font = { name: 'Times New Roman', size: 11, bold: true, underline: true };
+            ws.getCell('A8').alignment = { horizontal: 'center', vertical: 'middle' };
 
-            ws.mergeCells('A7:I7');
-            ws.getCell('A7').value = `PERIODE BULAN: ${selectedBulan.toUpperCase()} TAHUN: ${selectedYear}`;
-            ws.getCell('A7').font = { name: 'Times New Roman', size: 10, italic: true };
-            ws.getCell('A7').alignment = { horizontal: 'center', vertical: 'middle' };
+            ws.mergeCells('A9:I9');
+            ws.getCell('A9').value = `PERIODE BULAN: ${selectedBulan.toUpperCase()} TAHUN: ${selectedYear}`;
+            ws.getCell('A9').font = { name: 'Times New Roman', size: 9.5, italic: true };
+            ws.getCell('A9').alignment = { horizontal: 'center', vertical: 'middle' };
 
-            // Header Tabel (Baris 9)
-            const headerRow = ws.getRow(9);
+            // Header Tabel (Baris 11)
+            const headerRow = ws.getRow(11);
             headerRow.values = [
                 'No', 'Nama Unit Kerja / OPD', 'Total Pegawai',
                 'Sangat Baik', 'Baik', 'Butuh Perbaikan', 'Kurang', 'Sangat Kurang', 'Tidak Membuat SKP'
@@ -3298,8 +3311,8 @@ async function exportLaporanBulananExcel() {
                 };
             });
 
-            // Data Rows (Mulai Baris 10)
-            let currentRowNum = 10;
+            // Data Rows (Mulai Baris 12)
+            let currentRowNum = 12;
             dataRows.forEach((r) => {
                 const row = ws.getRow(currentRowNum);
                 row.values = r;
@@ -3412,8 +3425,11 @@ async function exportLaporanBulananExcel() {
 
     const aoa = [
         ["", "PEMERINTAH KABUPATEN ACEH TIMUR"],
-        ["", "BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA"],
-        ["", "Komplek Pusat Pemerintahan, Jalan Banda Aceh - Medan Km 370 Gedung No 12 Idi (Kode Pos 24454)"],
+        ["", "BADAN KEPEGAWAIAN DAN PENGEMBANGAN"],
+        ["", "SUMBER DAYA MANUSIA"],
+        ["", "Komplek Pusat Pemerintahan"],
+        ["", "Jalan Banda Aceh-Medan km. 370 Gedung No 12 Idi Rayeuk, Aceh Timur, Aceh"],
+        ["", "Telepon (0646) 21115 email bkpsdm.acehtimur@gmail.com Kode Pos 24454"],
         [],
         ["LAPORAN REKAPITULASI CAPAIAN PREDIKAT KINERJA SKP ASN"],
         [`PERIODE BULAN: ${selectedBulan.toUpperCase()} TAHUN: ${selectedYear}`],
