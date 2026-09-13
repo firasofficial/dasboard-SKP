@@ -305,82 +305,80 @@
         <aside id="sidebar"
             class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-100 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out border-r border-slate-800">
             <!-- Sidebar Header -->
-            <div class="h-14 flex items-center px-4 border-b border-slate-800 gap-3">
-                <div class="bg-white p-1 rounded-lg shadow-sm flex items-center justify-center shrink-0">
-                    <img src="./logo-simonika.jpeg" alt="Logo SIMONIKA" class="h-7 w-auto object-contain rounded">
+            <div class="h-16 flex items-center px-4 border-b border-slate-800 gap-3">
+                <div class="bg-white p-1 rounded-xl shadow-md flex items-center justify-center shrink-0">
+                    <img src="./logo-simonika.jpeg" alt="Logo SIMONIKA" class="h-8 w-auto object-contain rounded-lg">
                 </div>
                 <div>
-                    <h1 class="text-xs font-extrabold tracking-widest uppercase text-white leading-tight">Aceh Timur</h1>
+                    <h1 class="text-xs font-extrabold tracking-widest uppercase text-white">Aceh Timur</h1>
                     <p class="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">SIMONIKA</p>
                 </div>
             </div>
 
             <!-- Sidebar Navigation Links -->
-            <nav class="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
+            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
                 <a href="javascript:void(0)" id="nav-dashboard" onclick="switchView('dashboard')"
-                    class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-indigo-600/10 text-indigo-400 font-semibold border border-indigo-500/20 transition-all">
-                    <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-600/10 text-indigo-400 font-semibold border border-indigo-500/20 transition-all">
+                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                             d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
                     </svg>
-                    <span class="text-xs font-medium">Dashboard</span>
+                    <span class="text-sm">Dashboard Utama</span>
                 </a>
                 <a href="javascript:void(0)" id="nav-data-opd" onclick="switchView('data-opd')"
-                    class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-100 font-medium transition-all group">
-                    <svg class="w-4 h-4 text-slate-500 group-hover:text-slate-300 shrink-0" fill="none" stroke="currentColor"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-100 font-medium transition-all group">
+                    <svg class="w-5 h-5 text-slate-500 group-hover:text-slate-300" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
-                    <span class="text-xs font-medium">Laporan Kinerja</span>
+                    <span class="text-sm">Data OPD</span>
                 </a>
                 <a href="javascript:void(0)" id="nav-laporan-bulanan" onclick="switchView('laporan-bulanan')"
-                    class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-100 font-medium transition-all group">
-                    <svg class="w-4 h-4 text-slate-500 group-hover:text-slate-300 shrink-0" fill="none" stroke="currentColor"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-100 font-medium transition-all group">
+                    <svg class="w-5 h-5 text-slate-500 group-hover:text-slate-300" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <span class="text-xs font-medium">Rekap Laporan</span>
+                    <span class="text-sm">Laporan Bulanan</span>
                 </a>
 
                 <!-- Administrator Section (Level 1 only) -->
-                <div id="section-admin-nav" class="space-y-1 pt-1.5">
-                    <div class="pt-1.5 pb-1 px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Administrator</div>
+                <div id="section-admin-nav" class="space-y-1.5 pt-2">
+                    <div class="pt-2 pb-1 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Administrator</div>
 
                     <!-- Master Data Menu -->
                     <a href="javascript:void(0)" id="nav-master-data" onclick="switchView('master-data')"
-                        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-100 font-medium transition-all group">
-                        <svg class="w-4 h-4 text-slate-500 group-hover:text-slate-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-100 font-medium transition-all group">
+                        <svg class="w-5 h-5 text-slate-500 group-hover:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 7v10c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3V7c0-2-1.5-3-3.5-3h-9C5.5 4 4 5 4 7zm0 4h16M9 4v16" />
                         </svg>
-                        <span class="text-xs font-medium">Master Data</span>
+                        <span class="text-sm">Master Data</span>
                     </a>
                 </div>
 
-                <div class="pt-1.5">
-                    <a href="#" onclick="handleLogout()"
-                        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-red-400 hover:bg-red-950/30 hover:text-red-300 font-medium transition-all group">
-                        <svg class="w-4 h-4 text-red-500/70 group-hover:text-red-400 shrink-0" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        <span class="text-xs font-medium">Keluar (Logout)</span>
-                    </a>
-                </div>
+                <a href="#" onclick="handleLogout()"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-950/30 hover:text-red-300 font-medium transition-all group">
+                    <svg class="w-5 h-5 text-red-500/70 group-hover:text-red-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span class="text-sm">Keluar (Logout)</span>
+                </a>
             </nav>
 
             <!-- Sidebar Footer -->
-            <div class="p-3 border-t border-slate-800 flex items-center gap-2.5 bg-slate-950/40">
+            <div class="p-4 border-t border-slate-800 flex items-center gap-3 bg-slate-950/40">
                 <div id="sidebar-avatar-initial"
-                    class="w-7 h-7 rounded-lg bg-slate-800 text-indigo-400 font-bold text-xs flex items-center justify-center shrink-0">
+                    class="w-8 h-8 rounded-full bg-slate-800 text-indigo-400 font-bold text-xs flex items-center justify-center">
                     AT
                 </div>
                 <div class="overflow-hidden">
                     <p id="sidebar-unit-name" class="text-xs font-semibold text-slate-300 truncate">BKPSDM Kab. Aceh Timur</p>
-                    <p id="sidebar-role-label" class="text-[9px] text-slate-500 truncate">Administrator BKPSDM</p>
+                    <p id="sidebar-role-label" class="text-[10px] text-slate-500 truncate">Administrator BKPSDM</p>
                 </div>
             </div>
         </aside>
