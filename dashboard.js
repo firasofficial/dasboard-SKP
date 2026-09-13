@@ -3610,12 +3610,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 scales: {
                     x: {
                         grid: { display: false },
-                        ticks: { font: { size: 11, weight: '600', family: 'Inter' }, color: '#64748b' }
+                        ticks: { font: { size: 9.5, weight: '600', family: 'Inter' }, color: '#64748b', maxRotation: 0, minRotation: 0 }
                     },
                     y: {
                         beginAtZero: true,
                         grid: { color: '#f1f5f9', drawBorder: false },
-                        ticks: { font: { size: 11, family: 'Inter' }, color: '#64748b', callback: function (value) { return formatNumber(value); } }
+                        ticks: { font: { size: 10, family: 'Inter' }, color: '#64748b', callback: function (value) { return formatNumber(value); } }
                     }
                 }
             }
