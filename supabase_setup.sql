@@ -60,10 +60,16 @@ CREATE TABLE IF NOT EXISTS skp_detail_pegawai (
 CREATE INDEX IF NOT EXISTS idx_detail_opd_periode ON skp_detail_pegawai(opd_id, bulan, tahun);
 CREATE INDEX IF NOT EXISTS idx_detail_nip ON skp_detail_pegawai(nip);
 
--- 4. Menonaktifkan Row Level Security (RLS) agar dapat diakses dari frontend SIMONIKA
-ALTER TABLE master_opd DISABLE ROW LEVEL SECURITY;
-ALTER TABLE skp_rekap_bulanan DISABLE ROW LEVEL SECURITY;
-ALTER TABLE skp_detail_pegawai DISABLE ROW LEVEL SECURITY;
+-- 4. Menonaktifkan Row Level Security (RLS) & Memberikan Izin Akses Penuh ke Frontend (anon & authenticated)
+ALTER TABLE public.master_opd DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.skp_rekap_bulanan DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.skp_detail_pegawai DISABLE ROW LEVEL SECURITY;
+
+GRANT ALL ON TABLE public.master_opd TO anon, authenticated, service_role;
+GRANT ALL ON TABLE public.skp_rekap_bulanan TO anon, authenticated, service_role;
+GRANT ALL ON TABLE public.skp_detail_pegawai TO anon, authenticated, service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
+
 
 -- 5. Mengisi Data Master 61 OPD & Kecamatan (100% Selaras dengan Aplikasi)
 INSERT INTO master_opd (id, nama, kategori) VALUES
@@ -143,8 +149,9 @@ CREATE TABLE IF NOT EXISTS simonika_users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
--- Menonaktifkan RLS untuk tabel simonika_users
-ALTER TABLE simonika_users DISABLE ROW LEVEL SECURITY;
+-- Menonaktifkan RLS untuk tabel simonika_users & Memberikan Izin Akses
+ALTER TABLE public.simonika_users DISABLE ROW LEVEL SECURITY;
+GRANT ALL ON TABLE public.simonika_users TO anon, authenticated, service_role;
 
 -- 7. Inisialisasi Akun Default Administrator BKPSDM & 61 OPD se-Kabupaten Aceh Timur
 INSERT INTO simonika_users (id, username, nama, kategori, role, level, password, is_custom_password) VALUES
