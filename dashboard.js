@@ -170,7 +170,7 @@ window.simonikaConfirm = simonikaConfirm;
 // ==========================================
 const MASTER_OPD_LIST = [
     { id: 'BKPSDM', nama: 'Badan Kepegawaian dan Pengembangan Sumber Daya Manusia', kategori: 'DINAS', aliases: ['bkpsdm', 'kepegawaian', 'badan kepegawaian', 'pengembangan sumber daya manusia'] },
-    { id: 'SETDA', nama: 'Sekretariat Daerah', kategori: 'DINAS', aliases: ['setda', 'sekretariat daerah', 'asisten', 'bagian hukum', 'bagian organisasi', 'bagian keuangan', 'bagian keistimewaan'] },
+    { id: 'SETDA', nama: 'Sekretariat Daerah', kategori: 'DINAS', aliases: ['setda', 'sekretariat daerah', 'asisten', 'bagian hukum', 'bagian organisasi', 'bagian keuangan', 'bagian keistimewaan', 'bupati', 'wakil bupati', 'kepala daerah', 'pemerintah kabupaten'] },
     { id: 'BPKD', nama: 'Badan Pengelolaan Keuangan Daerah', kategori: 'DINAS', aliases: ['bpkd', 'pengelolaan keuangan daerah', 'pengelolaan keuangan', 'dinas pengelolaan keuangan'] },
     { id: 'BAPPEDA', nama: 'Badan Perencanaan Pembangunan Daerah', kategori: 'DINAS', aliases: ['bappeda', 'perencanaan pembangunan'] },
     { id: 'BPBD', nama: 'Badan Penanggulangan Bencana Daerah', kategori: 'DINAS', aliases: ['bpbd', 'penanggulangan bencana'] },
