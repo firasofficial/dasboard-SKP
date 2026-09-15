@@ -350,20 +350,36 @@ function matchOpdFromText(unorInduk, unor, jabatan) {
     const byId = MASTER_OPD_LIST.find(o => o.id.toLowerCase() === clean);
     if (byId) return byId;
 
-    // 2. Cek Aliases (Sorted by length descending) - Mendahulukan 'Pendidikan Dayah', 'Majelis Pendidikan Aceh', 'Disparpora', 'Perikanan', dll.
+    // 2. Prioritas Utama: Identifikasi Sektor Khusus Sekolah/Pendidikan & Puskesmas/Kesehatan
+    // Sekolah / Pendidikan -> Wajib masuk DISDIK (kecuali Dayah, MPA, Disparpora)
+    const isSekolah = /\b(smp|smpn|sd|sdn|skb|spnf|paud|tk|tkn|guru|sekolah|pengawas sekolah|penilik|kepala sekolah)\b/i.test(clean);
+    
+    // Puskesmas / Kesehatan -> Wajib masuk DINKES (kecuali RSUD)
+    const isKesehatan = /\b(puskesmas|pkm|labkesda|pustu|poskesdes|dokter|bidan|perawat|sanitarian|nutrisionis|apoteker)\b/i.test(clean);
+
+    if (isSekolah) {
+        if (clean.includes('dayah')) return MASTER_OPD_LIST.find(o => o.id === 'DINAS_DAYAH') || MASTER_OPD_LIST.find(o => o.id === 'DISDIK');
+        if (clean.includes('majelis pendidikan') || clean.includes(' mpa')) return MASTER_OPD_LIST.find(o => o.id === 'SET_MPA') || MASTER_OPD_LIST.find(o => o.id === 'DISDIK');
+        if (clean.includes('disparpora') || clean.includes('pariwisata pemuda')) return MASTER_OPD_LIST.find(o => o.id === 'DISPARPORA') || MASTER_OPD_LIST.find(o => o.id === 'DISDIK');
+        return MASTER_OPD_LIST.find(o => o.id === 'DISDIK');
+    }
+
+    if (isKesehatan) {
+        if (clean.includes('zubir mahmud') || clean.includes('rsud zm') || clean.includes('dr zubir')) return MASTER_OPD_LIST.find(o => o.id === 'RSUD_ZM') || MASTER_OPD_LIST.find(o => o.id === 'DINKES');
+        if (clean.includes('sultan abdul') || clean.includes('rsud saas') || clean.includes('rsud peureulak')) return MASTER_OPD_LIST.find(o => o.id === 'RSUD_SAAS') || MASTER_OPD_LIST.find(o => o.id === 'DINKES');
+        return MASTER_OPD_LIST.find(o => o.id === 'DINKES');
+    }
+
+    // 3. Cek Aliases (Sorted by length descending)
     const aliasPairs = getCachedOpdAliasPairs();
     for (const pair of aliasPairs) {
         if (clean.includes(pair.alias)) {
+            // Jika alias matching adalah KECAMATAN, pastikan record ini bukan sekolah/kesehatan
+            if (pair.opd.kategori === 'KECAMATAN' && (isSekolah || isKesehatan)) {
+                continue;
+            }
             return pair.opd;
         }
-    }
-
-    // 3. Fallback Sektor Khusus Sekolah & Kesehatan
-    if (/\b(smp|smpn|sd|sdn|skb|paud|tk|guru|sekolah)\b/.test(clean)) {
-        return MASTER_OPD_LIST.find(o => o.id === 'DISDIK');
-    }
-    if (/\b(puskesmas|labkesda|pustu|poskesdes)\b/.test(clean)) {
-        return MASTER_OPD_LIST.find(o => o.id === 'DINKES');
     }
 
     return null;
