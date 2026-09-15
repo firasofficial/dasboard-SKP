@@ -389,6 +389,41 @@ function matchOpdFromText(unorInduk, unor, jabatan) {
 }
 
 // ==========================================
+// NORMALISASI & PERHITUNGAN PREDIKAT SKP (STANDAR BKN E-KINERJA & PERMENPANRB 6/2022)
+// ==========================================
+function normalizeSkpPredikat(hasilAkhir, hasilKerja, perilakuKerja) {
+    const ha = String(hasilAkhir || '').toLowerCase().trim();
+    const hk = String(hasilKerja || '').toLowerCase().trim();
+    const pk = String(perilakuKerja || '').toLowerCase().trim();
+
+    // 1. Prioritas 1: Jika kolom hasil_akhir / predikat_skp terisi secara eksplisit
+    if (ha.includes('sangat baik') || ha.includes('istimewa')) return 'Sangat Baik';
+    if (ha.includes('sangat kurang') || ha.includes('sangat buruk')) return 'Sangat Kurang';
+    if (ha.includes('butuh perbaikan') || ha.includes('perbaikan')) return 'Butuh Perbaikan';
+    if (ha.includes('kurang')) return 'Kurang';
+    if (ha.includes('baik')) return 'Baik';
+
+    // 2. Prioritas 2: Matriks BKN e-Kinerja (Hasil Kerja x Perilaku Kerja) jika hasil_akhir kosong / tanda hubung (-)
+    const isDiatasHk = hk.includes('diatas') || hk.includes('di atas');
+    const isSesuaiHk = hk.includes('sesuai');
+    const isDibawahHk = hk.includes('dibawah') || hk.includes('di bawah');
+
+    const isDiatasPk = pk.includes('diatas') || pk.includes('di atas');
+    const isSesuaiPk = pk.includes('sesuai');
+    const isDibawahPk = pk.includes('dibawah') || pk.includes('di bawah');
+
+    if (isDiatasHk && isDiatasPk) return 'Sangat Baik';
+    if ((isDiatasHk && isSesuaiPk) || (isSesuaiHk && isDiatasPk) || (isSesuaiHk && isSesuaiPk)) return 'Baik';
+    if (isDibawahHk && (isDiatasPk || isSesuaiPk)) return 'Butuh Perbaikan';
+    if ((isSesuaiHk || isDiatasHk) && isDibawahPk) return 'Kurang';
+    if (isDibawahHk && isDibawahPk) return 'Sangat Kurang';
+
+    // 3. Fallback jika tidak ada data penilaian kinerja
+    return 'Tidak Membuat SKP';
+}
+window.normalizeSkpPredikat = normalizeSkpPredikat;
+
+// ==========================================
 // DATA REAL MASTER (BERSIH / KOSONG UNTUK PENGUJIAN MANDIRI)
 // ==========================================
 const REAL_MASTER_PRESEEDED = [];
@@ -1378,7 +1413,7 @@ async function renderSelectedOpdDetail() {
 // LOGIKA FILTER & TABEL NOMINATIF ASN
 // ==========================================
 function filterAsnTable() {
-window.filterAsnTable = filterAsnTable;
+    window.filterAsnTable = filterAsnTable;
     const searchVal = (document.getElementById('asn-search-input')?.value || '').toLowerCase().trim();
     const predikatFilter = (document.getElementById('asn-filter-predikat')?.value || 'ALL').toUpperCase();
     const statusFilter = (document.getElementById('asn-filter-status')?.value || 'ALL').toUpperCase();
@@ -1391,11 +1426,11 @@ window.filterAsnTable = filterAsnTable;
             String(item.skp_jabatan || '').toLowerCase().includes(searchVal) ||
             String(item.skp_unor || '').toLowerCase().includes(searchVal);
 
-        // Filter Predikat
-        const itemPred = String(item.hasil_akhir || '').toUpperCase();
+        // Filter Predikat (Pencocokan Tepat / Exact Match Berstandar Normalisasi)
+        const itemPred = normalizeSkpPredikat(item.hasil_akhir, item.hasil_kerja, item.perilaku_kerja).toUpperCase();
         let matchPredikat = true;
         if (predikatFilter !== 'ALL') {
-            matchPredikat = itemPred.includes(predikatFilter);
+            matchPredikat = (itemPred === predikatFilter);
         }
 
         // Filter Status
@@ -1463,32 +1498,26 @@ function renderAsnTableRows() {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50/80 transition-colors border-b border-slate-100 last:border-0';
 
-        // Styling Predikat Badge
-        const predRaw = String(item.hasil_akhir || '').toLowerCase();
+        // Styling Predikat Badge dengan Normalisasi Standar
+        const predLabel = normalizeSkpPredikat(item.hasil_akhir, item.hasil_kerja, item.perilaku_kerja);
         let predBadge = 'bg-slate-100 text-slate-700 border-slate-200';
-        let predLabel = item.hasil_akhir || 'Tidak Buat SKP';
         let predIcon = '🚫';
 
-        if (predRaw.includes('sangat baik') || predRaw.includes('diatas') || predRaw.includes('istimewa')) {
+        if (predLabel === 'Sangat Baik') {
             predBadge = 'bg-emerald-50 text-emerald-700 border-emerald-200 font-bold';
-            predLabel = 'Sangat Baik';
             predIcon = '👍';
-        } else if (predRaw.includes('sangat kurang') || predRaw.includes('sangat buruk')) {
-            predBadge = 'bg-rose-50 text-rose-700 border-rose-200 font-bold';
-            predLabel = 'Sangat Kurang';
-            predIcon = '✖️';
-        } else if (predRaw.includes('kurang') || predRaw.includes('dibawah')) {
-            predBadge = 'bg-orange-50 text-orange-700 border-orange-200 font-bold';
-            predLabel = 'Kurang';
-            predIcon = '⬇️';
-        } else if (predRaw.includes('perbaikan') || predRaw.includes('butuh')) {
-            predBadge = 'bg-amber-50 text-amber-700 border-amber-200 font-bold';
-            predLabel = 'Butuh Perbaikan';
-            predIcon = '⚠️';
-        } else if (predRaw.includes('baik') || predRaw.includes('sesuai')) {
+        } else if (predLabel === 'Baik') {
             predBadge = 'bg-blue-50 text-blue-700 border-blue-200 font-bold';
-            predLabel = 'Baik';
             predIcon = '✔️';
+        } else if (predLabel === 'Butuh Perbaikan') {
+            predBadge = 'bg-amber-50 text-amber-700 border-amber-200 font-bold';
+            predIcon = '⚠️';
+        } else if (predLabel === 'Kurang') {
+            predBadge = 'bg-orange-50 text-orange-700 border-orange-200 font-bold';
+            predIcon = '⬇️';
+        } else if (predLabel === 'Sangat Kurang') {
+            predBadge = 'bg-rose-50 text-rose-700 border-rose-200 font-bold';
+            predIcon = '✖️';
         }
 
         // Status Pegawai Badge
@@ -2364,18 +2393,19 @@ function processMasterDatasetExcel(file) {
                 let pltIdx = -1;
 
                 headers.forEach((h, idx) => {
-                    if (nipIdx === -1 && h.includes('nip')) nipIdx = idx;
-                    if (namaIdx === -1 && h.includes('nama') && !h.includes('unor')) namaIdx = idx;
-                    if (unorIdx === -1 && (h === 'skp_unor' || h.includes('satuan kerja') || h.includes('unit kerja') || h === 'unit')) unorIdx = idx;
-                    if (unorIndukIdx === -1 && (h.includes('unor_induk') || h.includes('induk'))) unorIndukIdx = idx;
-                    if (jabatanIdx === -1 && (h.includes('jabatan') && !h.includes('jenis'))) jabatanIdx = idx;
-                    if (hasilKerjaIdx === -1 && h.includes('hasil_kerja')) hasilKerjaIdx = idx;
-                    if (perilakuIdx === -1 && h.includes('perilaku')) perilakuIdx = idx;
-                    if (predikatIdx === -1 && (h.includes('hasil_akhir') || h.includes('predikat_skp') || h.includes('hasil akhir') || h.includes('predikat'))) predikatIdx = idx;
-                    if (statusIdx === -1 && (h.includes('jenis_pegawai') || h.includes('status'))) statusIdx = idx;
-                    if (golruIdx === -1 && (h.includes('golru') || h.includes('golongan'))) golruIdx = idx;
-                    if (jenisJabatanIdx === -1 && h.includes('jenis_jabatan')) jenisJabatanIdx = idx;
-                    if (pltIdx === -1 && (h.includes('plt') || h.includes('plh') || h.includes('pjb'))) pltIdx = idx;
+                    const cleanH = h.replace(/[_]/g, ' ').replace(/\s+/g, ' ').trim();
+                    if (nipIdx === -1 && cleanH.includes('nip')) nipIdx = idx;
+                    if (namaIdx === -1 && cleanH.includes('nama') && !cleanH.includes('unor')) namaIdx = idx;
+                    if (unorIdx === -1 && (cleanH === 'skp unor' || cleanH.includes('satuan kerja') || cleanH.includes('unit kerja') || cleanH === 'unit')) unorIdx = idx;
+                    if (unorIndukIdx === -1 && (cleanH.includes('unor induk') || cleanH.includes('induk'))) unorIndukIdx = idx;
+                    if (jabatanIdx === -1 && (cleanH.includes('jabatan') && !cleanH.includes('jenis'))) jabatanIdx = idx;
+                    if (hasilKerjaIdx === -1 && (cleanH.includes('hasil kerja') || cleanH.includes('rating hasil') || cleanH === 'hasil')) hasilKerjaIdx = idx;
+                    if (perilakuIdx === -1 && (cleanH.includes('perilaku') || cleanH.includes('rating perilaku'))) perilakuIdx = idx;
+                    if (predikatIdx === -1 && (cleanH.includes('hasil akhir') || cleanH.includes('predikat skp') || cleanH.includes('predikat') || cleanH.includes('nilai skp'))) predikatIdx = idx;
+                    if (statusIdx === -1 && (cleanH.includes('jenis pegawai') || cleanH.includes('status'))) statusIdx = idx;
+                    if (golruIdx === -1 && (cleanH.includes('golru') || cleanH.includes('golongan'))) golruIdx = idx;
+                    if (jenisJabatanIdx === -1 && cleanH.includes('jenis jabatan')) jenisJabatanIdx = idx;
+                    if (pltIdx === -1 && (cleanH.includes('plt') || cleanH.includes('plh') || cleanH.includes('pjb'))) pltIdx = idx;
                 });
 
                 if (unorIdx === -1 && unorIndukIdx !== -1) unorIdx = unorIndukIdx;
@@ -2438,18 +2468,22 @@ function processMasterDatasetExcel(file) {
                         target.pns++;
                     }
 
-                    // Deteksi Predikat Kinerja
-                    const predVal = predikatIdx !== -1 ? String(row[predikatIdx] || '').toLowerCase() : '';
-                    if (predVal.includes('sangat baik') || predVal.includes('diatas') || predVal.includes('istimewa')) {
+                    // Deteksi Predikat Kinerja dengan Normalisasi Standar BKN / PermenPANRB 6
+                    const rawPred = predikatIdx !== -1 ? row[predikatIdx] : '';
+                    const rawHk = hasilKerjaIdx !== -1 ? row[hasilKerjaIdx] : '';
+                    const rawPk = perilakuIdx !== -1 ? row[perilakuIdx] : '';
+                    const normalizedPred = normalizeSkpPredikat(rawPred, rawHk, rawPk);
+
+                    if (normalizedPred === 'Sangat Baik') {
                         target.sangat_baik++;
-                    } else if (predVal.includes('sangat kurang') || predVal.includes('sangat buruk')) {
-                        target.sangat_kurang++;
-                    } else if (predVal.includes('kurang') || predVal.includes('dibawah')) {
-                        target.kurang++;
-                    } else if (predVal.includes('perbaikan') || predVal.includes('butuh')) {
-                        target.butuh_perbaikan++;
-                    } else if (predVal.includes('baik') || predVal.includes('sesuai')) {
+                    } else if (normalizedPred === 'Baik') {
                         target.baik++;
+                    } else if (normalizedPred === 'Butuh Perbaikan') {
+                        target.butuh_perbaikan++;
+                    } else if (normalizedPred === 'Kurang') {
+                        target.kurang++;
+                    } else if (normalizedPred === 'Sangat Kurang') {
+                        target.sangat_kurang++;
                     } else {
                         target.tidak_membuat_skp++;
                     }
@@ -2465,9 +2499,9 @@ function processMasterDatasetExcel(file) {
                         skp_unor: unorText || matchedOpd.nama,
                         skp_unor_induk: unorIndukText || matchedOpd.nama,
                         skp_jabatan: jabatanText,
-                        hasil_kerja: hasilKerjaIdx !== -1 ? String(row[hasilKerjaIdx] || '').trim() : '',
-                        perilaku_kerja: perilakuIdx !== -1 ? String(row[perilakuIdx] || '').trim() : '',
-                        hasil_akhir: predVal || 'Tidak membuat SKP',
+                        hasil_kerja: rawHk ? String(rawHk).trim() : '',
+                        perilaku_kerja: rawPk ? String(rawPk).trim() : '',
+                        hasil_akhir: normalizedPred,
                         golru: golruIdx !== -1 ? String(row[golruIdx] || '').trim() : '',
                         jenis_pegawai: statusVal,
                         skp_jenis_jabatan: jenisJabatanIdx !== -1 ? String(row[jenisJabatanIdx] || '').trim() : '',
