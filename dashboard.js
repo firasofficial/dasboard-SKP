@@ -5,8 +5,8 @@
 // ==========================================
 let STORAGE_MODE = 'supabase';
 
-let SUPABASE_URL = 'https://hjinzrpqbcrjrllylrth.supabase.co';
-let SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqaW56cnBxYmNyanJsbHlscnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MDk2NzUsImV4cCI6MjA5OTQ4NTY3NX0.zBTeSstK6ft82yyGRbr-A90mmRT14TSCj4dOvM0vzDw';
+let SUPABASE_URL = 'https://vfxscyvaolgddugvoljr.supabase.co';
+let SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmeHNjeXZhb2xnZGR1Z3ZvbGpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0NzY2MTIsImV4cCI6MjEwNTA1MjYxMn0.6ghBfApCvtITxiymZhykgY9NlRgGIesf-C7RhMc7VFU';
 
 if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || !SUPABASE_URL) {
     SUPABASE_URL = localStorage.getItem('supabase_url') || '';
