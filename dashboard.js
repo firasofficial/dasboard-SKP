@@ -345,38 +345,60 @@ function getCachedOpdAliasPairs() {
 // PENCARIAN & PEMETAAN NAMA OPD DARI DATASET
 // ==========================================
 function matchOpdFromText(unorInduk, unor, jabatan) {
-    const combined = [unorInduk, unor, jabatan].filter(Boolean).join(' ');
-    if (!combined) return null;
-    const clean = combined.toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+    const cleanInduk = String(unorInduk || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+    const cleanUnor = String(unor || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+    const cleanJabatan = String(jabatan || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+    const cleanAll = [cleanInduk, cleanUnor, cleanJabatan].filter(Boolean).join(' ');
+
+    if (!cleanAll) return null;
 
     // 1. Cek Exact ID
-    const byId = MASTER_OPD_LIST.find(o => o.id.toLowerCase() === clean);
+    const byId = MASTER_OPD_LIST.find(o => o.id.toLowerCase() === cleanInduk || o.id.toLowerCase() === cleanAll);
     if (byId) return byId;
 
     // 2. Prioritas Utama: Identifikasi Sektor Khusus Sekolah/Pendidikan & Puskesmas/Kesehatan
     // Sekolah / Pendidikan -> Wajib masuk DISDIK (kecuali Dayah, MPA, Disparpora)
-    const isSekolah = /\b(smp|smpn|sd|sdn|skb|spnf|paud|tk|tkn|guru|sekolah|pengawas sekolah|penilik|kepala sekolah)\b/i.test(clean);
+    const isSekolah = /\b(smp|smpn|sd|sdn|skb|spnf|paud|tk|tkn|guru|sekolah|pengawas sekolah|penilik|kepala sekolah)\b/i.test(cleanAll);
     
     // Puskesmas / Kesehatan -> Wajib masuk DINKES (kecuali RSUD)
-    const isKesehatan = /\b(puskesmas|pkm|labkesda|pustu|poskesdes|dokter|bidan|perawat|sanitarian|nutrisionis|apoteker)\b/i.test(clean);
+    const isKesehatan = /\b(puskesmas|pkm|labkesda|pustu|poskesdes|dokter|bidan|perawat|sanitarian|nutrisionis|apoteker)\b/i.test(cleanAll);
 
     if (isSekolah) {
-        if (clean.includes('dayah')) return MASTER_OPD_LIST.find(o => o.id === 'DINAS_DAYAH') || MASTER_OPD_LIST.find(o => o.id === 'DISDIK');
-        if (clean.includes('majelis pendidikan') || clean.includes(' mpa')) return MASTER_OPD_LIST.find(o => o.id === 'SET_MPA') || MASTER_OPD_LIST.find(o => o.id === 'DISDIK');
-        if (clean.includes('disparpora') || clean.includes('pariwisata pemuda')) return MASTER_OPD_LIST.find(o => o.id === 'DISPARPORA') || MASTER_OPD_LIST.find(o => o.id === 'DISDIK');
+        if (cleanAll.includes('dayah')) return MASTER_OPD_LIST.find(o => o.id === 'DINAS_DAYAH') || MASTER_OPD_LIST.find(o => o.id === 'DISDIK');
+        if (cleanAll.includes('majelis pendidikan') || cleanAll.includes(' mpa')) return MASTER_OPD_LIST.find(o => o.id === 'SET_MPA') || MASTER_OPD_LIST.find(o => o.id === 'DISDIK');
+        if (cleanAll.includes('disparpora') || cleanAll.includes('pariwisata pemuda')) return MASTER_OPD_LIST.find(o => o.id === 'DISPARPORA') || MASTER_OPD_LIST.find(o => o.id === 'DISDIK');
         return MASTER_OPD_LIST.find(o => o.id === 'DISDIK');
     }
 
     if (isKesehatan) {
-        if (clean.includes('zubir mahmud') || clean.includes('rsud zm') || clean.includes('dr zubir')) return MASTER_OPD_LIST.find(o => o.id === 'RSUD_ZM') || MASTER_OPD_LIST.find(o => o.id === 'DINKES');
-        if (clean.includes('sultan abdul') || clean.includes('rsud saas') || clean.includes('rsud peureulak')) return MASTER_OPD_LIST.find(o => o.id === 'RSUD_SAAS') || MASTER_OPD_LIST.find(o => o.id === 'DINKES');
+        if (cleanAll.includes('zubir mahmud') || cleanAll.includes('rsud zm') || cleanAll.includes('dr zubir')) return MASTER_OPD_LIST.find(o => o.id === 'RSUD_ZM') || MASTER_OPD_LIST.find(o => o.id === 'DINKES');
+        if (cleanAll.includes('sultan abdul') || cleanAll.includes('rsud saas') || cleanAll.includes('rsud peureulak')) return MASTER_OPD_LIST.find(o => o.id === 'RSUD_SAAS') || MASTER_OPD_LIST.find(o => o.id === 'DINKES');
         return MASTER_OPD_LIST.find(o => o.id === 'DINKES');
     }
 
-    // 3. Cek Aliases (Sorted by length descending)
     const aliasPairs = getCachedOpdAliasPairs();
+
+    // 3. Cek Hierarki Induk (unorInduk) terlebih dahulu agar sub-unit tidak salah memicu keyword dinas lain
+    if (cleanInduk) {
+        for (const pair of aliasPairs) {
+            if (cleanInduk.includes(pair.alias)) {
+                return pair.opd;
+            }
+        }
+    }
+
+    // 4. Cek unor
+    if (cleanUnor) {
+        for (const pair of aliasPairs) {
+            if (cleanUnor.includes(pair.alias)) {
+                return pair.opd;
+            }
+        }
+    }
+
+    // 5. Cek Aliases pada seluruh teks (Sorted by length descending)
     for (const pair of aliasPairs) {
-        if (clean.includes(pair.alias)) {
+        if (cleanAll.includes(pair.alias)) {
             // Jika alias matching adalah KECAMATAN, pastikan record ini bukan sekolah/kesehatan
             if (pair.opd.kategori === 'KECAMATAN' && (isSekolah || isKesehatan)) {
                 continue;
