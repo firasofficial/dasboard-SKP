@@ -1703,7 +1703,7 @@ async function unduhDataAsnExcel() {
             const headerRow = ws.getRow(4);
             headerRow.height = 37.5;
             headerRow.values = [
-                'NO', 'NIP', 'NAMA', 'GOL. RUANG', 'JABATAN', 'UNIT KERJA', 'JENIS ASN', 'NILAI SKP', 'KET'
+                'NO', 'NIP', 'NAMA', 'GOL. RUANG', 'JABATAN', 'SATUAN KERJA', 'JENIS ASN', 'NILAI SKP', 'KET'
             ];
             headerRow.eachCell((cell) => {
                 cell.font = { name: 'Arial Narrow', size: 12, bold: true };
@@ -1815,7 +1815,7 @@ async function unduhDataAsnExcel() {
             'NAMA',
             'GOL. RUANG',
             'JABATAN',
-            'UNIT KERJA',
+            'SATUAN KERJA',
             'JENIS ASN',
             'NILAI SKP',
             'KET'
