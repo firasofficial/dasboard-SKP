@@ -309,6 +309,9 @@ async function syncFromCloudDatabase() {
             saveLocalRekapList(mapped);
             console.log(`SIMONIKA: Berhasil mengunduh ${mapped.length} data rekapitulasi dari Supabase.`);
             return true;
+        } else {
+            saveLocalRekapList([]);
+            return true;
         }
     } catch (e) {
         console.warn("Gagal sinkronisasi data dari Cloud Supabase:", e);
@@ -411,26 +414,39 @@ async function resetAllSimonikaData() {
     if (!confirmRes.isConfirmed) return;
 
     try {
+        // 1. Bersihkan Local Storage
         localStorage.removeItem(LOCAL_STORAGE_KEY_REKAP);
+
+        // 2. Bersihkan IndexedDB secara asinkron
         const db = await openSimonikaDB();
         if (db && db.objectStoreNames.contains(STORE_ASN)) {
-            const tx = db.transaction([STORE_ASN], 'readwrite');
-            const store = tx.objectStore(STORE_ASN);
-            store.clear();
+            await new Promise((resolve) => {
+                const tx = db.transaction([STORE_ASN], 'readwrite');
+                const store = tx.objectStore(STORE_ASN);
+                store.clear();
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => resolve(false);
+            });
         }
 
-        // Hapus dari Supabase jika terhubung
+        // 3. Bersihkan memori in-memory JavaScript
+        currentLoadedAsn = [];
+        filteredAsn = [];
+
+        // 4. Hapus dari Supabase jika terhubung
         if (supabaseClient) {
             try {
-                await supabaseClient.from('skp_detail_pegawai').delete().neq('id', 0);
-                await supabaseClient.from('skp_rekap_bulanan').delete().neq('id', 0);
+                await supabaseClient.from('skp_detail_pegawai').delete().gt('id', 0);
+                await supabaseClient.from('skp_rekap_bulanan').delete().gt('id', 0);
             } catch (supErr) {
                 console.warn("Gagal mengosongkan Supabase:", supErr);
             }
         }
 
+        // 5. Perbarui tampilan
         populateFilters();
         refreshAllData();
+
         simonikaAlert({
             title: 'Database Dikosongkan!',
             text: 'Seluruh dataset master dan data nominatif ASN berhasil dibersihkan dari sistem lokal dan Cloud Supabase.',
