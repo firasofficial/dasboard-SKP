@@ -2418,8 +2418,8 @@ function processMasterDatasetExcel(file) {
                     const cleanH = h.replace(/[_]/g, ' ').replace(/\s+/g, ' ').trim();
                     if (nipIdx === -1 && cleanH.includes('nip')) nipIdx = idx;
                     if (namaIdx === -1 && cleanH.includes('nama') && !cleanH.includes('unor')) namaIdx = idx;
-                    if (unorIdx === -1 && (cleanH === 'skp unor' || cleanH.includes('satuan kerja') || cleanH.includes('unit kerja') || cleanH === 'unit')) unorIdx = idx;
-                    if (unorIndukIdx === -1 && (cleanH.includes('unor induk') || cleanH.includes('induk'))) unorIndukIdx = idx;
+                    if (unorIdx === -1 && (cleanH === 'skp unor' || cleanH === 'unit' || (cleanH.includes('unit kerja') && !cleanH.includes('satuan')))) unorIdx = idx;
+                    if (unorIndukIdx === -1 && (cleanH.includes('unor induk') || cleanH.includes('satuan kerja') || cleanH.includes('induk'))) unorIndukIdx = idx;
                     if (jabatanIdx === -1 && (cleanH.includes('jabatan') && !cleanH.includes('jenis'))) jabatanIdx = idx;
                     if (hasilKerjaIdx === -1 && (cleanH.includes('hasil kerja') || cleanH.includes('rating hasil') || cleanH === 'hasil')) hasilKerjaIdx = idx;
                     if (perilakuIdx === -1 && (cleanH.includes('perilaku') || cleanH.includes('rating perilaku'))) perilakuIdx = idx;
