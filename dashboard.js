@@ -1146,7 +1146,7 @@ function renderDashboardDOM(data) {
             let badgeClass = '';
             if (item.nama === 'Sangat Baik') badgeClass = 'bg-green-50 text-green-700 border-green-200';
             else if (item.nama === 'Baik') badgeClass = 'bg-blue-50 text-blue-700 border-blue-200';
-            else if (item.nama === 'Butuh Perbaikan') badgeClass = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+            else if (item.nama === 'Butuh Perbaikan') badgeClass = 'bg-yellow-50 text-yellow-800 border-yellow-300';
             else if (item.nama === 'Kurang') badgeClass = 'bg-orange-50 text-orange-700 border-orange-200';
             else if (item.nama === 'Sangat Kurang') badgeClass = 'bg-red-50 text-red-700 border-red-200';
             else if (item.nama === 'Tidak membuat SKP') badgeClass = 'bg-slate-100 text-slate-700 border-slate-300';
@@ -1157,7 +1157,7 @@ function renderDashboardDOM(data) {
                     <span class="px-1.5 py-0.5 rounded border text-[11px] font-bold ${badgeClass}">${item.nama}</span>
                 </td>
                 <td class="py-1.5 px-3 text-right font-extrabold text-slate-800 text-xs">${formatNumber(item.jumlah)}</td>
-                <td class="py-1.5 px-3 text-right font-medium text-slate-500 text-xs">${item.persen.toFixed(2)}%</td>
+                <td class="py-1.5 px-3 text-right font-medium text-slate-500 text-xs">${item.persen.toFixed(1)}%</td>
             `;
             tbody.appendChild(row);
         });
