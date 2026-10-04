@@ -788,7 +788,37 @@ function populateOpdSingleSelect() {
 
     renderOpdCustomDropdownItems();
     updateOpdCustomDropdownTriggerLabel();
+    populateOpdTitleSelect();
 }
+
+// Dropdown OPD kompak di title bar dashboard
+function populateOpdTitleSelect() {
+    const select = document.getElementById('opd-title-select');
+    if (!select || typeof MASTER_OPD_LIST === 'undefined') return;
+    const mainSelect = document.getElementById('opd-single-select');
+    const currentVal = mainSelect ? mainSelect.value : '';
+    select.innerHTML = '';
+    MASTER_OPD_LIST.slice().sort((a, b) => a.nama.localeCompare(b.nama)).forEach(opd => {
+        const opt = document.createElement('option');
+        opt.value = opd.id;
+        opt.textContent = opd.nama;
+        select.appendChild(opt);
+    });
+    if (currentVal && [...select.options].some(o => o.value === currentVal)) {
+        select.value = currentVal;
+    }
+}
+window.populateOpdTitleSelect = populateOpdTitleSelect;
+
+function onTitleOpdChange(opdId) {
+    const mainSelect = document.getElementById('opd-single-select');
+    if (mainSelect) {
+        mainSelect.value = opdId;
+        if (typeof renderSelectedOpdDetail === 'function') renderSelectedOpdDetail();
+    }
+    if (typeof updateOpdCustomDropdownTriggerLabel === 'function') updateOpdCustomDropdownTriggerLabel();
+}
+window.onTitleOpdChange = onTitleOpdChange;
 
 function updateOpdCustomDropdownTriggerLabel() {
     const select = document.getElementById('opd-single-select');
@@ -812,6 +842,12 @@ function updateOpdCustomDropdownTriggerLabel() {
     }
 
     // Dropdown OPD aktif untuk semua level (termasuk operator OPD)
+
+    // Sinkronkan dropdown kompak di title bar
+    const titleSelect = document.getElementById('opd-title-select');
+    if (titleSelect && [...titleSelect.options].some(o => o.value === currentId)) {
+        titleSelect.value = currentId;
+    }
 }
 window.updateOpdCustomDropdownTriggerLabel = updateOpdCustomDropdownTriggerLabel;
 
@@ -1437,7 +1473,8 @@ let asnPageSize = 15;
 async function renderSelectedOpdDetail() {
     window.renderSelectedOpdDetail = renderSelectedOpdDetail;
     const select = document.getElementById('opd-single-select');
-    let opdId = (USER_LEVEL === 2 && USER_OPD_ID) ? USER_OPD_ID : (select?.value || 'BKPSDM');
+    // Operator OPD bisa pilih OPD lain via dropdown (default: OPD sendiri)
+    let opdId = select?.value || ((USER_LEVEL === 2 && USER_OPD_ID) ? USER_OPD_ID : 'BKPSDM');
 
     updateOpdCustomDropdownTriggerLabel();
 
