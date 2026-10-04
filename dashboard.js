@@ -723,10 +723,8 @@ function populateOpdSingleSelect() {
     const select = document.getElementById('opd-single-select');
     if (!select) return;
 
+    // Operator OPD kini bisa melihat semua OPD (default: OPD sendiri)
     let list = MASTER_OPD_LIST;
-    if (USER_LEVEL === 2 && USER_OPD_ID) {
-        list = MASTER_OPD_LIST.filter(o => o.id === USER_OPD_ID);
-    }
 
     const previousVal = select.value;
     select.innerHTML = '';
@@ -738,9 +736,13 @@ function populateOpdSingleSelect() {
         select.appendChild(opt);
     });
 
-    if (USER_LEVEL === 2 && USER_OPD_ID) {
-        select.value = USER_OPD_ID;
-        select.disabled = true;
+    if (USER_LEVEL === 2 && USER_OPD_ID && list.some(o => o.id === USER_OPD_ID)) {
+        // Default ke OPD sendiri, tapi dropdown tetap aktif bisa pilih OPD lain
+        if (!previousVal || !list.some(o => o.id === previousVal)) {
+            select.value = USER_OPD_ID;
+        } else {
+            select.value = previousVal;
+        }
     } else if (list.some(o => o.id === previousVal)) {
         select.value = previousVal;
     } else if (list.some(o => o.id === 'BKPSDM')) {
@@ -774,12 +776,7 @@ function updateOpdCustomDropdownTriggerLabel() {
         }
     }
 
-    if (USER_LEVEL === 2 && USER_OPD_ID) {
-        if (trigger) {
-            trigger.disabled = true;
-            trigger.classList.add('cursor-not-allowed', 'opacity-90');
-        }
-    }
+    // Dropdown OPD aktif untuk semua level (termasuk operator OPD)
 }
 window.updateOpdCustomDropdownTriggerLabel = updateOpdCustomDropdownTriggerLabel;
 
@@ -790,9 +787,6 @@ function renderOpdCustomDropdownItems(filteredList) {
     if (!listContainer || !select) return;
 
     let list = filteredList || MASTER_OPD_LIST;
-    if (USER_LEVEL === 2 && USER_OPD_ID) {
-        list = MASTER_OPD_LIST.filter(o => o.id === USER_OPD_ID);
-    }
 
     if (matchCount) {
         matchCount.textContent = `${list.length} Unit Kerja`;
@@ -982,7 +976,8 @@ async function updateDashboardDynamic() {
 
     const selectedYear = parseInt(filterTahunEl.value);
     const selectedBulan = filterBulanEl.value;
-    let selectedOpd = (USER_LEVEL === 2 && USER_OPD_ID) ? USER_OPD_ID : opdSelectEl.value;
+    // Operator OPD bisa pilih OPD lain via dropdown; default OPD sendiri
+    let selectedOpd = (opdSelectEl && opdSelectEl.value) ? opdSelectEl.value : ((USER_LEVEL === 2 && USER_OPD_ID) ? USER_OPD_ID : 'SEMUA');
 
     let periodData = getLocalRekapList().filter(item => item.bulan === selectedBulan && parseInt(item.tahun) === selectedYear);
 
