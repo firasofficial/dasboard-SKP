@@ -245,14 +245,15 @@ const INDONESIAN_MONTHS = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI
 let currentCategoryFilter = 'SEMUA';
 let kinerjaChart = null;
 
-// Hitung batas atas sumbu Y yang selalu bulat bagus (kelipatan 1/2/5×10^n)
+// Hitung batas atas sumbu Y yang selalu bulat bagus (1/1.2/1.5/2/2.5/3/4/5/6/8/10 × 10^n)
 function hitungYMax(nilai) {
     const maxVal = Math.max(0, ...nilai);
     if (maxVal === 0) return 10;
-    const kasar = maxVal * 1.15;
+    const kasar = maxVal * 1.12;
     const pangkat = Math.pow(10, Math.floor(Math.log10(kasar)));
     const langkah = kasar / pangkat;
-    const bulat = langkah <= 1 ? 1 : langkah <= 2 ? 2 : langkah <= 5 ? 5 : 10;
+    const pilihan = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
+    const bulat = pilihan.find(p => langkah <= p) || 10;
     return bulat * pangkat;
 }
 
