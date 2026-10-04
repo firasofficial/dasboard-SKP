@@ -245,6 +245,17 @@ const INDONESIAN_MONTHS = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI
 let currentCategoryFilter = 'SEMUA';
 let kinerjaChart = null;
 
+// Hitung batas atas sumbu Y yang selalu bulat bagus (kelipatan 1/2/5×10^n)
+function hitungYMax(nilai) {
+    const maxVal = Math.max(0, ...nilai);
+    if (maxVal === 0) return 10;
+    const kasar = maxVal * 1.15;
+    const pangkat = Math.pow(10, Math.floor(Math.log10(kasar)));
+    const langkah = kasar / pangkat;
+    const bulat = langkah <= 1 ? 1 : langkah <= 2 ? 2 : langkah <= 5 ? 5 : 10;
+    return bulat * pangkat;
+}
+
 // ==========================================
 // ENGINE LOCAL STORAGE (100% OFFLINE DEMO)
 // ==========================================
@@ -1207,8 +1218,8 @@ function renderDashboardDOM(data) {
 
     if (kinerjaChart) {
         kinerjaChart.data.datasets[0].data = data.predikat.map(item => item.jumlah);
-        const maxVal = Math.max(...data.predikat.map(item => item.jumlah));
-        kinerjaChart.options.scales.y.max = maxVal === 0 ? 10 : Math.ceil(maxVal * 1.15);
+        kinerjaChart.options.scales.y.max = hitungYMax(data.predikat.map(item => item.jumlah));
+        kinerjaChart.resize();
         kinerjaChart.update();
     }
 }
