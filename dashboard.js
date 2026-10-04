@@ -1522,6 +1522,7 @@ async function renderSelectedOpdDetail() {
     const asnCard = document.getElementById('asn-table-card');
     const lockNote = document.getElementById('asn-nominatif-lock-note');
     const btnNominatif = document.getElementById('btn-unduh-nominatif');
+    const btnRekap = document.getElementById('btn-unduh-rekap');
     const searchInput = document.getElementById('asn-search-input');
     const filterPred = document.getElementById('asn-filter-predikat');
     const filterStatus = document.getElementById('asn-filter-status');
@@ -1533,7 +1534,7 @@ async function renderSelectedOpdDetail() {
         asnRecords = []; // jangan muat/muat turun data nominatif OPD lain sama sekali
         if (asnCard) asnCard.classList.add('opacity-60');
         if (lockNote) lockNote.classList.remove('hidden');
-        [btnNominatif, searchInput, filterPred, filterStatus, pageSizeSel].forEach(el => {
+        [btnNominatif, btnRekap, searchInput, filterPred, filterStatus, pageSizeSel].forEach(el => {
             if (el) { el.style.display = 'none'; if (el.disabled !== undefined) el.disabled = true; }
         });
         if (paginationInfo) paginationInfo.textContent = 'Detail nominatif terkunci';
@@ -1541,7 +1542,7 @@ async function renderSelectedOpdDetail() {
     } else {
         if (asnCard) asnCard.classList.remove('opacity-60');
         if (lockNote) lockNote.classList.add('hidden');
-        [btnNominatif, searchInput, filterPred, filterStatus, pageSizeSel].forEach(el => {
+        [btnNominatif, btnRekap, searchInput, filterPred, filterStatus, pageSizeSel].forEach(el => {
             if (el) { el.style.display = ''; el.disabled = false; }
         });
     }
