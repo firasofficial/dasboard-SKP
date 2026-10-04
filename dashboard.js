@@ -1234,7 +1234,45 @@ async function getAsnRecordsByOpd(opdId, bulan, tahun) {
         });
     }
 
-    // Jika di IndexedDB lokal belum ada, ambil dari Cloud Supabase
+    // Cek kevalidan cache: bandingkan timestamp lokal vs server
+    // Jika server lebih baru (upload dari perangkat lain), cache lokal diabaikan
+    let useCache = records && records.length > 0;
+    if (useCache && supabaseClient) {
+        try {
+            const cacheKey = `simonika_cache_ts_${tahun}_${bulan}`;
+            const localTs = localStorage.getItem(cacheKey);
+            const { data: rekapData } = await supabaseClient
+                .from('skp_rekap_bulanan')
+                .select('updated_at')
+                .eq('opd_id', opdId)
+                .eq('bulan', bulan)
+                .eq('tahun', parseInt(tahun))
+                .limit(1)
+                .maybeSingle();
+            const serverTs = rekapData?.updated_at;
+            if (serverTs && localTs && new Date(serverTs) > new Date(localTs)) {
+                console.log(`SIMONIKA: Cache lokal ${opdId} kadaluarsa, ambil baru dari server.`);
+                useCache = false;
+                records = [];
+                // Hapus cache kadaluarsa untuk periode ini
+                try {
+                    const tx2 = db.transaction([STORE_ASN], 'readwrite');
+                    const store2 = tx2.objectStore(STORE_ASN);
+                    const idx2 = store2.index('by_period_opd');
+                    const kr2 = IDBKeyRange.only([parseInt(tahun), bulan, opdId]);
+                    const curReq = idx2.openCursor(kr2);
+                    curReq.onsuccess = function (e) {
+                        const cursor = e.target.result;
+                        if (cursor) { cursor.delete(); cursor.continue(); }
+                    };
+                } catch (delErr) { console.warn("Gagal hapus cache kadaluarsa:", delErr); }
+            }
+        } catch (tsErr) {
+            console.warn("Gagal cek versi cache:", tsErr);
+        }
+    }
+
+    // Jika di IndexedDB lokal belum ada (atau kadaluarsa), ambil dari Cloud Supabase
     if ((!records || records.length === 0) && supabaseClient) {
         try {
             const { data, error } = await supabaseClient
@@ -1270,6 +1308,7 @@ async function getAsnRecordsByOpd(opdId, bulan, tahun) {
                         const tx = db.transaction([STORE_ASN], 'readwrite');
                         const store = tx.objectStore(STORE_ASN);
                         records.forEach(r => store.add(r));
+                        try { localStorage.setItem(`simonika_cache_ts_${tahun}_${bulan}`, new Date().toISOString()); } catch (e) {}
                     } catch (cacheErr) {
                         console.warn("Gagal menyimpan cache ke IndexedDB:", cacheErr);
                     }
@@ -2539,6 +2578,8 @@ function processMasterDatasetExcel(file) {
                 // Simpan Seluruh Rincian Baris ASN ke IndexedDB
                 await saveAsnRecordsBatch(allAsnRecords, finalMonth, finalYear);
                 console.log(`Berhasil menyimpan ${allAsnRecords.length} baris nominatif ASN ke IndexedDB.`);
+                // Tandai waktu cache lokal agar bisa dideteksi kadaluarsa
+                try { localStorage.setItem(`simonika_cache_ts_${finalYear}_${finalMonth}`, new Date().toISOString()); } catch (e) {}
 
                 // Simpan ke Supabase Cloud Database jika terhubung
                 if (supabaseClient) {
@@ -2602,15 +2643,33 @@ function processMasterDatasetExcel(file) {
                             nama_file: file.name
                         }));
 
+                        // Insert per chunk dengan retry; chunk gagal tidak menghentikan chunk lain
+                        const failedChunks = [];
                         for (let i = 0; i < mappedDetail.length; i += chunkSize) {
                             const chunk = mappedDetail.slice(i, i + chunkSize);
-                            const { error: chunkErr } = await supabaseClient
-                                .from('skp_detail_pegawai')
-                                .insert(chunk);
-                            if (chunkErr) {
-                                console.warn("Supabase insert detail chunk error:", chunkErr);
-                                break;
+                            let chunkOk = false;
+                            let lastErr = null;
+                            for (let attempt = 1; attempt <= 3 && !chunkOk; attempt++) {
+                                const { error: chunkErr } = await supabaseClient
+                                    .from('skp_detail_pegawai')
+                                    .insert(chunk);
+                                if (!chunkErr) {
+                                    chunkOk = true;
+                                } else {
+                                    lastErr = chunkErr;
+                                    console.warn(`Supabase insert chunk ${Math.floor(i / chunkSize) + 1} percobaan ${attempt} gagal:`, chunkErr.message || chunkErr);
+                                    if (attempt < 3) await new Promise(res => setTimeout(res, 1000 * attempt));
+                                }
                             }
+                            if (!chunkOk) {
+                                failedChunks.push({ chunkIndex: Math.floor(i / chunkSize) + 1, rowStart: i + 1, error: lastErr });
+                            }
+                            const donePct = Math.min(85 + Math.round(((i + chunkSize) / mappedDetail.length) * 10), 95);
+                            progressBar.style.width = donePct + '%';
+                            percentText.textContent = donePct + '%';
+                        }
+                        if (failedChunks.length > 0) {
+                            console.error("SIMONIKA: chunk gagal permanen:", failedChunks);
                         }
                         console.log("SIMONIKA: Berhasil sinkronisasi master dataset ke Cloud Supabase.");
                     } catch (supSyncErr) {
