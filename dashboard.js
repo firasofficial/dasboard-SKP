@@ -794,7 +794,12 @@ function populateOpdSingleSelect() {
 // Dropdown OPD kompak di title bar dashboard
 function populateOpdTitleSelect() {
     const select = document.getElementById('opd-title-select');
-    if (!select || typeof MASTER_OPD_LIST === 'undefined') return;
+    if (!select) return;
+    if (typeof MASTER_OPD_LIST === 'undefined' || !MASTER_OPD_LIST || MASTER_OPD_LIST.length === 0) {
+        // Coba lagi setelah data siap
+        setTimeout(populateOpdTitleSelect, 500);
+        return;
+    }
     const mainSelect = document.getElementById('opd-single-select');
     const currentVal = mainSelect ? mainSelect.value : '';
     select.innerHTML = '';
