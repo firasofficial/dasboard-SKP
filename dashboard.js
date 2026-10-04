@@ -983,7 +983,13 @@ function updateOpdDropdown() {
     if (USER_LEVEL === 2 && USER_OPD_ID) {
         const defaultOption = document.createElement('option');
         defaultOption.value = 'SEMUA';
-        defaultOption.textContent = '-- TAMPILKAN SEMUA OPD --';
+        if (currentCategoryFilter === 'DINAS') {
+            defaultOption.textContent = '-- TAMPILKAN SEMUA DINAS / BADAN --';
+        } else if (currentCategoryFilter === 'KECAMATAN') {
+            defaultOption.textContent = '-- TAMPILKAN SEMUA KECAMATAN --';
+        } else {
+            defaultOption.textContent = '-- TAMPILKAN SEMUA OPD --';
+        }
         opdSelect.appendChild(defaultOption);
         MASTER_OPD_LIST
             .filter(item => !currentCategoryFilter || currentCategoryFilter === 'SEMUA' || item.kategori === currentCategoryFilter)
@@ -1052,7 +1058,7 @@ async function updateDashboardDynamic() {
 
     let periodData = getLocalRekapList().filter(item => item.bulan === selectedBulan && parseInt(item.tahun) === selectedYear);
 
-    if (currentCategoryFilter !== 'SEMUA' && USER_LEVEL !== 2) {
+    if (currentCategoryFilter !== 'SEMUA') {
         periodData = periodData.filter(row => {
             const meta = MASTER_OPD_LIST.find(o => o.id === row.opd_id);
             return meta && meta.kategori === currentCategoryFilter;
@@ -3972,6 +3978,7 @@ window.setCategoryFilter = setCategoryFilter;
     });
 
     updateOpdDropdown();
+    syncSearchableDropdown();
     updateDashboardDynamic();
 };
 
