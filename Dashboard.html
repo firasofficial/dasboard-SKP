@@ -1612,6 +1612,44 @@
 
     <!-- Script Logika Frontend -->
     <script src="dashboard.js"></script>
+    <script>
+    // Toggle sidebar untuk mobile
+    (function() {
+        var btn = document.getElementById('sidebar-toggle');
+        var sidebar = document.getElementById('sidebar');
+        var overlay = document.getElementById('sidebar-overlay');
+        if (!btn || !sidebar) return;
+        
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            if (overlay) overlay.classList.remove('hidden');
+        }
+        function closeSidebar() {
+            // Hanya sembunyikan di mobile (<768px)
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+                if (overlay) overlay.classList.add('hidden');
+            }
+        }
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (sidebar.classList.contains('-translate-x-full')) {
+                openSidebar();
+            } else {
+                closeSidebar();
+            }
+        });
+        if (overlay) {
+            overlay.addEventListener('click', closeSidebar);
+        }
+        // Tutup sidebar saat klik menu di mobile
+        sidebar.addEventListener('click', function(e) {
+            if (e.target.closest('a') && window.innerWidth < 768) {
+                closeSidebar();
+            }
+        });
+    })();
+    </script>
 </body>
 
 </html>
