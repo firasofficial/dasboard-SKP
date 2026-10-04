@@ -75,8 +75,13 @@ function applyUserLevelPermissions() {
         if (navLaporanBulanan) navLaporanBulanan.style.display = 'none';
         if (navManajemenPengguna) navManajemenPengguna.style.display = 'none';
 
-        // 2. Hide OPD selection dropdown on Dashboard (Level 2 is locked to their OPD)
-        if (dashboardFilterSec) dashboardFilterSec.style.display = 'none';
+        // 2. Level 2: tampilkan filter OPD di Dashboard agar bisa lihat statistik OPD lain (agregat).
+        //    Default tetap OPD-nya sendiri; nominatif tetap terkunci di Laporan Kinerja.
+        if (dashboardFilterSec) dashboardFilterSec.style.display = 'flex';
+        const dashFilterTitle = dashboardFilterSec?.querySelector('h3');
+        if (dashFilterTitle) dashFilterTitle.textContent = 'Bandingkan Statistik Unit Kerja Lain';
+        const opdSelectEl = document.getElementById('opd-select');
+        if (opdSelectEl && !opdSelectEl.value && USER_OPD_ID) opdSelectEl.value = USER_OPD_ID;
 
         // 3. Level 2 BOLEH melihat daftar & statistik seluruh OPD (angka agregat),
         //    namun detail nominatif OPD lain dikunci (lihat renderSelectedOpdDetail).
@@ -973,14 +978,25 @@ function updateOpdDropdown() {
 
     opdSelect.innerHTML = '';
 
+    // Level 2 (Operator OPD): dropdown PENUH agar bisa membandingkan statistik unit kerja lain.
+    // Nominatif tetap terkunci di Laporan Kinerja (lihat renderSelectedOpdDetail).
     if (USER_LEVEL === 2 && USER_OPD_ID) {
-        const myOpd = MASTER_OPD_LIST.find(o => o.id === USER_OPD_ID) || { id: USER_OPD_ID, nama: USER_OPD_NAME };
-        const opt = document.createElement('option');
-        opt.value = myOpd.id;
-        opt.textContent = myOpd.nama;
-        opdSelect.appendChild(opt);
-        opdSelect.value = USER_OPD_ID;
-        opdSelect.disabled = true;
+        const defaultOption = document.createElement('option');
+        defaultOption.value = 'SEMUA';
+        defaultOption.textContent = '-- TAMPILKAN SEMUA OPD --';
+        opdSelect.appendChild(defaultOption);
+        MASTER_OPD_LIST
+            .filter(item => !currentCategoryFilter || currentCategoryFilter === 'SEMUA' || item.kategori === currentCategoryFilter)
+            .sort((a, b) => a.nama.localeCompare(b.nama))
+            .forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.nama;
+                opdSelect.appendChild(option);
+            });
+        // Default: OPD sendiri
+        opdSelect.value = (currentSelectedOpd && currentSelectedOpd !== '') ? currentSelectedOpd : USER_OPD_ID;
+        opdSelect.disabled = false;
         return;
     }
 
