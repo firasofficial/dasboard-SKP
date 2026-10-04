@@ -300,6 +300,7 @@
             }
         }
     </style>
+<style>@media(min-width:768px){#main-wrapper{margin-left:16rem;width:calc(100% - 16rem);}}</style>
 </head>
 
 <body class="text-slate-800 antialiased">
@@ -401,7 +402,7 @@
         <div id="sidebar-overlay" class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm hidden md:hidden"></div>
 
         <!-- Main Content Wrapper -->
-        <div class="md:ml-64 min-h-screen flex flex-col">
+        <div id="main-wrapper" class="min-h-screen flex flex-col" style="width:100%;">
             <!-- Top Header Navbar -->
             <header
                 class="h-11 sm:h-12 bg-white border-b border-slate-200/80 flex items-center justify-between px-3 sm:px-5 sticky top-0 z-30 shadow-xs">
