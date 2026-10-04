@@ -883,8 +883,8 @@
                                 </div>
 
                                 <!-- Tombol Aksi Unduh -->
-                                <div class="flex flex-wrap items-center gap-1.5 shrink-0">
-                                    <button onclick="unduhDataAsnLengkapExcel()"
+                                <div class="flex flex-wrap items-center gap-1.5 shrink-0" id="opd-detail-actions">
+                                    <button onclick="unduhDataAsnLengkapExcel()" id="btn-unduh-nominatif"
                                         class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-xs active:scale-[0.98] transition-all focus:outline-none cursor-pointer">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -925,7 +925,11 @@
                             </div>
 
                             <!-- Tabel Nominatif ASN Unit Kerja Terpilih -->
-                            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden mt-3">
+                            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden mt-3" id="asn-table-card">
+                                <div id="asn-nominatif-lock-note" class="hidden p-4 text-center">
+                                    <p class="text-xs font-semibold text-slate-500">🔒 Detail nominatif pegawai OPD lain tidak dapat dilihat.</p>
+                                    <p class="text-[10px] text-slate-400 mt-0.5">Hanya angka statistik agregat yang ditampilkan sesuai kebijakan privasi data kepegawaian.</p>
+                                </div>
                                 <div class="p-2.5 px-3 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-2">
                                     <div>
                                         <div class="flex items-center gap-1.5">

@@ -78,11 +78,14 @@ function applyUserLevelPermissions() {
         // 2. Hide OPD selection dropdown on Dashboard (Level 2 is locked to their OPD)
         if (dashboardFilterSec) dashboardFilterSec.style.display = 'none';
 
-        // 3. Hide list of all other OPDs on Data OPD page
-        if (opdAllListSec) opdAllListSec.style.display = 'none';
+        // 3. Level 2 BOLEH melihat daftar & statistik seluruh OPD (angka agregat),
+        //    namun detail nominatif OPD lain dikunci (lihat renderSelectedOpdDetail).
+        if (opdAllListSec) opdAllListSec.style.display = 'block';
 
-        // 4. Hide / lock OPD selector dropdown on Data OPD page
-        if (opdSingleContainer) opdSingleContainer.style.display = 'none';
+        // 4. OPD selector tetap tampil agar Operator OPD dapat menelusuri statistik unit kerja lain
+        if (opdSingleContainer) opdSingleContainer.style.display = 'block';
+        const opdListSubtitle = document.querySelector('#section-daftar-seluruh-opd p');
+        if (opdListSubtitle) opdListSubtitle.textContent = 'Statistik ringkas seluruh unit kerja (detail nominatif hanya unit kerja Anda)';
     } else {
         // ADMINISTRATOR BKPSDM (SUPER ADMIN)
         if (levelBadge) {
@@ -738,6 +741,12 @@ function updateMonthStatusBadge(selectedMonth, selectedYear) {
         const badge = document.getElementById(bId);
         const text = document.getElementById(textIds[idx]);
         const cont = document.getElementById(containerIds[idx]);
+
+        // RBAC: badge jumlah OPD tidak relevan untuk Operator OPD (level 2) — sembunyikan
+        if (badge && USER_LEVEL === 2) {
+            badge.style.display = 'none';
+            return;
+        }
 
         if (badge && text) {
             const dot = badge.querySelector('span:first-child');
@@ -1507,6 +1516,36 @@ async function renderSelectedOpdDetail() {
         asnRecords = generateSampleAsnRecords(opd, selectedBulan, selectedYear, opdData);
     }
 
+    // RBAC PRIVASI: Operator OPD (level 2) hanya boleh melihat detail nominatif OPD-nya sendiri.
+    // Untuk OPD lain: statistik agregat (kartu angka) tetap tampil, nominatif & unduhan disembunyikan.
+    const isOwnOpd = (USER_LEVEL !== 2) || (opdId === USER_OPD_ID);
+    const asnCard = document.getElementById('asn-table-card');
+    const lockNote = document.getElementById('asn-nominatif-lock-note');
+    const btnNominatif = document.getElementById('btn-unduh-nominatif');
+    const searchInput = document.getElementById('asn-search-input');
+    const filterPred = document.getElementById('asn-filter-predikat');
+    const filterStatus = document.getElementById('asn-filter-status');
+    const paginationInfo = document.getElementById('asn-pagination-info');
+    const paginationControls = document.getElementById('asn-pagination-controls');
+    const pageSizeSel = document.getElementById('asn-page-size');
+
+    if (!isOwnOpd) {
+        asnRecords = []; // jangan muat/muat turun data nominatif OPD lain sama sekali
+        if (asnCard) asnCard.classList.add('opacity-60');
+        if (lockNote) lockNote.classList.remove('hidden');
+        [btnNominatif, searchInput, filterPred, filterStatus, pageSizeSel].forEach(el => {
+            if (el) { el.style.display = 'none'; if (el.disabled !== undefined) el.disabled = true; }
+        });
+        if (paginationInfo) paginationInfo.textContent = 'Detail nominatif terkunci';
+        if (paginationControls) paginationControls.innerHTML = '';
+    } else {
+        if (asnCard) asnCard.classList.remove('opacity-60');
+        if (lockNote) lockNote.classList.add('hidden');
+        [btnNominatif, searchInput, filterPred, filterStatus, pageSizeSel].forEach(el => {
+            if (el) { el.style.display = ''; el.disabled = false; }
+        });
+    }
+
     currentLoadedAsn = asnRecords || [];
     filterAsnTable();
 };
@@ -1716,6 +1755,15 @@ async function unduhDataAsnExcel() {
 
     const select = document.getElementById('opd-single-select');
     let opdId = select?.value || ((USER_LEVEL === 2 && USER_OPD_ID) ? USER_OPD_ID : 'BKPSDM'); // Operator bisa pilih OPD lain
+
+    // RBAC PRIVASI: Operator OPD hanya boleh mengunduh nominatif OPD-nya sendiri
+    if (USER_LEVEL === 2 && opdId !== USER_OPD_ID) {
+        if (window.simonikaAlert) {
+            simonikaAlert({ title: 'Akses Ditolak', text: 'Detail nominatif pegawai OPD lain tidak dapat diunduh. Hanya angka statistik agregat yang dapat dilihat.', icon: 'error' });
+        }
+        return;
+    }
+
     const selectedYear = parseInt(document.getElementById('opd-filter-tahun')?.value || 2026);
     const selectedBulan = document.getElementById('opd-filter-bulan')?.value || 'JULI';
     const opd = MASTER_OPD_LIST.find(o => o.id === opdId) || { id: opdId, nama: (USER_LEVEL === 2 ? USER_OPD_NAME : opdId), kategori: 'DINAS' };
@@ -1956,6 +2004,15 @@ async function unduhRekapOpdExcel() {
     const select = document.getElementById('opd-single-select');
 
     let opdId = select?.value || ((USER_LEVEL === 2 && USER_OPD_ID) ? USER_OPD_ID : 'BKPSDM'); // Operator bisa pilih OPD lain
+
+    // RBAC PRIVASI: rekap nominatif OPD lain tidak boleh diunduh oleh Operator OPD
+    if (USER_LEVEL === 2 && opdId !== USER_OPD_ID) {
+        if (window.simonikaAlert) {
+            simonikaAlert({ title: 'Akses Ditolak', text: 'Rekap nominatif OPD lain tidak dapat diunduh. Hanya angka statistik agregat yang dapat dilihat.', icon: 'error' });
+        }
+        return;
+    }
+
     const selectedYear = parseInt(document.getElementById('opd-filter-tahun')?.value || 2026);
     const selectedBulan = document.getElementById('opd-filter-bulan')?.value || 'JULI';
     const opd = MASTER_OPD_LIST.find(o => o.id === opdId) || { id: opdId, nama: (USER_LEVEL === 2 ? USER_OPD_NAME : opdId), kategori: 'DINAS' };

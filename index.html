@@ -252,7 +252,7 @@
                     <!-- Remember & Help Links -->
                     <div class="flex items-center justify-between text-xs font-semibold pt-1">
                         <label class="flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900 transition-colors select-none">
-                            <input type="checkbox" id="remember" checked
+                            <input type="checkbox" id="remember"
                                 class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500/20">
                             <span>Ingat Saya</span>
                         </label>
@@ -431,6 +431,16 @@
             const rawUsername = usernameField.value.trim();
             const username = rawUsername.toLowerCase();
             const password = passwordField.value;
+
+            // Validasi: field wajib diisi
+            if (!rawUsername || !password) {
+                errorMessage.textContent = !rawUsername && !password
+                    ? 'Username dan kata sandi wajib diisi.'
+                    : (!rawUsername ? 'Username wajib diisi.' : 'Kata sandi wajib diisi.');
+                errorAlert.classList.remove('hidden');
+                (!rawUsername ? usernameField : passwordField).focus();
+                return;
+            }
 
             // Reset Alert State
             errorAlert.classList.add('hidden');
