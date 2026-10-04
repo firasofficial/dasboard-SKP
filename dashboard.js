@@ -459,9 +459,15 @@ async function ensureInitialRealSeed() {
 }
 
 async function resetAllSimonikaData() {
+    // Ambil periode yang dipilih di halaman Master Data
+    const selBulan = document.getElementById('master-filter-bulan')?.value || '';
+    const selTahun = parseInt(document.getElementById('master-filter-tahun')?.value || 0);
+
     const confirmRes = await simonikaConfirm({
-        title: 'Kosongkan Seluruh Database?',
-        text: 'Tindakan ini akan menghapus seluruh dataset master, rincian ASN nominatif, dan rekapitulasi yang tersimpan di sistem dan Cloud Supabase.',
+        title: selBulan ? `Kosongkan Data ${selBulan} ${selTahun}?` : 'Kosongkan Seluruh Database?',
+        text: selBulan
+            ? `Tindakan ini akan menghapus dataset, rincian ASN nominatif, dan rekapitulasi periode <strong>${selBulan} ${selTahun}</strong> yang tersimpan di sistem dan Cloud Supabase. Periode lain tidak ikut terhapus.`
+            : 'Tindakan ini akan menghapus seluruh dataset master, rincian ASN nominatif, dan rekapitulasi yang tersimpan di sistem dan Cloud Supabase.',
         icon: 'warning',
         confirmText: 'Ya, Kosongkan Sekarang',
         cancelText: 'Batalkan',
@@ -471,18 +477,40 @@ async function resetAllSimonikaData() {
     if (!confirmRes.isConfirmed) return;
 
     try {
-        // 1. Bersihkan Local Storage
-        localStorage.removeItem(LOCAL_STORAGE_KEY_REKAP);
+        // 1. Bersihkan Local Storage (hanya periode terpilih, atau semua jika tak ada pilihan)
+        if (selBulan && selTahun) {
+            const list = getLocalRekapList().filter(item =>
+                !(item.bulan === selBulan && parseInt(item.tahun) === selTahun)
+            );
+            saveLocalRekapList(list);
+            try { localStorage.removeItem(`simonika_cache_ts_${selTahun}_${selBulan}`); } catch (e) {}
+        } else {
+            localStorage.removeItem(LOCAL_STORAGE_KEY_REKAP);
+        }
 
-        // 2. Bersihkan IndexedDB secara asinkron
+        // 2. Bersihkan IndexedDB (hanya periode terpilih via index by_period)
         const db = await openSimonikaDB();
         if (db && db.objectStoreNames.contains(STORE_ASN)) {
             await new Promise((resolve) => {
-                const tx = db.transaction([STORE_ASN], 'readwrite');
-                const store = tx.objectStore(STORE_ASN);
-                store.clear();
-                tx.oncomplete = () => resolve(true);
-                tx.onerror = () => resolve(false);
+                try {
+                    const tx = db.transaction([STORE_ASN], 'readwrite');
+                    const store = tx.objectStore(STORE_ASN);
+                    if (selBulan && selTahun) {
+                        const index = store.index('by_period');
+                        const keyRange = IDBKeyRange.only([selTahun, selBulan]);
+                        const cursorReq = index.openCursor(keyRange);
+                        cursorReq.onsuccess = function (e) {
+                            const cursor = e.target.result;
+                            if (cursor) { cursor.delete(); cursor.continue(); }
+                            else resolve(true);
+                        };
+                        cursorReq.onerror = () => resolve(false);
+                    } else {
+                        store.clear();
+                    }
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => resolve(false);
+                } catch (e) { resolve(false); }
             });
         }
 
@@ -490,11 +518,16 @@ async function resetAllSimonikaData() {
         currentLoadedAsn = [];
         filteredAsn = [];
 
-        // 4. Hapus dari Supabase jika terhubung
+        // 4. Hapus dari Supabase jika terhubung (hanya periode terpilih)
         if (supabaseClient) {
             try {
-                await supabaseClient.from('skp_detail_pegawai').delete().gt('id', 0);
-                await supabaseClient.from('skp_rekap_bulanan').delete().gt('id', 0);
+                if (selBulan && selTahun) {
+                    await supabaseClient.from('skp_detail_pegawai').delete().eq('bulan', selBulan).eq('tahun', selTahun);
+                    await supabaseClient.from('skp_rekap_bulanan').delete().eq('bulan', selBulan).eq('tahun', selTahun);
+                } else {
+                    await supabaseClient.from('skp_detail_pegawai').delete().gt('id', 0);
+                    await supabaseClient.from('skp_rekap_bulanan').delete().gt('id', 0);
+                }
             } catch (supErr) {
                 console.warn("Gagal mengosongkan Supabase:", supErr);
             }
@@ -506,7 +539,9 @@ async function resetAllSimonikaData() {
 
         simonikaAlert({
             title: 'Database Dikosongkan!',
-            text: 'Seluruh dataset master dan data nominatif ASN berhasil dibersihkan dari sistem lokal dan Cloud Supabase.',
+            text: selBulan
+                ? `Data periode ${selBulan} ${selTahun} berhasil dibersihkan dari sistem lokal dan Cloud Supabase.`
+                : 'Seluruh dataset master dan data nominatif ASN berhasil dibersihkan dari sistem lokal dan Cloud Supabase.',
             icon: 'success'
         });
     } catch (err) {
