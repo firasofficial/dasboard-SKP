@@ -187,7 +187,7 @@ const MASTER_OPD_LIST = [
     { id: 'DPMG', nama: 'Dinas Pemberdayaan Masyarakat dan Gampong', kategori: 'DINAS', aliases: ['dpmg', 'pemberdayaan masyarakat dan gampong', 'pemberdayaan masyarakat gampong'] },
     { id: 'DSI', nama: 'Dinas Syariat Islam', kategori: 'DINAS', aliases: ['syariat islam', 'dsi', 'dinas syariat'] },
     { id: 'DINAS_DAYAH', nama: 'Dinas Pendidikan Dayah', kategori: 'DINAS', aliases: ['pendidikan dayah', 'dinas pendidikan dayah', 'dayah'] },
-    { id: 'DPMP2T', nama: 'Dinas Penanaman Modal dan Pelayanan Perizinan Terpadu', kategori: 'DINAS', aliases: ['dpmp2t', 'dpmptsp', 'penanaman modal', 'perizinan terpadu', 'pelayanan terpadu satu pintu'] },
+    { id: 'DPMP2T', nama: 'Dinas Penanaman Modal dan Pelayanan Perizinan Terpadu', kategori: 'DINAS', username: 'opd_dpmppt', aliases: ['dpmp2t', 'dpmptsp', 'penanaman modal', 'perizinan terpadu', 'pelayanan terpadu satu pintu'] },
     { id: 'DISKOMINFO', nama: 'Dinas Komunikasi dan Informatika', kategori: 'DINAS', aliases: ['diskominfo', 'komunikasi dan informatika', 'kominfo'] },
     { id: 'DISHUB', nama: 'Dinas Perhubungan', kategori: 'DINAS', aliases: ['dishub', 'dinas perhubungan', 'perhubungan'] },
     { id: 'DLH', nama: 'Dinas Lingkungan Hidup', kategori: 'DINAS', aliases: ['dlh', 'lingkungan hidup', 'dinas lingkungan'] },
@@ -4213,7 +4213,7 @@ function generateDefaultSimonikaUsers() {
     MASTER_OPD_LIST.forEach(opd => {
         list.push({
             id: opd.id,
-            username: 'opd_' + opd.id.toLowerCase(),
+            username: opd.username || ('opd_' + opd.id.toLowerCase()),
             nama: opd.nama,
             kategori: opd.kategori,
             role: 'opd',
