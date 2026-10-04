@@ -459,6 +459,17 @@ async function ensureInitialRealSeed() {
 }
 
 async function resetAllSimonikaData() {
+    // RBAC GUARD: hanya Admin (level 1) boleh mengosongkan database
+    if (USER_LEVEL !== 1) {
+        await simonikaConfirm({
+            title: 'Akses Ditolak',
+            text: 'Hanya Administrator BKPSDM yang dapat mengosongkan database.',
+            icon: 'error',
+            confirmText: 'Mengerti',
+            cancelText: 'Tutup'
+        });
+        return;
+    }
     // Ambil periode yang dipilih di halaman Master Data
     const selBulan = document.getElementById('master-filter-bulan')?.value || '';
     const selTahun = parseInt(document.getElementById('master-filter-tahun')?.value || 0);
@@ -2393,6 +2404,17 @@ function initMasterDataEvents() {
 }
 
 function processMasterDatasetExcel(file) {
+    // RBAC GUARD: hanya Admin (level 1) boleh mengimpor dataset master se-Kabupaten
+    if (USER_LEVEL !== 1) {
+        simonikaConfirm({
+            title: 'Akses Ditolak',
+            text: 'Unggah dataset master hanya dapat dilakukan oleh Administrator BKPSDM.',
+            icon: 'error',
+            confirmText: 'Mengerti',
+            cancelText: 'Tutup'
+        });
+        return;
+    }
     const progressDiv = document.getElementById('master-parsing-progress');
     const progressBar = document.getElementById('master-progress-bar');
     const statusText = document.getElementById('master-progress-status');
